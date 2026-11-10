@@ -40,4 +40,6 @@
   --touch-min: 44px;
   --content-max: 960px;
   --text-max: 60ch;
+  --touch-lg: 64px; /* botões do modo apresentação */
+  --canvas-max-height: 58vh; /* altura máxima do canvas do simulador fora do modo apresentação */
 }

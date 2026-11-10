@@ -7,34 +7,6 @@
 
   const HOME_ROUTE = '#/inicio';
 
-  /** Tela do simulador (parte 1: só título e "Voltar"; a parte 2 completa a tela). */
-  ChecaAi.screens.simulator = ChecaAi.screens.simulator || {
-    id: 'simulator',
-    route: '#/simulador',
-    title: 'Como um boato se espalha',
-    feature: 'simulator',
-
-    mount(sectionEl) {
-      sectionEl.textContent = '';
-
-      const wrap = document.createElement('div');
-      wrap.className = 'simulator';
-
-      const h1 = document.createElement('h1');
-      h1.tabIndex = -1;
-      h1.textContent = 'Como um boato se espalha';
-
-      const back = document.createElement('a');
-      back.className = 'btn btn--secondary';
-      back.href = HOME_ROUTE;
-      back.textContent = 'Voltar';
-
-      wrap.append(h1, back);
-      sectionEl.appendChild(wrap);
-      return h1;
-    }
-  };
-
   /** Telas ligadas, indexadas pela rota. */
   function getRoutes() {
     const features = ChecaAi.config.FEATURES;
@@ -47,7 +19,12 @@
     return routes;
   }
 
+  /** Tela montada agora; recebe unmount() (se tiver) antes de trocar de tela. */
+  let currentScreen = null;
+
   function showScreen(screen, isFirst) {
+    if (currentScreen && typeof currentScreen.unmount === 'function') currentScreen.unmount();
+    currentScreen = screen;
     const sections = document.querySelectorAll('[data-screen]');
     let target = null;
     sections.forEach((el) => {
