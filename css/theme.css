@@ -1,0 +1,43 @@
+/* Único lugar com cores e medidas do site. */
+:root {
+  /* Cores */
+  --bg: #0F1B2D;
+  --surface: #17263D;
+  --border: #2A3B55;
+  --text: #F2F5F9;
+  --text-muted: #A9B6C8;
+  --accent: #3DA5FF;
+  --on-accent: #0F1B2D; /* texto sobre fundo --accent (branco não passa no contraste AA) */
+  --verdict-true: #3FB27F;
+  --verdict-false: #E5534B;
+  --verdict-misleading: #E9A23B;
+  --verdict-unproven: #8A9BB0;
+
+  /* Tipografia */
+  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sm: 0.875rem;
+  --font-md: 1rem;
+  --font-lg: 1.25rem;
+  --font-xl: 1.75rem;
+  --font-2xl: 2.25rem;
+  --line-height: 1.5;
+  --weight-normal: 400;
+  --weight-bold: 700;
+
+  /* Espaçamentos */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* Formas e medidas */
+  --radius: 6px;
+  --border-width: 1px;
+  --focus-width: 3px;
+  --touch-min: 44px;
+  --content-max: 960px;
+  --text-max: 60ch;
+}

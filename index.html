@@ -4,9 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Checa Aí</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/screens.css">
 </head>
 <body>
-  <h1>Checa Aí</h1>
-  <p>Em breve.</p>
+  <div class="app">
+    <header class="app-header">
+      <div class="app-header__inner">
+        <a class="app-brand" href="#/inicio">Checa Aí</a>
+      </div>
+    </header>
+
+    <main class="app-main" id="main">
+      <section data-screen="home" hidden></section>
+      <section data-screen="simulator" hidden></section>
+    </main>
+
+    <footer class="app-footer">
+      <div class="app-footer__inner">
+        <span>Simulação educativa · CiberMissões 2026</span>
+        <span id="app-version"></span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/missions-data.js"></script>
+  <script src="js/screens/home.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
