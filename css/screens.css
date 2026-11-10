@@ -1,4 +1,4 @@
-/* Estrutura da página: rodapé sempre embaixo, conteúdo centralizado */
+/* Estrutura da página: rodapé sempre embaixo, container centralizado que usa a largura útil */
 .app {
   display: flex;
   flex-direction: column;
@@ -16,14 +16,14 @@
   width: 100%;
   max-width: var(--content-max);
   margin: 0 auto;
-  padding-left: var(--space-4);
-  padding-right: var(--space-4);
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
 }
 
 .app-header__inner {
   display: flex;
   align-items: center;
-  min-height: 56px;
+  min-height: var(--header-height);
 }
 
 .app-brand {
@@ -57,20 +57,22 @@
   padding-bottom: var(--space-3);
 }
 
-/* Tela inicial */
+/* Tela inicial: bloco centralizado, ocupa a largura útil */
 .home {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  max-width: var(--text-max);
+  width: 100%;
+  max-width: var(--panel-max);
+  margin: 0 auto;
 }
 
 .home__title {
-  font-size: var(--font-2xl);
+  font-size: var(--font-3xl);
 }
 
 .home__tagline {
-  font-size: var(--font-lg);
+  font-size: var(--font-xl);
   color: var(--text-muted);
 }
 
@@ -80,32 +82,35 @@
   gap: var(--space-3);
 }
 
-/* Tela do simulador */
+.home__actions .btn {
+  min-height: var(--touch-lg);
+  font-size: var(--font-lg);
+}
+
+/* Tela do simulador (detalhes em simulator.css) */
 .simulator {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: var(--space-5);
 }
 
-@media (min-width: 768px) {
-  .app-header__inner,
-  .app-main,
-  .app-footer__inner {
-    padding-left: var(--space-5);
-    padding-right: var(--space-5);
-  }
-
-  .app-main {
-    padding-top: var(--space-7);
-  }
-
-  .home__title {
-    font-size: 3rem;
-  }
-
+@media (min-width: 600px) {
   .home__actions {
     flex-direction: row;
     flex-wrap: wrap;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home {
+    align-items: center;
+    text-align: center;
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-7);
+  }
+
+  .home__actions {
+    justify-content: center;
   }
 }
