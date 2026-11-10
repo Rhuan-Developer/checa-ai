@@ -156,11 +156,12 @@ Scripts carregados em ordem no fim do `index.html`; cada arquivo pendura suas fu
 - **Começa no celular do visitante:** chega um boato sorteado entre as missões que não são verdadeiras (cada vez um diferente). O visitante escolhe **Compartilhar** ou **Checar antes**.
   - Checar antes → "Você parou o boato aqui. 0 pessoas enganadas." + o gabarito curto da missão. Botão "E se eu tivesse compartilhado?".
   - Compartilhar → começa a animação.
-- **Animação em árvore** (`<canvas>`): o primeiro celular manda para 3, cada um manda para mais 3 (1 → 3 → 9 → 27 → 81), rodada por rodada, com os celulares abrindo em círculo a partir do centro. Contador de pessoas alcançadas e de rodadas. Depois da 5ª rodada a árvore para de desenhar e só o contador continua ("na 10ª rodada: 29.524 pessoas").
+- **Animação em árvore** (`<canvas>`): o primeiro celular manda para 3, cada um manda para mais 3 (1 → 3 → 9 → 27 → 81), rodada por rodada, com os celulares abrindo em círculo a partir do centro. A árvore cobre as primeiras rodadas (3 a 5, conforme o fanout; teto de 400 nós). Contador de pessoas alcançadas e de rodadas.
+- **Visão de multidão (v0.3.1):** depois da última rodada da árvore, ela encolhe para o centro e cada rodada nova vira um anel de pontos (vermelho = repassou; verde = checou, proporcional ao sorteio da rodada; máx. 720 pontos por anel, cada ponto = `ceil(pessoas/720)` pessoas). Cada rodada muda a tela, inclusive no modo apresentação (um clique = um anel). A tela termina na rodada 8 (`SIM_PRESENTATION_ROUNDS`) ou antes, se o boato parar.
 - **Sempre diferente:** em cada rodada, algumas pessoas checam antes e não repassam (celular verde com ✓; aquele ramo para). Quem checa é sorteado, então cada simulação dá um resultado diferente.
 - **Ajustes** (painel recolhível, para o mediador): repasses por pessoa (2 a 5, padrão 3) e % que checa antes (0 a 80, padrão 10).
 - **Modo apresentação:** tela cheia, botões grandes e avanço de uma rodada por toque/clique, para o grupo explicar cada rodada no ritmo da fala. No modo normal as rodadas avançam sozinhas.
-- **Comparação:** ao final, "Ninguém checou: X pessoas × 30% checaram: Y pessoas" — a mensagem central da estação.
+- **Comparação:** ao final, "Ninguém checou: X pessoas × 30% checaram: Y pessoas" — a mensagem central da estação. A comparação é calculada para 10 rodadas e se chama "Se continuasse até a 10ª rodada".
 - Ligação com a cartilha: "Ajude a combater os boatos — na dúvida, não compartilhe."
 
 ---

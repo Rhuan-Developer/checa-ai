@@ -1,4 +1,13 @@
-/* Único lugar com cores e medidas do site. */
+/* Único lugar com cores e medidas do site.
+
+   PONTOS DE QUEBRA (media query não aceita var(); use sempre estes números):
+     celular  < 600px          1 coluna
+     tablet   600px a 1023px   1 coluna larga (2 colunas em paisagem)
+     notebook >= 1024px        container centralizado, 2 colunas em .layout-split
+     telão    >= 1600px        mesma estrutura; tudo escala pela fonte base e pelos clamp()
+   DIVISÃO EM COLUNAS (.layout-split e a tela do simulador) vale em:
+     (min-width: 1024px), (min-width: 600px) and (orientation: landscape)
+   Tipografia e espaçamentos são fluidos (clamp): tamanhos em rem escalam com --root-size. */
 :root {
   /* Cores */
   --bg: #0F1B2D;
@@ -13,33 +22,55 @@
   --verdict-misleading: #E9A23B;
   --verdict-unproven: #8A9BB0;
 
-  /* Tipografia */
+  /* Tipografia (fluida: do celular ao projetor) */
   --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --root-size: clamp(16px, 0.55vw + 11px, 30px); /* base de todos os rem: 16px no celular, ~18px no notebook, ~22px no telão */
   --font-sm: 0.875rem;
   --font-md: 1rem;
-  --font-lg: 1.25rem;
-  --font-xl: 1.75rem;
-  --font-2xl: 2.25rem;
+  --font-lg: clamp(1.15rem, 1.05rem + 0.4vw, 1.5rem);
+  --font-xl: clamp(1.5rem, 1.25rem + 0.9vw, 2.1rem);
+  --font-2xl: clamp(1.9rem, 1.4rem + 1.6vw, 3rem);
+  --font-3xl: clamp(2.5rem, 1.6rem + 3vw, 4.5rem);
   --line-height: 1.5;
   --weight-normal: 400;
   --weight-bold: 700;
 
-  /* Espaçamentos */
+  /* Espaçamentos (os maiores são fluidos) */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
-  --space-5: 1.5rem;
-  --space-6: 2rem;
-  --space-7: 3rem;
+  --space-5: clamp(1.25rem, 1rem + 1vw, 2rem);
+  --space-6: clamp(1.5rem, 1.1rem + 1.4vw, 2.75rem);
+  --space-7: clamp(2rem, 1.2rem + 2.4vw, 4rem);
+  --gutter: clamp(1rem, 0.5rem + 2.2vw, 3rem); /* margem lateral da página */
 
   /* Formas e medidas */
   --radius: 6px;
   --border-width: 1px;
   --focus-width: 3px;
   --touch-min: 44px;
-  --content-max: 960px;
-  --text-max: 60ch;
   --touch-lg: 64px; /* botões do modo apresentação */
-  --canvas-max-height: 58vh; /* altura máxima do canvas do simulador fora do modo apresentação */
+  --header-height: 3.5rem;
+
+  /* Larguras de conteúdo (em rem: crescem com a fonte base no telão) */
+  --content-max: 75rem; /* container da página: ~1200px no notebook */
+  --panel-max: 56rem; /* coluna central de uma tela só de texto (mensagem, resultado) */
+  --compare-max: 72rem; /* comparação final */
+  --text-max: 60ch;
+  --split-cols: minmax(0, 5fr) minmax(0, 7fr); /* .layout-split: conteúdo à esquerda, visual à direita */
+  --split-cols-present: minmax(0, 2fr) minmax(0, 3fr); /* modo apresentação: painel e canvas */
+
+  /* Simulador */
+  --canvas-max-height: 58vh; /* canvas no celular (1 coluna) */
+  --canvas-min-height: 20rem;
+  --sim-chrome: 15rem; /* altura de cabeçalho, rodapé, margens e barra do simulador: o canvas usa 100dvh menos isto */
+  --fade-ms: 220ms; /* transição curta entre passos */
+}
+
+/* Telão (>= 1600px): container mais largo; o resto escala pela fonte base */
+@media (min-width: 1600px) {
+  :root {
+    --content-max: 88rem;
+  }
 }

@@ -274,8 +274,41 @@
     return total;
   }
 
+  /** Máximo de pontos por anel na visão de multidão. */
+  const MAX_CROWD_DOTS = 720;
+
+  /**
+   * Quantas pessoas cada ponto representa numa rodada da visão de multidão.
+   * @param {number} received  pessoas que receberam na rodada
+   * @param {number} [maxDots]  máximo de pontos no anel (padrão MAX_CROWD_DOTS)
+   * @returns {number} inteiro >= 1
+   */
+  function personsPerDot(received, maxDots) {
+    const limit = maxDots || MAX_CROWD_DOTS;
+    return Math.max(1, Math.ceil(Math.max(0, received) / limit));
+  }
+
+  /**
+   * Anel de pontos de uma rodada: quantos pontos no total e quantos são de quem checou (verde).
+   * A fração verde é proporcional a checked/received; nenhuma contagem fica negativa.
+   * @param {{received: number, checked: number, maxDots?: number}} opts
+   * @returns {{perDot: number, dots: number, checkedDots: number, sharedDots: number}}
+   */
+  function crowdRing(opts) {
+    const received = Math.max(0, Math.floor(opts.received || 0));
+    const checked = Math.min(received, Math.max(0, Math.floor(opts.checked || 0)));
+    const perDot = personsPerDot(received, opts.maxDots);
+    if (received === 0) return { perDot, dots: 0, checkedDots: 0, sharedDots: 0 };
+    const dots = Math.max(1, Math.round(received / perDot));
+    const checkedDots = Math.min(dots, Math.max(0, Math.round((dots * checked) / received)));
+    return { perDot, dots, checkedDots, sharedDots: dots - checkedDots };
+  }
+
   window.ChecaAi.simulatorModel = {
     MAX_TREE_NODES,
+    MAX_CROWD_DOTS,
+    personsPerDot,
+    crowdRing,
     roundsThatFit,
     buildTree,
     layoutAngles,

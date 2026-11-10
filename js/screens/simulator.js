@@ -6,9 +6,10 @@
   ChecaAi.screens = ChecaAi.screens || {};
 
   const HOME_ROUTE = '#/inicio';
-  const NUMBERS_ROUND_MS = 200; // rodadas só-números andam rápido
   const FIRST_ROUND_DELAY_MS = 700;
-  const GROW_MS = 600; // crescimento do anel novo
+  const GROW_MS = 600; // crescimento do anel novo da árvore
+  const CROWD_MS = 500; // encolher a visão e abrir o anel novo da multidão
+  const SPLIT_QUERY = '(min-width: 1024px), (min-width: 600px) and (orientation: landscape)'; // igual ao theme.css
   const PHONE_RATIO = 0.6; // largura / altura do celular desenhado
 
   const numberFormat = new Intl.NumberFormat('pt-BR');
@@ -64,7 +65,10 @@
       checked: get('--verdict-true'),
       you: get('--accent'),
       line: get('--text-muted'),
-      mark: get('--bg')
+      mark: get('--bg'),
+      surface: get('--surface'),
+      text: get('--text'),
+      textMuted: get('--text-muted')
     };
   }
 
@@ -98,12 +102,13 @@
     let fsActive = false;
     let timer = null;
     let raf = null;
-    let anim = null; // { round, start }
+    let anim = null; // { round, start, t }
     let canvas = null;
     let ctx = null;
     let resizeObserver = null;
     let counterEls = null;
     let noteEl = null;
+    let crowdLegendEl = null;
     let nextBtn = null;
 
     // Estrutura fixa da tela
@@ -148,8 +153,23 @@
       ctx = null;
       counterEls = null;
       noteEl = null;
+      crowdLegendEl = null;
       nextBtn = null;
       stage.textContent = '';
+      stage.className = 'sim-stage';
+    }
+
+    /** Mostra o passo novo com um fade curto (sem animação se o visitante pediu menos movimento). */
+    function enter(modifier, quiet) {
+      stage.className = 'sim-stage ' + modifier;
+      if (quiet || prefersReducedMotion()) return;
+      void stage.offsetWidth;
+      stage.classList.add('sim-stage--enter');
+    }
+
+    function scrollToTop() {
+      wrap.scrollTop = 0;
+      window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
     }
 
     function heading(text) {
@@ -209,10 +229,27 @@
     }
 
     function focusHeading(h2) {
-      h2.focus();
+      h2.focus({ preventScroll: true });
     }
 
     /* ---------- passo a: chegou no celular ---------- */
+
+    /** Cartão da mensagem fictícia, com o quadro da imagem quando a missão tem `image`. */
+    function buildMessage(r) {
+      const msg = el('article', 'sim-msg');
+      msg.setAttribute('aria-label', 'Mensagem recebida');
+      const msgTop = el('div', 'sim-msg__top');
+      msgTop.append(el('span', 'sim-msg__header', r.format.header), el('span', 'sim-stamp', 'Simulação'));
+      msg.appendChild(msgTop);
+      if (r.format.badge) msg.appendChild(el('p', 'sim-msg__badge', r.format.badge));
+      msg.appendChild(el('p', 'sim-msg__content', r.content));
+      if (r.image) {
+        const figure = el('figure', 'sim-image');
+        figure.append(el('span', 'sim-image__label', 'Imagem fictícia'), el('figcaption', 'sim-image__alt', r.image.alt));
+        msg.appendChild(figure);
+      }
+      return msg;
+    }
 
     function renderStepA(initial) {
       clearStage();
@@ -221,13 +258,7 @@
 
       const h2 = heading('Chegou no seu celular');
 
-      const msg = el('article', 'sim-msg');
-      msg.setAttribute('aria-label', 'Mensagem recebida');
-      const msgTop = el('div', 'sim-msg__top');
-      msgTop.append(el('span', 'sim-msg__header', rumor.format.header), el('span', 'sim-stamp', 'Simulação'));
-      msg.appendChild(msgTop);
-      if (rumor.format.badge) msg.appendChild(el('p', 'sim-msg__badge', rumor.format.badge));
-      msg.appendChild(el('p', 'sim-msg__content', rumor.content));
+      const msg = buildMessage(rumor);
 
       const actions = el('div', 'sim-actions');
       const share = el('button', 'btn', 'Compartilhar');
@@ -239,7 +270,11 @@
       actions.append(share, check);
 
       stage.append(h2, msg, actions, buildSettings());
-      if (!initial) focusHeading(h2);
+      enter('sim-stage--center', initial);
+      if (!initial) {
+        focusHeading(h2);
+        scrollToTop();
+      }
     }
 
     /* ---------- passo b: checou antes ---------- */
@@ -256,10 +291,11 @@
       what.addEventListener('click', () => renderStepC());
       actions.append(what, backLink());
       stage.append(h2, zero, why, actions);
+      enter('sim-stage--center');
       focusHeading(h2);
     }
 
-    /* ---------- passo c: árvore ---------- */
+    /* ---------- passo c: árvore e multidão ---------- */
 
     function renderStepC() {
       clearStage();
@@ -273,6 +309,9 @@
       });
       sim.fanout = settings.fanout;
       sim.layout = model.layoutAngles(sim.nodes);
+      sim.crowd = new Map();
+      // A tela termina na rodada de apresentação, ou antes se o boato parar.
+      sim.lastRound = Math.max(1, Math.min(config.SIM_PRESENTATION_ROUNDS, sim.rows.length));
 
       const h2 = heading('Você compartilhou');
 
@@ -301,6 +340,10 @@
         li.append(el('span', 'sim-swatch ' + item[0]), document.createTextNode(item[1]));
         legend.appendChild(li);
       });
+      crowdLegendEl = el('li');
+      crowdLegendEl.append(el('span', 'sim-swatch sim-swatch--dot sim-swatch--shared'), document.createTextNode(''));
+      crowdLegendEl.hidden = true;
+      legend.appendChild(crowdLegendEl);
 
       noteEl = el('p', 'sim-note');
 
@@ -309,6 +352,7 @@
       nextBtn.addEventListener('click', () => advance());
 
       stage.append(h2, counters, canvasWrap, legend, noteEl, nextBtn);
+      enter('sim-stage--run layout-split');
 
       if (typeof ResizeObserver === 'function') {
         resizeObserver = new ResizeObserver(() => {
@@ -320,8 +364,15 @@
       resizeCanvas();
       updateCounters();
       draw();
-      if (presenting) nextBtn.focus();
-      else focusHeading(h2);
+      if (presenting) {
+        nextBtn.focus({ preventScroll: true });
+      } else {
+        focusHeading(h2);
+        // Celular (1 coluna): leva o canvas para a tela depois de compartilhar.
+        if (!window.matchMedia(SPLIT_QUERY).matches) {
+          canvasWrap.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'center' });
+        }
+      }
       schedule();
     }
 
@@ -339,7 +390,21 @@
     }
 
     function finished() {
-      return round >= sim.rows.length;
+      return round >= sim.lastRound;
+    }
+
+    /** Dados do anel da multidão de uma rodada (calculados uma vez, para o desenho não "tremer"). */
+    function crowdInfo(k) {
+      let info = sim.crowd.get(k);
+      if (!info) {
+        const row = sim.rows[k - 1];
+        const ring = model.crowdRing({ received: row.received, checked: row.checked });
+        const kinds = [];
+        for (let i = 0; i < ring.dots; i++) kinds.push(i < ring.checkedDots ? 1 : 0);
+        info = { ring, kinds: ChecaAi.utils.shuffle(kinds), offset: Math.random() * Math.PI * 2, received: row.received };
+        sim.crowd.set(k, info);
+      }
+      return info;
     }
 
     function updateCounters() {
@@ -350,11 +415,18 @@
       counterEls.receivedEl.textContent = received === 1 ? '1 pessoa recebeu' : fmt(received) + ' pessoas receberam';
       counterEls.checkedEl.textContent = checked === 1 ? '1 checou' : fmt(checked) + ' checaram';
 
-      let note = '';
-      if (row && round > sim.roundsDrawn) {
-        note = 'Se continuasse: na ' + round + 'ª rodada, ' + fmt(row.receivedTotal) + ' pessoas';
+      const crowdNow = round > sim.roundsDrawn;
+      crowdLegendEl.hidden = !crowdNow;
+      if (crowdNow) {
+        const per = crowdInfo(round).ring.perDot;
+        crowdLegendEl.lastChild.textContent = 'Cada ponto = ' + fmt(per) + (per === 1 ? ' pessoa' : ' pessoas');
+        canvas.setAttribute('aria-label', 'Multidão que recebeu o boato, em anéis por rodada');
+      } else {
+        canvas.setAttribute('aria-label', 'Árvore de pessoas que receberam o boato');
       }
-      if (finished() && sim.stoppedAt !== null) {
+
+      let note = '';
+      if (finished() && sim.stoppedAt !== null && sim.stoppedAt === sim.lastRound) {
         note = 'O boato parou na rodada ' + sim.stoppedAt + '.';
       }
       noteEl.textContent = note;
@@ -370,7 +442,7 @@
         timer = null;
       }
       if (step !== 'c' || presenting || finished() || destroyed) return;
-      const delay = round === 0 ? FIRST_ROUND_DELAY_MS : (round < sim.roundsDrawn ? config.SIM_ROUND_MS : NUMBERS_ROUND_MS);
+      const delay = round === 0 ? FIRST_ROUND_DELAY_MS : config.SIM_ROUND_MS;
       timer = setTimeout(() => {
         timer = null;
         advance();
@@ -385,8 +457,8 @@
       }
       round++;
       updateCounters();
-      if (round <= sim.roundsDrawn && !prefersReducedMotion()) {
-        startGrow(round);
+      if (!prefersReducedMotion()) {
+        startAnimation(round, round <= sim.roundsDrawn ? GROW_MS : CROWD_MS);
       } else {
         anim = null;
         draw();
@@ -394,22 +466,23 @@
       schedule();
     }
 
-    function startGrow(k) {
+    function startAnimation(k, duration) {
       if (raf !== null) cancelAnimationFrame(raf);
-      anim = { round: k, start: null };
+      anim = { round: k, start: null, t: 0 };
+      draw();
       const frame = (now) => {
         raf = null;
         if (destroyed || !anim || anim.round !== k) return;
         if (anim.start === null) anim.start = now;
-        const t = Math.min(1, (now - anim.start) / GROW_MS);
-        if (t >= 1) anim = null;
-        draw(t);
+        anim.t = Math.min(1, (now - anim.start) / duration);
+        if (anim.t >= 1) anim = null;
+        draw();
         if (anim) raf = requestAnimationFrame(frame);
       };
       raf = requestAnimationFrame(frame);
     }
 
-    function draw(t) {
+    function draw() {
       if (!canvas || !ctx || !sim) return;
       const w = Number(canvas.dataset.cssWidth);
       const h = Number(canvas.dataset.cssHeight);
@@ -418,14 +491,18 @@
 
       const rings = sim.roundsDrawn;
       const shown = Math.min(round, rings);
-      const growing = anim && anim.round === shown ? (t === undefined ? 0 : t) : 1;
-      const eased = 1 - Math.pow(1 - growing, 3);
+      const crowdShown = Math.max(0, round - rings);
+      const eased = anim ? 1 - Math.pow(1 - anim.t, 3) : 1;
+      const growing = anim && anim.round <= rings ? eased : 1; // anel novo da árvore
+      const crowdE = anim && anim.round > rings ? eased : 1; // anel novo da multidão
+      // A visão encolhe para caber o anel novo: de `rings` (só árvore) até rings + crowdShown.
+      const viewRings = rings + (crowdShown === 0 ? 0 : crowdShown - 1 + crowdE);
 
       const cx = w / 2;
       const cy = h / 2;
-      const margin = 10;
+      const margin = crowdShown > 0 ? 16 : 10;
       const maxR = Math.max(20, Math.min(w, h) / 2 - margin);
-      const ringStep = maxR / rings;
+      const ringStep = maxR / viewRings;
       const baseH = Math.min(ringStep * 0.62, 56);
 
       function ringRadius(k) {
@@ -435,7 +512,7 @@
       function phoneSize(k) {
         if (k === 0) return { w: baseH * PHONE_RATIO * 1.4, h: baseH * 1.4 };
         const arc = (2 * Math.PI * ringRadius(k)) / Math.pow(sim.fanout, k);
-        const ph = Math.max(5, Math.min(baseH, (arc * 0.85) / PHONE_RATIO));
+        const ph = Math.max(4, Math.min(baseH, (arc * 0.85) / PHONE_RATIO));
         return { w: ph * PHONE_RATIO, h: ph };
       }
 
@@ -489,6 +566,47 @@
         }
       });
       ctx.globalAlpha = 1;
+
+      // multidão: um anel de pontos por rodada depois da árvore
+      for (let j = 1; j <= crowdShown; j++) {
+        const k = rings + j;
+        const info = crowdInfo(k);
+        const n = info.kinds.length;
+        if (n === 0) continue;
+        const r = ringRadius(k);
+        const dotR = Math.max(0.9, Math.min(ringStep * 0.34, ((2 * Math.PI * r) / n) * 0.42));
+        ctx.globalAlpha = j === crowdShown ? crowdE : 1;
+        for (let i = 0; i < n; i++) {
+          const a = info.offset + (2 * Math.PI * i) / n;
+          ctx.fillStyle = info.kinds[i] === 1 ? colors.checked : colors.shared;
+          ctx.beginPath();
+          ctx.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, dotR, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+
+      // rótulos dos anéis ("Rodada 6 · 729 pessoas"), no alto de cada anel
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let j = 1; j <= crowdShown; j++) {
+        const k = rings + j;
+        const last = j === crowdShown;
+        const fontPx = Math.max(10, Math.min(ringStep * 0.5, 20));
+        const pillH = fontPx + 6;
+        if (!last && ringStep < pillH) continue;
+        const info = crowdInfo(k);
+        ctx.font = (last ? '700 ' : '400 ') + fontPx + 'px ' + getComputedStyle(document.body).fontFamily;
+        const label = 'Rodada ' + k + ' · ' + fmt(info.received) + (info.received === 1 ? ' pessoa' : ' pessoas');
+        const pillW = Math.min(w - 4, ctx.measureText(label).width + 12);
+        const y = cy - ringRadius(k);
+        ctx.globalAlpha = last ? Math.max(crowdE, 0.15) : 1;
+        ctx.fillStyle = colors.surface;
+        ctx.fillRect(cx - pillW / 2, y - pillH / 2, pillW, pillH);
+        ctx.fillStyle = last ? colors.text : colors.textMuted;
+        ctx.fillText(label, cx, y, pillW - 6);
+      }
+      ctx.globalAlpha = 1;
     }
 
     /* ---------- passo d: comparação ---------- */
@@ -501,7 +619,7 @@
       const rate = config.SIM_COMPARE_CHECK_RATE;
       const some = Math.round(model.expectedReach({ fanout: sim.fanout, checkRate: rate, rounds: total }));
 
-      const h2 = heading('Na ' + total + 'ª rodada');
+      const h2 = heading('Se continuasse até a ' + fmt(total) + 'ª rodada');
 
       const compare = el('div', 'sim-compare');
       [['Ninguém checou', none, 'sim-compare__col--bad'],
@@ -521,7 +639,9 @@
       actions.append(again, backLink());
 
       stage.append(h2, compare, rule, ref, actions, buildSettings());
+      enter('sim-stage--wide');
       focusHeading(h2);
+      scrollToTop();
     }
 
     /* ---------- modo apresentação ---------- */

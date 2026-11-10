@@ -1,6 +1,6 @@
-/* Tela do simulador "Como um boato se espalha". Cores e medidas vêm do theme.css. */
+/* Tela do simulador "Como um boato se espalha". Cores e medidas vêm do theme.css.
+   Divisão em colunas: (min-width: 1024px), (min-width: 600px) and (orientation: landscape) */
 .simulator {
-  align-items: stretch;
   width: 100%;
   gap: var(--space-4);
 }
@@ -27,6 +27,30 @@
   flex-direction: column;
   gap: var(--space-4);
   width: 100%;
+}
+
+/* Passos só de texto: coluna centralizada */
+.sim-stage--center {
+  max-width: var(--panel-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sim-stage--wide {
+  max-width: var(--compare-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sim-stage--enter {
+    animation: sim-fade var(--fade-ms) ease-out;
+  }
+}
+
+@keyframes sim-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .sim-title {
@@ -57,14 +81,14 @@
 
 /* Mensagem fictícia */
 .sim-msg {
-  max-width: var(--text-max);
   background: var(--surface);
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
-  padding: var(--space-4);
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  font-size: var(--font-lg);
 }
 
 .sim-msg__top {
@@ -97,11 +121,35 @@
   padding: 0 var(--space-2);
 }
 
+/* Quadro da imagem fictícia */
+.sim-image {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  min-height: 8rem;
+  justify-content: center;
+  background: var(--surface);
+  border: var(--border-width) dashed var(--text-muted);
+  border-radius: var(--radius);
+}
+
+.sim-image__label {
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+}
+
+.sim-image__alt {
+  font-size: var(--font-md);
+  overflow-wrap: anywhere;
+}
+
 /* Ajustes */
 .sim-settings {
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
-  max-width: var(--text-max);
 }
 
 .sim-settings__summary {
@@ -137,12 +185,32 @@
   font: inherit;
 }
 
-/* Contadores e canvas */
+/* Passo da árvore e da multidão: celular = título, contadores, canvas, legenda, nota, botão */
+.sim-stage--run {
+  display: grid;
+  grid-template-areas:
+    "title"
+    "counters"
+    "canvas"
+    "legend"
+    "note"
+    "next";
+  gap: var(--space-3);
+}
+
+.sim-stage--run > .sim-title { grid-area: title; }
+.sim-stage--run > .sim-counters { grid-area: counters; }
+.sim-stage--run > .sim-canvas-wrap { grid-area: canvas; }
+.sim-stage--run > .sim-legend { grid-area: legend; }
+.sim-stage--run > .sim-note { grid-area: note; }
+.sim-stage--run > .sim-next { grid-area: next; }
+
+/* Contadores (compactos no celular) */
 .sim-counters {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1) var(--space-5);
-  font-size: var(--font-lg);
+  gap: 0 var(--space-4);
+  font-size: var(--font-md);
   font-weight: var(--weight-bold);
 }
 
@@ -190,6 +258,12 @@
   border-radius: 3px;
 }
 
+.sim-swatch--dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+}
+
 .sim-swatch--you { background: var(--accent); }
 .sim-swatch--shared { background: var(--verdict-false); }
 .sim-swatch--checked { background: var(--verdict-true); }
@@ -206,7 +280,7 @@
   border: var(--border-width) solid var(--border);
   border-left-width: var(--space-1);
   border-radius: var(--radius);
-  padding: var(--space-4);
+  padding: var(--space-5);
 }
 
 .sim-compare__col--bad { border-left-color: var(--verdict-false); }
@@ -214,16 +288,19 @@
 
 .sim-compare__label {
   font-weight: var(--weight-bold);
+  font-size: var(--font-lg);
 }
 
 .sim-compare__value {
-  font-size: var(--font-2xl);
+  font-size: var(--font-3xl);
   font-weight: var(--weight-bold);
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .sim-compare__unit {
   color: var(--text-muted);
+  font-size: var(--font-lg);
 }
 
 @media (min-width: 600px) {
@@ -235,9 +312,45 @@
   .sim-compare {
     grid-template-columns: 1fr 1fr;
   }
+
+  .sim-actions .btn {
+    min-height: var(--touch-lg);
+    font-size: var(--font-lg);
+  }
 }
 
-/* Modo apresentação: ocupa a tela toda (com ou sem tela cheia do navegador) */
+/* Duas colunas: texto e controles à esquerda, canvas à direita na altura útil */
+@media (min-width: 1024px), (min-width: 600px) and (orientation: landscape) {
+  .sim-stage--run {
+    grid-template-areas:
+      "title canvas"
+      "counters canvas"
+      "legend canvas"
+      "note canvas"
+      "next canvas";
+    grid-template-rows: auto auto auto auto 1fr;
+    align-items: start;
+  }
+
+  .sim-stage--run > .sim-canvas-wrap {
+    height: max(var(--canvas-min-height), calc(100vh - var(--sim-chrome)));
+    height: max(var(--canvas-min-height), calc(100dvh - var(--sim-chrome)));
+    aspect-ratio: auto;
+    max-height: none;
+  }
+
+  .sim-stage--run .sim-counters {
+    flex-direction: column;
+    font-size: var(--font-xl);
+  }
+
+  .sim-stage--run .sim-legend {
+    font-size: var(--font-md);
+  }
+}
+
+/* Modo apresentação: ocupa a tela toda (com ou sem tela cheia do navegador).
+   Retrato: canvas em cima, painel embaixo. Paisagem: painel à esquerda, canvas grande à direita. */
 .simulator--presenting {
   position: fixed;
   inset: 0;
@@ -245,21 +358,32 @@
   display: flex;
   flex-direction: column;
   overflow: auto;
-  padding: var(--space-4);
+  padding: var(--space-3) var(--gutter);
   background: var(--bg);
+}
+
+.simulator--presenting .sim-top {
+  flex: none;
+}
+
+.simulator--presenting .sim-top__title {
+  display: none;
+}
+
+.simulator--presenting .sim-top {
+  justify-content: flex-end;
 }
 
 .simulator--presenting .sim-stage {
   flex: 1;
   min-height: 0;
+  max-width: none;
 }
 
-.simulator--presenting .sim-canvas-wrap {
-  flex: 1;
-  min-height: 16rem;
-  aspect-ratio: auto;
-  max-height: none;
-  cursor: pointer;
+.simulator--presenting .sim-stage--center,
+.simulator--presenting .sim-stage--wide {
+  max-width: var(--compare-max);
+  justify-content: center;
 }
 
 .simulator--presenting .btn,
@@ -272,22 +396,44 @@
   font-size: var(--font-2xl);
 }
 
-.simulator--presenting .sim-counters {
+.simulator--presenting .sim-stage--run {
+  grid-template-areas:
+    "canvas"
+    "title"
+    "counters"
+    "note"
+    "next"
+    "legend";
+  grid-template-rows: minmax(var(--canvas-min-height), 1fr) auto auto auto auto auto;
+}
+
+.simulator--presenting .sim-stage--run > .sim-title {
   font-size: var(--font-xl);
 }
 
-.simulator--presenting .sim-compare__value {
-  font-size: 3.5rem;
+.simulator--presenting .sim-canvas-wrap {
+  height: auto;
+  min-height: var(--canvas-min-height);
+  aspect-ratio: auto;
+  max-height: none;
+  align-self: stretch;
+  cursor: pointer;
 }
 
-.simulator--presenting .sim-compare__label,
+.simulator--presenting .sim-counters {
+  font-size: var(--font-2xl);
+}
+
+.simulator--presenting .sim-compare__value {
+  font-size: var(--font-3xl);
+}
+
 .simulator--presenting .sim-big,
 .simulator--presenting .sim-text,
 .simulator--presenting .sim-msg {
-  font-size: var(--font-lg);
+  font-size: var(--font-xl);
 }
 
-.simulator--presenting .sim-msg,
 .simulator--presenting .sim-text {
   max-width: none;
 }
@@ -295,9 +441,36 @@
 .simulator--presenting .sim-note,
 .simulator--presenting .sim-legend,
 .simulator--presenting .sim-ref {
-  font-size: var(--font-md);
+  font-size: var(--font-lg);
 }
 
 .simulator--presenting .sim-next {
   width: 100%;
+}
+
+@media (min-width: 1024px), (min-width: 600px) and (orientation: landscape) {
+  .simulator--presenting .sim-stage--run {
+    grid-template-columns: var(--split-cols-present);
+    grid-template-areas:
+      "title canvas"
+      "counters canvas"
+      "note canvas"
+      "legend canvas"
+      "next canvas";
+    grid-template-rows: auto auto auto auto 1fr;
+    height: 100%;
+  }
+
+  .simulator--presenting .sim-stage--run > .sim-canvas-wrap {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .simulator--presenting .sim-stage--run .sim-counters {
+    font-size: var(--font-2xl);
+  }
+
+  .simulator--presenting .sim-stage--run > .sim-next {
+    align-self: end;
+  }
 }

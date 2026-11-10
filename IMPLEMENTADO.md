@@ -60,6 +60,8 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 
 ## Simulador viral (Fase 1 — parte 2, v0.3.0)
 
+> A continuação só numérica depois da árvore foi substituída pela visão de multidão na v0.3.1 (ver seção abaixo).
+
 **Status:** ✅ v0.3.0 na `feat/fase-1-simulador`, mesclada na `main` e publicada no GitHub Pages. Sem banco, sem revisão do `security-engineer`.
 
 ### Regras
@@ -111,6 +113,50 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 
 ---
 
+## Layout responsivo e simulador: visão de multidão (v0.3.1)
+
+**Status:** ✅ v0.3.1 na `fix/layout-simulador`, mesclada na `main` e publicada no GitHub Pages. Sem banco, sem revisão do `security-engineer`.
+
+### Regras
+- A árvore desenha as primeiras rodadas (3 a 5, conforme o fanout, teto de 400 nós). Depois dela entra a **visão de multidão**: a árvore encolhe para o centro e cada rodada vira um anel de pontos (`--verdict-false` = repassou; `--verdict-true` = checou, proporcional ao sorteio da rodada)
+- Cada ponto = `ceil(received / 720)` pessoas (máx. 720 pontos por anel); legenda "Cada ponto = N pessoas" e rótulo do anel "Rodada 6 · 729 pessoas"
+- A tela termina na rodada `SIM_PRESENTATION_ROUNDS` (8) ou antes ("O boato parou na rodada N."). A comparação continua calculada para `SIM_TOTAL_ROUNDS` (10) e se chama "Se continuasse até a 10ª rodada"
+- Vale nos dois modos; no modo apresentação cada clique, Espaço ou → gera um anel novo
+
+### Fluxo / Telas
+- Simulador no notebook: `.layout-split` com mensagem, contadores e botão à esquerda e canvas à direita, sem rolar em 1366×768 e 1920×1080. No celular: título, contadores compactos, canvas, legenda, botão; depois de "Compartilhar" o canvas entra na tela
+- Modo apresentação em tela cheia: notebook/projetor com painel à esquerda (rodada e contadores em fonte grande, botão grande) e canvas na altura toda; retrato com canvas em cima e painel embaixo
+- Nova simulação: fade de 220 ms, rolagem ao topo, mensagem grande e centralizada; o modo apresentação continua ligado
+- Mensagem do boato mostra o quadro "Imagem fictícia" com o `alt` nas missões com `image` (M1, D1, D2)
+- Sem animação com `prefers-reduced-motion` (encolher da árvore, fade e rolagem)
+
+### Arquivos e funções
+- `css/theme.css`, `css/base.css`, `css/screens.css`: sistema de layout global (ver "Constantes e Tema")
+- `css/simulator.css`: reescrito (passos centrados, grade de 2 colunas na árvore, apresentação, quadro da imagem, fade)
+- `js/simulator-model.js`: `personsPerDot`, `crowdRing` (→ perDot, dots, checkedDots, sharedDots), `MAX_CROWD_DOTS` (720)
+- `js/screens/simulator.js`: multidão, fim na rodada 8, quadro da imagem, fade, rolagem
+- `js/config.js`: `SIM_PRESENTATION_ROUNDS` 8, `APP_VERSION` 0.3.1
+- `docs/capturas/v0.3.1/`: 6 capturas (rodada 8 e comparação em 375×812, 768×1024 e 1920×1080); fora do site
+
+### Decisões técnicas
+- `--root-size` fluido faz o `rem` escalar com a tela (16 px no celular, ~18 px no notebook, ~22 px no telão); alvos de toque continuam em px (≥ 44 px)
+- Cada anel tem o seu "cada ponto = N"; a legenda mostra o do anel de fora. Um N único para todos os anéis é uma mudança pequena no `crowdInfo`
+- `phoneSize` mínimo de 4 px (era 5) para a árvore caber quando encolhe
+- Em apresentação o título fica oculto e só "Sair" aparece no topo
+- Só M1, D1 e D2 têm `image`; F1, F2 e M2 estão com `image: null` e não mostram quadro
+
+### Roteiro de teste
+1. Notebook 1366×768 e 1920×1080 (file:// e Live Server) → sem coluna estreita, sem rolagem horizontal; simulador sem rolagem vertical
+2. Compartilhar → árvore até a última rodada dela; a rodada seguinte encolhe a árvore e abre o primeiro anel; cada rodada muda o desenho até a 8ª; "Ver comparação" → "Se continuasse até a 10ª rodada"
+3. Modo apresentação: clique no canvas, Espaço e → geram um anel novo cada; "Nova simulação" 3 vezes seguidas mantém o modo ligado
+4. Fanout 5 e 80% checando → o boato pode parar cedo ("O boato parou na rodada N.")
+5. 375×812, 390×844, 768×1024 e 2560×1440 → alvos ≥ 44 px
+6. Pendente: tela cheia de verdade no Chrome comum e no tablet (o headless recusa `requestFullscreen`; o fallback foi testado)
+
+**Arquivos:** `css/theme.css`, `css/base.css`, `css/screens.css`, `css/simulator.css`, `js/simulator-model.js`, `js/screens/simulator.js`, `js/config.js`, `docs/capturas/v0.3.1/*`
+
+---
+
 <!-- MODELO DE SEÇÃO — copiar para cada funcionalidade nova
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
@@ -153,15 +199,24 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 ---
 
 ## Constantes e Tema
-- `js/config.js`: `APP_VERSION` ('0.3.0', único lugar da versão), `MISSIONS_PER_LEVEL_IN_MATCH` (1), `FEATURES` (`simulator` ligado; `missions` e `ranking` desligados), `SIM_FANOUT` 3, `SIM_CHECK_RATE` 0.1, `SIM_VISUAL_ROUNDS` 5, `SIM_TOTAL_ROUNDS` 10, `SIM_ROUND_MS` 1200, `SIM_COMPARE_CHECK_RATE` 0.3
+- `js/config.js`: `APP_VERSION` ('0.3.1', único lugar da versão), `MISSIONS_PER_LEVEL_IN_MATCH` (1), `FEATURES` (`simulator` ligado; `missions` e `ranking` desligados), `SIM_FANOUT` 3, `SIM_CHECK_RATE` 0.1, `SIM_VISUAL_ROUNDS` 5, `SIM_TOTAL_ROUNDS` 10, `SIM_ROUND_MS` 1200, `SIM_COMPARE_CHECK_RATE` 0.3
 - `css/theme.css` — cores: `--bg #0F1B2D`, `--surface #17263D`, `--border #2A3B55`, `--text #F2F5F9`, `--text-muted #A9B6C8`, `--accent #3DA5FF`, `--on-accent #0F1B2D`; vereditos: `--verdict-true #3FB27F`, `--verdict-false #E5534B`, `--verdict-misleading #E9A23B`, `--verdict-unproven #8A9BB0`
 - `css/theme.css` — medidas: fonte `system-ui`, `--font-sm` a `--font-2xl`, `--space-1` a `--space-7`, `--radius` 6px, `--touch-min` 44px, `--content-max` 960px, `--text-max` 60ch, `--touch-lg` 64px, `--canvas-max-height` 58vh
+- Layout (v0.3.1) — breakpoints (media query não aceita `var()`; repetir os números, documentados no topo do `theme.css`): celular < 600px (1 coluna); tablet 600–1023px (1 coluna larga, 2 em paisagem); notebook ≥ 1024px (container centralizado); telão ≥ 1600px (`--content-max` sobe para 88rem). Divisão em colunas: `(min-width: 1024px), (min-width: 600px) and (orientation: landscape)`
+- Layout — tipografia fluida: `--root-size` = `clamp(16px, 0.55vw + 11px, 30px)` no `html` (todo `rem` escala); `--font-lg/xl/2xl/3xl` com `clamp()`; `--font-sm` e `--font-md` fixos. Espaçamentos `--space-5/6/7` fluidos; `--gutter` (margem lateral)
+- Layout — medidas: `--header-height`, `--content-max` (75rem; 88rem a partir de 1600px; antes era 960px), `--panel-max` (56rem), `--compare-max` (72rem), `--split-cols` (5fr/7fr), `--split-cols-present` (2fr/3fr), `--canvas-min-height`, `--sim-chrome` (15rem), `--fade-ms` (220ms)
+- Layout — classes globais (`base.css`): `.layout-center` (coluna centralizada até `--panel-max`) e `.layout-split` (1 coluna que vira 2 nas condições acima; filhos usam `grid-area` ou `.layout-split__side` / `__visual`). Header, main e footer usam `--gutter` e `--content-max`. **Telas novas (Fase 2) devem usar essas classes e variáveis, nunca largura fixa em px**
+- `js/config.js`: `SIM_PRESENTATION_ROUNDS` 8 (última rodada mostrada na tela); `SIM_TOTAL_ROUNDS` 10 é só a rodada da comparação
 
 ---
 
 ## Bugs Corrigidos
 | Bug | Causa | Fix |
 |---|---|---|
+| A. Site vira coluna estreita à esquerda no computador | `.app-main`/`.home` limitados a 960px e a `.home` a 60ch, alinhados à esquerda, sem grade de colunas | Sistema de layout (container fluido centralizado, `.layout-split`, `clamp()`) — v0.3.1 |
+| B. A partir da 5ª rodada só os números subiam | `SIM_VISUAL_ROUNDS` desenha a árvore só até a rodada 5 (3 com fanout 5); as seguintes só atualizavam o contador | Visão de multidão: anéis de pontos até a rodada 8, nos dois modos — v0.3.1 |
+| C. "Nova simulação" era corte brusco e a tela cheia no computador tinha cara de tablet | Passo A era um cartão pequeno à esquerda, sem transição; apresentação usava coluna única | Fade de 220 ms, rolagem ao topo, mensagem grande e centralizada; apresentação em 2 colunas no notebook — v0.3.1 |
+| D. Quadro da imagem fictícia não aparecia no simulador | `simulator.js` nunca renderizava `rumor.image` | `buildMessage()` mostra `<figure class="sim-image">` com "Imagem fictícia" e o `alt` — v0.3.1 |
 
 ---
 
@@ -176,4 +231,4 @@ Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
 
 ---
 
-*Última atualização: 10/11/2026 (Fase 1 — parte 2, v0.3.0)*
+*Última atualização: 10/11/2026 (v0.3.1 — layout e visão de multidão)*
