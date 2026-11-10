@@ -79,73 +79,6 @@
   gap: var(--space-3);
 }
 
-/* Mensagem fictícia */
-.sim-msg {
-  background: var(--surface);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  font-size: var(--font-lg);
-}
-
-.sim-msg__top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.sim-msg__header {
-  font-weight: var(--weight-bold);
-}
-
-.sim-msg__badge {
-  color: var(--text-muted);
-  font-size: var(--font-sm);
-}
-
-.sim-msg__content {
-  overflow-wrap: anywhere;
-}
-
-.sim-stamp {
-  border: var(--border-width) solid var(--verdict-misleading);
-  border-radius: var(--radius);
-  color: var(--verdict-misleading);
-  font-size: var(--font-sm);
-  font-weight: var(--weight-bold);
-  padding: 0 var(--space-2);
-}
-
-/* Quadro da imagem fictícia */
-.sim-image {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-4);
-  min-height: 8rem;
-  justify-content: center;
-  background: var(--surface);
-  border: var(--border-width) dashed var(--text-muted);
-  border-radius: var(--radius);
-}
-
-.sim-image__label {
-  color: var(--text-muted);
-  font-size: var(--font-sm);
-  font-weight: var(--weight-bold);
-}
-
-.sim-image__alt {
-  font-size: var(--font-md);
-  overflow-wrap: anywhere;
-}
-
 /* Ajustes */
 .sim-settings {
   border: var(--border-width) solid var(--border);
@@ -430,7 +363,7 @@
 
 .simulator--presenting .sim-big,
 .simulator--presenting .sim-text,
-.simulator--presenting .sim-msg {
+.simulator--presenting .post-card {
   font-size: var(--font-xl);
 }
 

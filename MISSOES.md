@@ -1,4 +1,4 @@
-# Checa Aí — Missões (v1: 6 missões)
+# Checa Aí — Missões (v1: 7 missões: 3 fáceis, 2 médias, 2 difíceis)
 
 > Conteúdo das missões, para o grupo revisar e para o Claude Code converter em `js/missions-data.js`.
 > Base: Cartilha de Segurança para Internet do CERT.br — fascículo **Boatos** (jul/2024) e fascículo **Redes Sociais**. Os PDFs ficam em `cartilhas/`.
@@ -6,16 +6,17 @@
 > Tema da estação: **origem, data e contexto**. Sem golpes/phishing (Estação 1) e sem IA/deepfake (Grupo 5 da outra turma).
 
 ## Como a partida funciona
-- 6 missões: 2 fáceis, 2 médias, 2 difíceis.
+- 7 missões: 3 fáceis, 2 médias, 2 difíceis.
 - Cada partida sorteia **1 fácil + 1 média + 1 difícil**, nessa ordem. Assim, cada visitante pega uma combinação diferente.
 - Para crescer depois: 9 missões (3 de cada nível), depois 12 (4 de cada). O sorteio continua igual.
 - Vereditos possíveis em todas as missões: **Verdadeira · Falsa · Enganosa / fora de contexto · Sem provas suficientes**.
-- As 6 missões usam os 4 vereditos, para o visitante não achar que "tudo é mentira".
+- As missões usam os 4 vereditos, para o visitante não achar que "tudo é mentira".
 
 | # | Nível | Missão | Veredito |
 |---|---|---|---|
 | F1 | Fácil | Aulas suspensas na semana que vem | Sem provas suficientes |
 | F2 | Fácil | A corrente do aplicativo pago | Falsa |
+| F3 | Fácil | A mostra cancelada | Falsa |
 | M1 | Médio | A enchente de hoje (que não era de hoje) | Enganosa / fora de contexto |
 | M2 | Médio | A pesquisa do celular na sala | Enganosa / fora de contexto |
 | D1 | Difícil | O comunicado oficial que não existia | Falsa |
@@ -78,6 +79,36 @@ Formato de cada missão: **publicação** (o que o visitante vê) → **ferramen
 **Como se proteger:** Não repasse correntes. Confira no canal oficial do serviço e em uma agência de checagem antes de acreditar.
 
 **Cartilha:** Boatos — "O que são boatos?" (correntes), "Consulte agências de checagem".
+
+---
+
+## F3 · Fácil — A mostra cancelada
+**Formato:** documento (imagem de um comunicado) circulando no grupo de alunos ("Turma 1º Ano"), marcado como *Encaminhada*. Cabeçalho com o logo do IFNMG Campus Arinos (assets/images/marcas/ifnmg-arinos.png).
+
+**Publicação (texto do documento):**
+> Instituto Federal do Norte de Minas Gerais — Campus Arinos · Coordenação de Ensino
+> COMUNICADO Nº 058/2026 — Informamos que a Mostra de Cibersegurança CiberMissões 2026 está CANCELADA por motivo de manutenção na rede do campus. As atividades serão remarcadas em data a definir.
+> Arinos, 27 de novembro de 2026. Marta Regina Fontoura — Coordenadora de Ensino
+
+**Ferramentas:**
+- **Site oficial do campus** → Notícia publicada ontem: "CiberMissões 2026 acontece nesta quinta". Nenhum comunicado de cancelamento.
+- **Olhe ao redor** → Você está na mostra agora. Ela não foi cancelada.
+- **Analisar a imagem** → O logo é o verdadeiro, mas logotipo se copia da internet em segundos. O nome que assina não aparece no quadro de servidores do campus e o comunicado nº 058 não está no site.
+
+**O que é suspeito aqui?**
+- ✅ Nenhum aviso no site oficial do campus
+- ✅ Assina alguém que não é servidor do campus
+- ✅ Contradiz o que você está vendo agora
+- ❌ Tem o logo oficial, então é verdadeiro
+- ❌ Tem número de comunicado, então é oficial
+
+**Veredito:** Falsa
+
+**Gabarito comentado:** O logo é verdadeiro, mas qualquer um copia um logotipo. O site oficial não fala em cancelamento, quem assina não trabalha no campus e a mostra está acontecendo. É um comunicado falso.
+
+**Como se proteger:** Comunicado da escola se confere no site e nos canais oficiais do campus. Logotipo não é prova.
+
+**Cartilha:** Boatos — "Vá direto à fonte da notícia", "Observe os detalhes de imagens e vídeos".
 
 ---
 

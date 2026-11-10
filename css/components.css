@@ -1,0 +1,210 @@
+/* Componentes compartilhados. Cores e medidas vêm do theme.css. */
+
+/* Mensagem fictícia (js/components/post-card.js) */
+.post-card {
+  background: var(--surface);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font-size: var(--font-lg);
+}
+
+.post-card__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.post-card__header {
+  font-weight: var(--weight-bold);
+}
+
+.post-card__badge {
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+}
+
+.post-card__content {
+  overflow-wrap: anywhere;
+}
+
+.post-card__stamp {
+  border: var(--border-width) solid var(--verdict-misleading);
+  border-radius: var(--radius);
+  color: var(--verdict-misleading);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+  padding: 0 var(--space-2);
+}
+
+/* Foto real com crédito */
+.post-card__photo {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.post-card__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  background: var(--border);
+}
+
+.post-card__credit {
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+  overflow-wrap: anywhere;
+}
+
+/* Quadro "Imagem fictícia" (sem foto, ou foto que não carregou) */
+.post-card__placeholder {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  min-height: 8rem;
+  justify-content: center;
+  background: var(--surface);
+  border: var(--border-width) dashed var(--text-muted);
+  border-radius: var(--radius);
+}
+
+.post-card__placeholder-label {
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+}
+
+.post-card__placeholder-alt {
+  font-size: var(--font-md);
+  overflow-wrap: anywhere;
+}
+
+/* Documento fictício (ofício / comunicado) */
+.post-doc {
+  position: relative;
+  overflow: hidden;
+  container-type: inline-size;
+  width: 100%;
+  max-width: 44rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: var(--space-5);
+  background: var(--doc-paper);
+  color: var(--doc-ink);
+  border: var(--border-width) solid var(--doc-border);
+  border-radius: var(--radius);
+  font-size: var(--font-md);
+  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.post-doc__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-width) solid var(--doc-border);
+  text-align: center;
+}
+
+.post-doc__crest {
+  width: 3.5rem;
+  height: auto;
+}
+
+.post-doc__logo {
+  display: block;
+  width: 100%;
+  max-width: 24rem;
+  height: auto;
+}
+
+.post-doc__org {
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+
+.post-doc__subtitle {
+  font-size: var(--font-sm);
+  color: var(--doc-ink-muted);
+}
+
+.post-doc__number {
+  font-weight: var(--weight-bold);
+  font-size: var(--font-md);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.post-doc__body {
+  text-align: justify;
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+
+.post-doc__place {
+  text-align: right;
+  font-size: var(--font-sm);
+  color: var(--doc-ink-muted);
+}
+
+.post-doc__sign {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.post-doc__signature {
+  font-family: "Segoe Script", "Bradley Hand", "Brush Script MT", cursive;
+  font-size: var(--font-lg);
+  line-height: 1.2;
+}
+
+.post-doc__sign-line {
+  display: block;
+  width: 60%;
+  max-width: 14rem;
+  height: 1.5rem;
+  border-bottom: var(--border-width) solid var(--doc-ink);
+}
+
+.post-doc__role {
+  font-size: var(--font-sm);
+  color: var(--doc-ink-muted);
+}
+
+/* Faixa diagonal: posição, rotação e z-index também vão inline (post-card.js) */
+.post-doc__band {
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: var(--weight-bold);
+  font-size: 2.4rem;
+  font-size: clamp(2.6rem, 12cqw, 5rem);
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  color: var(--verdict-false);
+  opacity: 0.42;
+  border-top: 0.06em solid var(--verdict-false);
+  border-bottom: 0.06em solid var(--verdict-false);
+  pointer-events: none;
+  user-select: none;
+}
