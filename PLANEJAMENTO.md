@@ -172,23 +172,23 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 | Fase | Datas | Versão |
 |---|---|---|
 | 0 — Setup | 10 a 11/11 | v0.1.x |
-| 1 — Simulador viral (pronto para o grupo treinar a apresentação) | 12 a 14/11 | v0.2.0 |
-| 2 — Núcleo do jogo (sem banco) | 15 a 19/11 | v0.3.0 |
-| 3 — Conteúdo: 6 missões (escritas pelo Claude, revisadas pelo grupo) | revisão até 17/11 | v0.4.0 |
-| 4 — Ranking online | 20 a 22/11 | v0.5.0 |
+| 1 — Simulador viral (pronto para o grupo treinar a apresentação) | 12 a 14/11 | v0.2.0 (base) + v0.3.0 (simulador) |
+| 2 — Núcleo do jogo (sem banco) | 15 a 19/11 | v0.4.0 |
+| 3 — Conteúdo: 6 missões (escritas pelo Claude, revisadas pelo grupo) | revisão até 17/11 | v0.5.0 |
+| 4 — Ranking online | 20 a 22/11 | v0.6.0 |
 | 5 — Polimento e testes | 23 a 24/11 | v0.9.x |
 | Congelamento | 25/11 — só correção de bug | v1.0.0 |
 | Ensaio no estande | 26/11 | — |
 | **Mostra** | **27/11** | — |
 
-### Fase 1 — Simulador viral
+### Fase 1 — Simulador viral — ✅ Completo (v0.3.0)
 **Objetivo:** simulador pronto primeiro, para o grupo treinar a apresentação em cima dele. Já entra com a base do site (tema, layout, tela de início e navegação).
-- [ ] 0. Setup (estrutura, docs, kit do Claude, git) — feito pelo setup
-- [ ] 1. Tema (`theme.css`), layout base responsivo, tela de início e navegação (`app.js`)
-- [ ] 2. `missions-data.js` com as 6 missões do `MISSOES.md` (o simulador usa as mensagens delas)
-- [ ] 3. Modelo por rodadas (função pura, testável): repasses por pessoa, % que checa, sorteio
-- [ ] 4. Tela do simulador: escolha Compartilhar/Checar, árvore animada no `<canvas>`, contador, ajustes, modo apresentação e comparação
-- [ ] 5. Publicado no GitHub Pages e testado no notebook, no tablet e no celular
+- [x] 0. Setup (estrutura, docs, kit do Claude, git) — feito pelo setup
+- [x] 1. Tema (`theme.css`), layout base responsivo, tela de início e navegação (`app.js`) — v0.2.0
+- [x] 2. `missions-data.js` com as 6 missões do `MISSOES.md` (o simulador usa as mensagens delas) — v0.2.0
+- [x] 3. Modelo por rodadas (função pura, testável): repasses por pessoa, % que checa, sorteio
+- [x] 4. Tela do simulador: escolha Compartilhar/Checar, árvore animada no `<canvas>`, contador, ajustes, modo apresentação e comparação
+- [x] 5. Publicado no GitHub Pages e testado no notebook, no tablet e no celular (tela cheia em tablet real ainda por testar)
 
 ### Fase 2 — Núcleo do jogo (sem banco)
 **Objetivo:** uma partida completa funcionando offline, com 2 missões de exemplo.

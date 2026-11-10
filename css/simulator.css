@@ -1,0 +1,303 @@
+/* Tela do simulador "Como um boato se espalha". Cores e medidas vêm do theme.css. */
+.simulator {
+  align-items: stretch;
+  width: 100%;
+  gap: var(--space-4);
+}
+
+.sim-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.sim-top__title {
+  font-size: var(--font-lg);
+}
+
+.sim-top__tools {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.sim-stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.sim-title {
+  font-size: var(--font-xl);
+}
+
+.sim-big {
+  font-size: var(--font-lg);
+  font-weight: var(--weight-bold);
+}
+
+.sim-text {
+  max-width: var(--text-max);
+}
+
+.sim-ref,
+.sim-note,
+.sim-legend {
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+}
+
+.sim-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Mensagem fictícia */
+.sim-msg {
+  max-width: var(--text-max);
+  background: var(--surface);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sim-msg__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.sim-msg__header {
+  font-weight: var(--weight-bold);
+}
+
+.sim-msg__badge {
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+}
+
+.sim-msg__content {
+  overflow-wrap: anywhere;
+}
+
+.sim-stamp {
+  border: var(--border-width) solid var(--verdict-misleading);
+  border-radius: var(--radius);
+  color: var(--verdict-misleading);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+  padding: 0 var(--space-2);
+}
+
+/* Ajustes */
+.sim-settings {
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  max-width: var(--text-max);
+}
+
+.sim-settings__summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-4);
+  cursor: pointer;
+  font-weight: var(--weight-bold);
+}
+
+.sim-settings__body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.sim-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 12rem;
+}
+
+.sim-select {
+  min-height: var(--touch-min);
+  padding: 0 var(--space-3);
+  background: var(--surface);
+  color: var(--text);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  font: inherit;
+}
+
+/* Contadores e canvas */
+.sim-counters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
+  font-size: var(--font-lg);
+  font-weight: var(--weight-bold);
+}
+
+.sim-counters__checked {
+  color: var(--verdict-true);
+}
+
+.sim-canvas-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: var(--canvas-max-height);
+  background: var(--surface);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+}
+
+.sim-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sim-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sim-legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sim-swatch {
+  display: inline-block;
+  width: 0.75rem;
+  height: 1.1rem;
+  border-radius: 3px;
+}
+
+.sim-swatch--you { background: var(--accent); }
+.sim-swatch--shared { background: var(--verdict-false); }
+.sim-swatch--checked { background: var(--verdict-true); }
+
+/* Comparação final */
+.sim-compare {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.sim-compare__col {
+  background: var(--surface);
+  border: var(--border-width) solid var(--border);
+  border-left-width: var(--space-1);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.sim-compare__col--bad { border-left-color: var(--verdict-false); }
+.sim-compare__col--good { border-left-color: var(--verdict-true); }
+
+.sim-compare__label {
+  font-weight: var(--weight-bold);
+}
+
+.sim-compare__value {
+  font-size: var(--font-2xl);
+  font-weight: var(--weight-bold);
+  line-height: 1.2;
+}
+
+.sim-compare__unit {
+  color: var(--text-muted);
+}
+
+@media (min-width: 600px) {
+  .sim-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sim-compare {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Modo apresentação: ocupa a tela toda (com ou sem tela cheia do navegador) */
+.simulator--presenting {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: var(--space-4);
+  background: var(--bg);
+}
+
+.simulator--presenting .sim-stage {
+  flex: 1;
+  min-height: 0;
+}
+
+.simulator--presenting .sim-canvas-wrap {
+  flex: 1;
+  min-height: 16rem;
+  aspect-ratio: auto;
+  max-height: none;
+  cursor: pointer;
+}
+
+.simulator--presenting .btn,
+.simulator--presenting .sim-settings__summary {
+  min-height: var(--touch-lg);
+  font-size: var(--font-lg);
+}
+
+.simulator--presenting .sim-title {
+  font-size: var(--font-2xl);
+}
+
+.simulator--presenting .sim-counters {
+  font-size: var(--font-xl);
+}
+
+.simulator--presenting .sim-compare__value {
+  font-size: 3.5rem;
+}
+
+.simulator--presenting .sim-compare__label,
+.simulator--presenting .sim-big,
+.simulator--presenting .sim-text,
+.simulator--presenting .sim-msg {
+  font-size: var(--font-lg);
+}
+
+.simulator--presenting .sim-msg,
+.simulator--presenting .sim-text {
+  max-width: none;
+}
+
+.simulator--presenting .sim-note,
+.simulator--presenting .sim-legend,
+.simulator--presenting .sim-ref {
+  font-size: var(--font-md);
+}
+
+.simulator--presenting .sim-next {
+  width: 100%;
+}
