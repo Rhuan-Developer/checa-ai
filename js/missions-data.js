@@ -9,6 +9,26 @@
    * @property {string} header  nome do grupo, perfil ou órgão
    * @property {string} badge   selo curto da publicação ('' se não houver)
    *
+   * @typedef {Object} MissionPhoto  foto real (arquivo local, com crédito visível)
+   * @property {'photo'} kind
+   * @property {string} src  caminho do arquivo
+   * @property {string} alt  descrição da foto
+   * @property {string} credit  "Foto: Autor, Licença, via Wikimedia Commons"
+   * @property {number} width  largura real em px (reserva o espaço no layout)
+   * @property {number} height  altura real em px
+   *
+   * @typedef {Object} MissionDocument  documento desenhado em HTML/CSS (ofício, comunicado)
+   * @property {'document'} kind
+   * @property {{type: 'crest'|'logo', src?: string, alt?: string}} brand  brasão inventado ou logo (arquivo)
+   * @property {string} orgLine  linha da instituição
+   * @property {string} [subtitle]
+   * @property {string} number  título completo, ex.: "OFÍCIO Nº 487/2026"
+   * @property {string} body
+   * @property {string} place
+   * @property {string} date
+   * @property {{name?: string, role: string}} signature  sem name: linha de assinatura e só o cargo
+   * @property {string} alt  descrição para leitor de tela
+   *
    * @typedef {Object} MissionTool
    * @property {string} label  nome da ferramenta
    * @property {string} clue   pista revelada ao tocar
@@ -18,12 +38,12 @@
    * @property {boolean} isSuspicious  true = sinal verdadeiro; false = isca
    *
    * @typedef {Object} Mission
-   * @property {string} id  'F1', 'F2', 'M1', 'M2', 'D1', 'D2'
+   * @property {string} id  'F1', 'F2', 'F3', 'M1', 'M2', 'D1', 'D2'
    * @property {'easy'|'medium'|'hard'} level
    * @property {string} title
    * @property {MissionFormat} format
    * @property {string} content  texto da publicação
-   * @property {{alt: string}|null} image
+   * @property {MissionPhoto|MissionDocument|null} image  mídia da publicação (null = sem mídia)
    * @property {MissionTool[]} tools
    * @property {MissionSignal[]} signals
    * @property {'true'|'false'|'misleading'|'unproven'} verdict
@@ -110,12 +130,53 @@
       reference: 'Boatos — "O que são boatos?" (correntes), "Consulte agências de checagem".'
     },
     {
+      id: 'F3',
+      level: 'easy',
+      title: 'A mostra cancelada',
+      format: { type: 'document', header: 'Turma 1º Ano', badge: 'Encaminhada' },
+      content: 'COMUNICADO Nº 058/2026 — Informamos que a Mostra de Cibersegurança CiberMissões 2026 está CANCELADA por motivo de manutenção na rede do campus. As atividades serão remarcadas em data a definir. Arinos, 27 de novembro de 2026. Marta Regina Fontoura, Coordenadora de Ensino.',
+      image: {
+        kind: 'document',
+        brand: { type: 'logo', src: 'assets/images/marcas/ifnmg-arinos.png', alt: 'Logo do IFNMG Campus Arinos' },
+        orgLine: 'Instituto Federal do Norte de Minas Gerais — Campus Arinos · Coordenação de Ensino',
+        number: 'COMUNICADO Nº 058/2026',
+        body: 'Informamos que a Mostra de Cibersegurança CiberMissões 2026 está CANCELADA por motivo de manutenção na rede do campus. As atividades serão remarcadas em data a definir.',
+        place: 'Arinos',
+        date: '27 de novembro de 2026',
+        signature: { name: 'Marta Regina Fontoura', role: 'Coordenadora de Ensino' },
+        alt: 'Comunicado nº 058/2026 do IFNMG Campus Arinos, com o logo da instituição, avisando o cancelamento da mostra CiberMissões 2026, assinado por Marta Regina Fontoura, Coordenadora de Ensino.'
+      },
+      tools: [
+        { label: 'Site oficial do campus', clue: 'Notícia publicada ontem: "CiberMissões 2026 acontece nesta quinta". Nenhum comunicado de cancelamento.' },
+        { label: 'Olhe ao redor', clue: 'Você está na mostra agora. Ela não foi cancelada.' },
+        { label: 'Analisar a imagem', clue: 'O logo é o verdadeiro, mas logotipo se copia da internet em segundos. O nome que assina não aparece no quadro de servidores do campus e o comunicado nº 058 não está no site.' }
+      ],
+      signals: [
+        { text: 'Nenhum aviso no site oficial do campus', isSuspicious: true },
+        { text: 'Assina alguém que não é servidor do campus', isSuspicious: true },
+        { text: 'Contradiz o que você está vendo agora', isSuspicious: true },
+        { text: 'Tem o logo oficial, então é verdadeiro', isSuspicious: false },
+        { text: 'Tem número de comunicado, então é oficial', isSuspicious: false }
+      ],
+      verdict: 'false',
+      explanation: 'O logo é verdadeiro, mas qualquer um copia um logotipo. O site oficial não fala em cancelamento, quem assina não trabalha no campus e a mostra está acontecendo. É um comunicado falso.',
+      howToProtect: 'Comunicado da escola se confere no site e nos canais oficiais do campus. Logotipo não é prova.',
+      reference: 'Boatos — "Vá direto à fonte da notícia", "Observe os detalhes de imagens e vídeos".'
+    },
+    {
       id: 'M1',
       level: 'medium',
       title: 'A enchente de hoje (que não era de hoje)',
       format: { type: 'social-post', header: '@noticias.da.aurora.ja', badge: '' },
       content: 'AGORA! Centro de Nova Aurora debaixo d\'água 😱 Evitem a Avenida Central! Compartilhem pra todo mundo saber!',
-      image: { alt: 'Foto fictícia de uma rua alagada, com carros com água até a porta.' },
+      image: {
+        kind: 'photo',
+        src: 'assets/images/missoes/m1-enchente.jpg',
+        alt: 'Foto real de uma rua com árvores totalmente alagada, com carros cobertos pela água até a janela.',
+        credit: 'Foto: Don Becker (USGS), domínio público, via Wikimedia Commons',
+        width: 1200,
+        height: 798
+      },
       tools: [
         { label: 'Buscar a imagem', clue: 'A mesma foto aparece num portal de notícias em março de 2019, numa reportagem sobre uma enchente em Rio Claro do Sul, outra cidade.' },
         { label: 'Conferir a data', clue: 'O post é de hoje, às 10h12. A foto é de mais de 5 anos atrás.' },
@@ -163,7 +224,17 @@
       title: 'O comunicado oficial que não existia',
       format: { type: 'document', header: 'Prefeitura Municipal de Nova Aurora — Secretaria de Educação', badge: '' },
       content: 'OFÍCIO Nº 487/2026 — Comunicamos que, devido à reforma das escolas municipais, as provas finais estão ADIADAS para fevereiro de 2027. Nova Aurora, 31 de novembro de 2026. Secretária Municipal de Educação.',
-      image: { alt: 'Imagem de um documento com brasão no alto, número de ofício e assinatura no final.' },
+      image: {
+        kind: 'document',
+        brand: { type: 'crest' },
+        orgLine: 'Prefeitura Municipal de Nova Aurora — Secretaria de Educação',
+        number: 'OFÍCIO Nº 487/2026',
+        body: 'Comunicamos que, devido à reforma das escolas municipais, as provas finais estão ADIADAS para fevereiro de 2027.',
+        place: 'Nova Aurora',
+        date: '31 de novembro de 2026',
+        signature: { role: 'Secretária Municipal de Educação' },
+        alt: 'Ofício da Prefeitura de Nova Aurora com brasão, número 487/2026, aviso de adiamento das provas finais, data 31 de novembro de 2026 e assinatura sem nome.'
+      },
       tools: [
         { label: 'Site oficial da Prefeitura', clue: 'A lista de ofícios de 2026 vai até o nº 312. O nº 487 não existe.' },
         { label: 'Perfil oficial da Secretaria de Educação', clue: 'Post de ontem: "ATENÇÃO: circula um comunicado FALSO sobre adiamento das provas. O calendário está mantido."' },
@@ -187,7 +258,14 @@
       title: 'A ponte interditada',
       format: { type: 'group-chat', header: 'Família 👨‍👩‍👧', badge: 'Encaminhada' },
       content: 'Gente, a ponte do Rio Aurora na estrada pra Vila Serena tá INTERDITADA até sexta! Rachou a pilastra. Quem for viajar vai ter que dar a volta por Santa Luz. Passem pra frente!',
-      image: { alt: 'Foto de uma ponte com cones e fita de isolamento na entrada.' },
+      image: {
+        kind: 'photo',
+        src: 'assets/images/missoes/d2-ponte.jpg',
+        alt: 'Foto real da entrada de uma ponte fechada, com cones, barreira de concreto e placa de interdição.',
+        credit: 'Foto: Les Hull, CC BY-SA 2.0, via Wikimedia Commons',
+        width: 1066,
+        height: 800
+      },
       tools: [
         { label: 'Ir à fonte', clue: 'A mensagem não tem link, mas cita o local exato e um prazo ("até sexta").' },
         { label: 'Órgão oficial de estradas (site do DER Estadual, fictício)', clue: 'Aviso publicado ontem: "Ponte sobre o Rio Aurora (km 42) interditada para vistoria estrutural até sexta-feira. Desvio por Santa Luz."' },

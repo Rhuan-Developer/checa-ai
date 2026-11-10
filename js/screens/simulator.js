@@ -118,8 +118,11 @@
     const h1 = el('h1', 'sim-top__title', 'Como um boato se espalha');
     h1.tabIndex = -1;
     const toolbar = el('div', 'sim-top__tools');
-    const presentBtn = el('button', 'btn btn--secondary', 'Modo apresentação');
+    const presentBtn = el('button', 'btn-icon');
     presentBtn.type = 'button';
+    presentBtn.setAttribute('aria-label', 'Modo apresentação');
+    presentBtn.title = 'Modo apresentação';
+    presentBtn.innerHTML = '<svg class="btn-icon__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-present"></use></svg>';
     const exitBtn = el('button', 'btn btn--secondary', 'Sair');
     exitBtn.type = 'button';
     exitBtn.hidden = true;
@@ -234,23 +237,6 @@
 
     /* ---------- passo a: chegou no celular ---------- */
 
-    /** Cartão da mensagem fictícia, com o quadro da imagem quando a missão tem `image`. */
-    function buildMessage(r) {
-      const msg = el('article', 'sim-msg');
-      msg.setAttribute('aria-label', 'Mensagem recebida');
-      const msgTop = el('div', 'sim-msg__top');
-      msgTop.append(el('span', 'sim-msg__header', r.format.header), el('span', 'sim-stamp', 'Simulação'));
-      msg.appendChild(msgTop);
-      if (r.format.badge) msg.appendChild(el('p', 'sim-msg__badge', r.format.badge));
-      msg.appendChild(el('p', 'sim-msg__content', r.content));
-      if (r.image) {
-        const figure = el('figure', 'sim-image');
-        figure.append(el('span', 'sim-image__label', 'Imagem fictícia'), el('figcaption', 'sim-image__alt', r.image.alt));
-        msg.appendChild(figure);
-      }
-      return msg;
-    }
-
     function renderStepA(initial) {
       clearStage();
       step = 'a';
@@ -258,7 +244,7 @@
 
       const h2 = heading('Chegou no seu celular');
 
-      const msg = buildMessage(rumor);
+      const msg = ChecaAi.components.postCard.render(rumor, { ariaLabel: 'Mensagem recebida' });
 
       const actions = el('div', 'sim-actions');
       const share = el('button', 'btn', 'Compartilhar');

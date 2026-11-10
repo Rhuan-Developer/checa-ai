@@ -100,6 +100,31 @@ img, svg, canvas {
   border-color: var(--border);
 }
 
+/* Botão só com ícone (traço em currentColor), discreto */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn-icon:hover {
+  color: var(--text);
+}
+
+.btn-icon__svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
 .btn[disabled],
 .btn[aria-disabled="true"] {
   opacity: 0.5;

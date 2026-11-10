@@ -135,6 +135,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 - `css/simulator.css`: reescrito (passos centrados, grade de 2 colunas na árvore, apresentação, quadro da imagem, fade)
 - `js/simulator-model.js`: `personsPerDot`, `crowdRing` (→ perDot, dots, checkedDots, sharedDots), `MAX_CROWD_DOTS` (720)
 - `js/screens/simulator.js`: multidão, fim na rodada 8, quadro da imagem, fade, rolagem
+- Documentos (v0.3.2) — `css/theme.css`: `--doc-paper`, `--doc-ink`, `--doc-ink-muted`, `--doc-border`, `--doc-crest-a/b/c` (papel e brasão inventado dos documentos fictícios; únicas cores fora da paleta do tema)
 - `js/config.js`: `SIM_PRESENTATION_ROUNDS` 8, `APP_VERSION` 0.3.1
 - `docs/capturas/v0.3.1/`: 6 capturas (rodada 8 e comparação em 375×812, 768×1024 e 1920×1080); fora do site
 
@@ -154,6 +155,52 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 6. Pendente: tela cheia de verdade no Chrome comum e no tablet (o headless recusa `requestFullscreen`; o fallback foi testado)
 
 **Arquivos:** `css/theme.css`, `css/base.css`, `css/screens.css`, `css/simulator.css`, `js/simulator-model.js`, `js/screens/simulator.js`, `js/config.js`, `docs/capturas/v0.3.1/*`
+
+---
+
+## Conteúdo e imagens (Fase 2 — parte A, v0.3.2)
+
+**Status:** ✅ v0.3.2 na `feat/conteudo-imagens`, mesclada na `main` e publicada no GitHub Pages. Sem banco, sem revisão do `security-engineer`.
+
+### Regras
+- Agora são 7 missões (3 fáceis, 2 médias, 2 difíceis); `drawMatch` e `getShareableRumors` não precisaram mudar (F3 entra sozinha no sorteio fácil e no simulador)
+- `mission.image` é `{ kind: 'photo', src, alt, credit, width, height }`, `{ kind: 'document', brand, orgLine, subtitle?, number, body, place, date, signature, alt }` ou `null`. Mídia sem `kind` (formato antigo `{ alt }`) cai no quadro "Imagem fictícia"
+- Foto que não carrega (evento `error`) vira o quadro "Imagem fictícia" com o `alt`; logo que não carrega some e o cabeçalho fica só em texto
+
+### Fluxo / Telas
+- Mensagem do boato (simulador) vem do componente compartilhado; a Fase 2B reusa nas missões
+- Documentos (D1 e F3) desenhados em HTML/CSS com faixa diagonal "SIMULAÇÃO" de ponta a ponta, sempre visível
+- M1 e D2 com foto real e crédito visível abaixo
+- Modo apresentação: botão só com ícone (canto superior direito, 44×44, `--text-muted`, `aria-label` e `title` "Modo apresentação"); dentro do modo, "Sair" continua texto
+- Favicon novo
+
+### Arquivos e funções
+- `js/components/post-card.js`: `ChecaAi.components.postCard.render(mission, { ariaLabel })` → `<article class="post-card">` (cabeçalho, selo "Simulação", selo da publicação, texto, mídia). Carregado depois de `missions-data.js`
+- `css/components.css`: `.post-card*` e `.post-doc*` (sem depender de classe do simulador)
+- Documento: `div role="img"` com `aria-label` = `alt`; o `content` da missão fica só para leitor de tela. Faixa SIMULAÇÃO dentro do componente (posição, rotação, z-index e `pointer-events:none` inline no JS; `aria-hidden`; `clamp(2.6rem, 12cqw, 5rem)`, opacidade 0,42, `--verdict-false`). Assinatura em fonte cursiva do sistema só quando há nome; sem nome, linha e cargo
+- `theme.css`: `--doc-paper`, `--doc-ink`, `--doc-ink-muted`, `--doc-border`, `--doc-crest-a/b/c`
+- `assets/icons/icons.svg` (pacote; hoje só `icon-present`) com cópia idêntica inline no `index.html` (`<use>` externo não funciona por `file://`; mudou um, muda o outro); `assets/icons/favicon.svg`
+- `assets/images/missoes/m1-enchente.jpg`, `d2-ponte.jpg` e `CREDITOS.md`; `assets/images/marcas/ifnmg-arinos.png` (logo da F3)
+- `simulator.css`: blocos `.sim-msg*`, `.sim-stamp` e `.sim-image*` removidos (agora no `components.css`)
+- `docs/capturas/v0.3.2/`: capturas de F3, D1, M1, D2 e do topo do simulador (375×812, 768×1024, 1920×1080)
+
+### Decisões técnicas
+- D1: `document` com brasão inventado em SVG inline (escudo verde, sol dourado, faixa vinho; cores `--doc-crest-*`, diferentes do tema), "OFÍCIO Nº 487/2026", assinatura só com o cargo (como diz a missão)
+- F3: `document` com o logo do IFNMG Campus Arinos (PNG 672×112, já traz texto MEC/IFNMG, então a `orgLine` repete o nome), "COMUNICADO Nº 058/2026", assinatura fictícia "Marta Regina Fontoura — Coordenadora de Ensino"
+- M1: foto de Don Becker (USGS), domínio público, "Sunken cars on flooded street in Cedar Rapids Iowa" (EUA, 2008) — https://commons.wikimedia.org/wiki/File:Sunken_cars_on_flooded_street_in_Cedar_Rapids_Iowa.jpg (1200×798, 159 KB). Tem um grafite pequeno na caçamba de uma picape
+- D2: foto de Les Hull, CC BY-SA 2.0, via Geograph, "Wark Bridge (closed for repairs)" — https://commons.wikimedia.org/wiki/File:Wark_Bridge_(closed_for_repairs)_-_geograph.org.uk_-_3458307.jpg (1066×800, 102 KB). As placas estão em inglês ("ROAD CLOSED"); trocar a foto se incomodar na mostra
+- Só existe o ícone `icon-present` no pacote; o `container-type`/`cqw` da faixa exige Chrome 105+, Safari 16+ e Firefox 110+ (em navegador antigo a faixa cai em 2,4rem, mas aparece)
+
+### Roteiro de teste
+1. Abrir `#/simulador` pelo `file://` e por http em 375×812, 768×1024 e 1920×1080
+2. No console, trocar o `.post-card` por `ChecaAi.components.postCard.render(ChecaAi.missions.all.find(m => m.id === 'F3'))` e repetir para D1, M1, D2, F1, F2 e M2 → logo/brasão, faixa SIMULAÇÃO, foto com crédito, sem rolagem horizontal
+3. Trocar `image.src` por um arquivo inexistente numa cópia da missão → quadro "Imagem fictícia" com o `alt`
+4. Rodar a tela várias vezes até sortear a F3; compartilhar, passar as rodadas e ver a comparação
+5. Modo apresentação pelo ícone e "Sair"
+6. `ChecaAi.missions.drawMatch()` 100 vezes → sempre 1 fácil, 1 média, 1 difícil
+7. Pendente: Safari/iOS, Firefox, toque em tablet real e tela cheia de verdade (só Chrome headless foi testado)
+
+**Arquivos:** `index.html`, `css/theme.css`, `css/base.css`, `css/components.css`, `css/simulator.css`, `js/components/post-card.js`, `js/missions-data.js`, `js/screens/simulator.js`, `js/config.js`, `MISSOES.md`, `assets/icons/*`, `assets/images/missoes/*`, `assets/images/marcas/ifnmg-arinos.png`, `docs/capturas/v0.3.2/*`
 
 ---
 
@@ -199,7 +246,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 ---
 
 ## Constantes e Tema
-- `js/config.js`: `APP_VERSION` ('0.3.1', único lugar da versão), `MISSIONS_PER_LEVEL_IN_MATCH` (1), `FEATURES` (`simulator` ligado; `missions` e `ranking` desligados), `SIM_FANOUT` 3, `SIM_CHECK_RATE` 0.1, `SIM_VISUAL_ROUNDS` 5, `SIM_TOTAL_ROUNDS` 10, `SIM_ROUND_MS` 1200, `SIM_COMPARE_CHECK_RATE` 0.3
+- `js/config.js`: `APP_VERSION` ('0.3.2', único lugar da versão), `MISSIONS_PER_LEVEL_IN_MATCH` (1), `FEATURES` (`simulator` ligado; `missions` e `ranking` desligados), `SIM_FANOUT` 3, `SIM_CHECK_RATE` 0.1, `SIM_VISUAL_ROUNDS` 5, `SIM_TOTAL_ROUNDS` 10, `SIM_ROUND_MS` 1200, `SIM_COMPARE_CHECK_RATE` 0.3
 - `css/theme.css` — cores: `--bg #0F1B2D`, `--surface #17263D`, `--border #2A3B55`, `--text #F2F5F9`, `--text-muted #A9B6C8`, `--accent #3DA5FF`, `--on-accent #0F1B2D`; vereditos: `--verdict-true #3FB27F`, `--verdict-false #E5534B`, `--verdict-misleading #E9A23B`, `--verdict-unproven #8A9BB0`
 - `css/theme.css` — medidas: fonte `system-ui`, `--font-sm` a `--font-2xl`, `--space-1` a `--space-7`, `--radius` 6px, `--touch-min` 44px, `--content-max` 960px, `--text-max` 60ch, `--touch-lg` 64px, `--canvas-max-height` 58vh
 - Layout (v0.3.1) — breakpoints (media query não aceita `var()`; repetir os números, documentados no topo do `theme.css`): celular < 600px (1 coluna); tablet 600–1023px (1 coluna larga, 2 em paisagem); notebook ≥ 1024px (container centralizado); telão ≥ 1600px (`--content-max` sobe para 88rem). Divisão em colunas: `(min-width: 1024px), (min-width: 600px) and (orientation: landscape)`
@@ -231,4 +278,4 @@ Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
 
 ---
 
-*Última atualização: 10/11/2026 (v0.3.1 — layout e visão de multidão)*
+*Última atualização: 10/11/2026 (v0.3.2 — conteúdo e imagens)*

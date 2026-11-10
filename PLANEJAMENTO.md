@@ -175,7 +175,7 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 | 0 — Setup | 10 a 11/11 | v0.1.x |
 | 1 — Simulador viral (pronto para o grupo treinar a apresentação) | 12 a 14/11 | v0.2.0 (base) + v0.3.0 (simulador) |
 | 2 — Núcleo do jogo (sem banco) | 15 a 19/11 | v0.4.0 |
-| 3 — Conteúdo: 6 missões (escritas pelo Claude, revisadas pelo grupo) | revisão até 17/11 | v0.5.0 |
+| 3 — Conteúdo: 7 missões (escritas pelo Claude, revisadas pelo grupo) | revisão até 17/11 | v0.5.0 |
 | 4 — Ranking online | 20 a 22/11 | v0.6.0 |
 | 5 — Polimento e testes | 23 a 24/11 | v0.9.x |
 | Congelamento | 25/11 — só correção de bug | v1.0.0 |
@@ -208,8 +208,8 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 - [ ] 3. `scoring.js` + resultado da missão + fim da partida
 - [ ] 4. Teste: partida inteira no notebook e no celular, abrindo também pelo `file://`
 
-### Fase 3 — Conteúdo: 6 missões
-**Objetivo:** as 6 missões de `MISSOES.md` (escritas pelo Claude a partir dos fascículos Boatos e Redes Sociais do CERT.br) revisadas pelo grupo até 17/11. Mudança pedida pelo grupo = editar `MISSOES.md` e o `missions-data.js` juntos.
+### Fase 3 — Conteúdo: 7 missões (3 fáceis, 2 médias, 2 difíceis)
+**Objetivo:** as 7 missões de `MISSOES.md` (escritas pelo Claude a partir dos fascículos Boatos e Redes Sociais do CERT.br) revisadas pelo grupo até 17/11. Mudança pedida pelo grupo = editar `MISSOES.md` e o `missions-data.js` juntos.
 - Cada missão: situação-problema (texto e imagem fictícia), ferramentas com pistas, sinais (verdadeiros e iscas), veredito, gabarito comentado de até 3 linhas, orientação de segurança ("Como se proteger") e referência ao fascículo da Cartilha do CERT.br.
 - Ficar no tema da estação: origem, data e contexto. Sem golpes/phishing nem IA (outras estações).
 - Depois, se der tempo: 9 missões (3 por nível) e 12 (4 por nível), usando o banco de ideias do `MISSOES.md`.
@@ -228,6 +228,8 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 ### Fase 5 — Polimento e testes
 - [ ] QR Code do site para os cartazes
 - [ ] Teste no notebook, em tablet e em celulares Android/iPhone (o guia pede teste nos tablets, se houver)
+- [ ] Confirmar com o professor que não existe servidor com o nome Marta Regina Fontoura no campus (assinatura fictícia da missão F3)
+- [ ] Confirmar com o professor o uso do logo do IFNMG Campus Arinos na missão F3
 - [ ] Service worker: site abre sem internet no tablet e no celular depois do primeiro acesso
 - [ ] Tela final "Antes de compartilhar": dicas da Cartilha do CERT.br
 - [ ] Cópia do site no pendrive (contingência sem internet)
