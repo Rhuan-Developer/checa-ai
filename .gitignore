@@ -1,0 +1,26 @@
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Segredos
+.env
+.env*.local
+*.key
+*.pem
+
+# Claude (pessoal)
+.claude/settings.local.json
+
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/
+
+# Gerados
+node_modules/
+*.log
