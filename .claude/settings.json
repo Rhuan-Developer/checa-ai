@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git branch*)",
+      "Bash(gh repo view*)",
+      "Bash(gh api repos/*/pages*)"
+    ]
+  }
+}
