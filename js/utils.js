@@ -54,5 +54,49 @@
     return array[Math.floor(rnd() * array.length)];
   }
 
-  window.ChecaAi.utils = { todayISO, shuffle, pickRandom };
+  const NICKNAME_MIN = 2;
+  const NICKNAME_MAX = 20;
+  const NICKNAME_PATTERN = /^[\p{L}\p{N} ]+$/u;
+
+  // Palavrões comuns, sem acento e em minúsculas. Fica interna; a regra é espelhada no banco na Fase 4.
+  // Por palavra inteira (palavras curtas ou que aparecem dentro de palavras comuns, como "puta" em "computador").
+  const BLOCKED_WORDS = ['cu', 'puta', 'puto', 'putaria', 'viado', 'viada', 'bosta', 'otario', 'otaria', 'idiota',
+    'fdp', 'pqp', 'vsf', 'tnc', 'vtnc', 'foda', 'fodase', 'cuzao', 'babaca', 'imbecil', 'retardado', 'retardada',
+    'cacete', 'corno', 'vagabunda', 'vagabundo', 'prostituta', 'nazista', 'estuprador'];
+  // Por trecho colado (tira os espaços antes de comparar): só as mais graves e sem risco de aparecer em palavras comuns.
+  const BLOCKED_PARTS = ['merda', 'porra', 'caralho', 'buceta', 'punheta', 'arrombad', 'xereca', 'piroca', 'fodase', 'foder'];
+
+  /** Minúsculas e sem acento, para comparar. */
+  function foldText(text) {
+    return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
+
+  /**
+   * Valida e normaliza o apelido do visitante.
+   * Regra (a mesma será validada no banco na Fase 4): tira espaços das pontas e junta espaços repetidos;
+   * 2 a 20 caracteres; só letras (com acento), números e espaço; sem palavras da lista de bloqueio
+   * (comparação sem acento e sem diferença de maiúsculas, por palavra e por trecho colado nas mais graves).
+   * @param {string} text
+   * @returns {{ok: boolean, value: string, error: string}} value é o apelido normalizado; error vazio se ok
+   */
+  function validateNickname(text) {
+    const value = String(text === undefined || text === null ? '' : text)
+      .normalize('NFC').replace(/\s+/g, ' ').trim();
+    const length = Array.from(value).length;
+    if (length < NICKNAME_MIN || length > NICKNAME_MAX) {
+      return { ok: false, value, error: 'Use de ' + NICKNAME_MIN + ' a ' + NICKNAME_MAX + ' caracteres.' };
+    }
+    if (!NICKNAME_PATTERN.test(value)) {
+      return { ok: false, value, error: 'Só letras, números e espaço.' };
+    }
+    const folded = foldText(value);
+    const blocked = folded.split(' ').some((w) => BLOCKED_WORDS.indexOf(w) !== -1) ||
+      BLOCKED_PARTS.some((part) => folded.replace(/ /g, '').indexOf(part) !== -1);
+    if (blocked) {
+      return { ok: false, value, error: 'Escolha outro apelido.' };
+    }
+    return { ok: true, value, error: '' };
+  }
+
+  window.ChecaAi.utils = { todayISO, shuffle, pickRandom, validateNickname };
 })();

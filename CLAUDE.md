@@ -37,7 +37,7 @@ Site interativo da Estação 5 ("Verdadeiro ou manipulado?", boatos e desinforma
 
 ## Conteúdo das missões
 - Fonte da verdade: `MISSOES.md`. Mudou uma missão = muda `MISSOES.md` e `js/missions-data.js` juntos
-- Tudo fictício e marcado "Simulação"; nada de pessoas, empresas ou instituições reais
+- Tudo fictício e marcado "Simulação"; nada de pessoas ou empresas reais; instituição real só com autorização do professor: IFNMG Campus Arinos, na F3, sempre com nome e assinatura inventados e selo SIMULAÇÃO
 - Tema da estação: origem, data e contexto. Sem golpes/phishing (Estação 1) e sem IA/deepfake (outra turma)
 - Toda missão tem: nível, publicação, ferramentas com pistas, sinais (verdadeiros e iscas), veredito, gabarito comentado, "Como se proteger" e referência ao fascículo do CERT.br
 - Partida = sorteio de 1 fácil + 1 média + 1 difícil, nessa ordem; o sorteio tem que funcionar com qualquer quantidade por nível
