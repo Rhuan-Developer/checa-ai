@@ -7,17 +7,20 @@
 
 .sim-top {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
 }
 
+/* O título pode quebrar linha; o botão "Modo apresentação" fica sempre visível no canto direito */
 .sim-top__title {
+  flex: 1;
+  min-width: 0;
   font-size: var(--font-lg);
 }
 
 .sim-top__tools {
+  flex: none;
   display: flex;
   gap: var(--space-2);
 }
@@ -291,12 +294,25 @@
   display: flex;
   flex-direction: column;
   overflow: auto;
-  padding: var(--space-3) var(--gutter);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--space-3)) max(var(--gutter), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + var(--space-3)) max(var(--gutter), env(safe-area-inset-left, 0px));
   background: var(--bg);
 }
 
 .simulator--presenting .sim-top {
   flex: none;
+  min-height: var(--exit-row);
+}
+
+/* "Sair" fixo no canto superior direito, dentro da área segura; a faixa do .sim-top reserva o espaço dele */
+.simulator--presenting .sim-top__tools .btn {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + var(--space-3));
+  right: calc(env(safe-area-inset-right, 0px) + var(--space-3));
+  z-index: 11;
+  width: var(--exit-width);
+  min-height: var(--touch-min);
+  padding: 0;
+  font-size: var(--font-md);
 }
 
 .simulator--presenting .sim-top__title {
@@ -317,6 +333,7 @@
 .simulator--presenting .sim-stage--wide {
   max-width: var(--compare-max);
   justify-content: center;
+  justify-content: safe center; /* se o conteúdo for maior que a tela, começa no topo (rola) em vez de subir sob o "Sair" */
 }
 
 .simulator--presenting .btn,

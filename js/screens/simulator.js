@@ -101,6 +101,7 @@
     let canvas = null;
     let ctx = null;
     let resizeObserver = null;
+    let dprQuery = null; // escuta a troca do zoom do navegador (muda o devicePixelRatio)
     let counterEls = null;
     let noteEl = null;
     let crowdLegendEl = null;
@@ -360,7 +361,7 @@
 
     function resizeCanvas() {
       if (!canvas) return;
-      const rect = canvas.parentElement.getBoundingClientRect();
+      const rect = canvas.getBoundingClientRect(); // do próprio canvas (o pai tem borda de 1px)
       const dpr = window.devicePixelRatio || 1;
       const w = Math.max(1, Math.round(rect.width));
       const h = Math.max(1, Math.round(rect.height));
@@ -369,6 +370,22 @@
       canvas.dataset.cssWidth = String(w);
       canvas.dataset.cssHeight = String(h);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    /** O zoom do navegador muda o devicePixelRatio sem garantir um resize do canvas: refaz o tamanho e o desenho. */
+    function onDprChange() {
+      watchDpr();
+      if (!canvas || destroyed) return;
+      resizeCanvas();
+      draw();
+    }
+
+    function watchDpr() {
+      if (dprQuery) dprQuery.removeEventListener('change', onDprChange);
+      dprQuery = typeof window.matchMedia === 'function'
+        ? window.matchMedia('(resolution: ' + (window.devicePixelRatio || 1) + 'dppx)')
+        : null;
+      if (dprQuery) dprQuery.addEventListener('change', onDprChange);
     }
 
     function finished() {
@@ -707,10 +724,15 @@
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('fullscreenchange', onFullscreenChange);
     document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    watchDpr();
 
     function destroy() {
       destroyed = true;
       stopRun();
+      if (dprQuery) {
+        dprQuery.removeEventListener('change', onDprChange);
+        dprQuery = null;
+      }
       if (resizeObserver) {
         resizeObserver.disconnect();
         resizeObserver = null;

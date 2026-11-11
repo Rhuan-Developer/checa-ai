@@ -33,7 +33,10 @@
 
   /* Tipografia (fluida: do celular ao projetor) */
   --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --root-size: clamp(16px, 0.55vw + 11px, 30px); /* base de todos os rem: 16px no celular, ~18px no notebook, ~22px no telão */
+  /* Base de todos os rem. Parte fixa grande (13px) + parte pequena em vw (0.2vw): o zoom do navegador continua
+     mudando o tamanho visível (a parte fixa escala com o zoom; só 0.2vw é "anulada"). 16px até ~1500px CSS
+     (celular e tablet inalterados), ~17px a 1920, ~18px a 2400, ~19px a 3000. */
+  --root-size: clamp(16px, 0.2vw + 13px, 24px);
   --font-sm: 0.875rem;
   --font-md: 1rem;
   --font-lg: clamp(1.15rem, 1.05rem + 0.4vw, 1.5rem);
@@ -62,12 +65,14 @@
   --focus-width: 3px;
   --touch-min: 44px;
   --touch-lg: 64px; /* botões do modo apresentação */
+  --exit-width: 4.5rem; /* botão "Sair" do modo apresentação (fixo no canto superior direito) */
+  --exit-row: calc(var(--touch-min) + var(--space-3)); /* faixa reservada no topo do modo apresentação: título e chip nunca ficam sob o "Sair" */
   --header-height: 3.5rem;
 
   /* Larguras de conteúdo (em rem: crescem com a fonte base no telão) */
-  --content-max: 75rem; /* container da página: ~1200px no notebook */
-  --panel-max: 56rem; /* coluna central de uma tela só de texto (mensagem, resultado) */
-  --compare-max: 72rem; /* comparação final */
+  --content-max: max(75rem, 82vw); /* container da página: 75rem no notebook; acima disso cresce com a tela (82vw), sem teto fixo */
+  --panel-max: max(56rem, 46vw); /* coluna central de uma tela só de texto (mensagem, resultado) */
+  --compare-max: max(72rem, 62vw); /* comparação final */
   --text-max: 60ch;
   --split-cols: minmax(0, 5fr) minmax(0, 7fr); /* .layout-split: conteúdo à esquerda, visual à direita */
   --split-cols-present: minmax(0, 2fr) minmax(0, 3fr); /* modo apresentação: painel e canvas */
@@ -79,9 +84,3 @@
   --fade-ms: 220ms; /* transição curta entre passos */
 }
 
-/* Telão (>= 1600px): container mais largo; o resto escala pela fonte base */
-@media (min-width: 1600px) {
-  :root {
-    --content-max: 88rem;
-  }
-}

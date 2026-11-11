@@ -303,6 +303,48 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 
 ---
 
+## Correções de zoom/escala e do modo apresentação (v0.4.2)
+
+**Status:** ✅ v0.4.2 na `fix/zoom-e-apresentacao`, mesclada na `main` e publicada no GitHub Pages. O visual não mudou (mesmas cores, estrutura, componentes e telas); só tamanhos, escala e a posição de dois botões. Sem banco.
+
+### Regras
+- O zoom do navegador tem efeito visível: o layout funciona de 320 a ~3000 px CSS de largura (zoom de 50% a 200%)
+- Celular e tablet (até ~1500 px CSS) ficam com `rem` = 16 px, como antes; no desktop o tamanho base ficou um pouco menor (1366: 18,5 → 16 px; 1920: 21,6 → 16,8 px)
+- O container cresce com a largura da tela, sem teto fixo nem degrau em 1600 px
+
+### Fluxo / Telas
+- Simulador: botão "Modo apresentação" (ícone) na mesma linha do título, no canto extremo direito; em tela estreita o título quebra linha e o ícone continua visível
+- Modo apresentação: "Sair" fixo no canto superior direito, dentro da área segura (`env(safe-area-inset-*)`), com faixa reservada no topo — não colide com título/chip no celular, com ou sem Fullscreen API
+- Canvas e visão de multidão se redimensionam com a janela e com a troca de zoom (devicePixelRatio), sem borrar
+- Foto da S4 segue pendente: a mensagem mostra o quadro com a descrição
+
+### Arquivos e funções
+- `css/theme.css`: `--root-size: clamp(16px, 0.2vw + 13px, 24px)`; `--content-max: max(75rem, 82vw)`; `--panel-max: max(56rem, 46vw)`; `--compare-max: max(72rem, 62vw)`; bloco `@media (min-width: 1600px)` removido; novas `--exit-width` (4.5rem) e `--exit-row` (`calc(var(--touch-min) + var(--space-3))`)
+- `css/screens.css`: padding lateral de header, main e footer = `max(var(--gutter), env(safe-area-inset-left/right, 0px))`
+- `css/simulator.css`: `.sim-top` sem quebra (título `flex: 1; min-width: 0`, ferramentas `flex: none`); "Sair" `position: fixed` com área segura; `.sim-top` reserva `--exit-row` no modo apresentação; passos centralizados usam `justify-content: safe center`
+- `js/screens/simulator.js`: `resizeCanvas()` mede o próprio canvas (antes media o pai, com borda: bitmap 2 px maior); `watchDpr()`/`onDprChange()` escutam `matchMedia('(resolution: Xdppx)')`, refazem tamanho e desenho e se re-armam; listener removido no `destroy()`
+- `index.html`: viewport com `viewport-fit=cover`
+- `js/config.js`: `APP_VERSION` 0.4.2
+- `docs/capturas/v0.4.2/`: 19 capturas (simulador em 360, 1366@100%, 1920@100%, 1920@80%, 2400 CSS; multidão; início e missão em 1920@80% e 1366@100%; modo apresentação em 360, 390, 768 e 844×390)
+
+### Decisões técnicas
+- `--root-size` com parte fixa dominante (13 px, que escala com o zoom) e só 0.2vw de parte fluida: o zoom não é mais anulado. Medido em 1920: `rem` físico 14,2 px a 80%, 16,8 px a 100%, 20,1 px a 125% (antes 19,4 / 21,6 / 24,3)
+- Faixa reservada (`--exit-row`) no topo do modo apresentação em vez de só `padding-right`: colisão impossível por construção (custa ~56 px de altura em paisagem)
+- `--panel-max` e `--compare-max` também crescem com vw, para o texto central não ficar estreito em 2400/3000 px
+- Em 844×390 o modo apresentação rola (já acontecia antes)
+
+### Roteiro de teste
+1. Edge/Chrome no notebook: zoom 80%, 100%, 110%, 125%, 150% → o conteúdo diminui/aumenta, sem margens vazias enormes nem rolagem horizontal
+2. Simulador em 360 px → título quebra linha e o ícone de apresentação continua à direita, sem sobrepor
+3. Modo apresentação no celular (retrato e paisagem) → "Sair" no canto superior direito, sem sobrepor título/chip; avançar por toque; sair
+4. Mudar o zoom com a simulação aberta → canvas redesenha nítido
+5. Testes da v0.4.1 (scoring 200 nas 9, apelido, `drawMatch`, fluxo do jogo, simulador 88.572 × 4.546) continuam passando
+6. Pendente: aparelho físico (notch real), Safari, Firefox, Edge real, tela cheia real e o evento real de troca de zoom (o headless não dispara)
+
+**Arquivos:** `css/theme.css`, `css/screens.css`, `css/simulator.css`, `js/screens/simulator.js`, `index.html`, `js/config.js`, `docs/capturas/v0.4.2/*`
+
+---
+
 <!-- MODELO DE SEÇÃO — copiar para cada funcionalidade nova
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
@@ -345,12 +387,12 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 ---
 
 ## Constantes e Tema
-- `js/config.js`: `APP_VERSION` ('0.4.1', único lugar da versão), `MISSIONS_PER_LEVEL_IN_MATCH` (1), `FEATURES` (`simulator` ligado; `missions` e `ranking` desligados), `SIM_FANOUT` 3, `SIM_CHECK_RATE` 0.1, `SIM_VISUAL_ROUNDS` 5, `SIM_TOTAL_ROUNDS` 10, `SIM_ROUND_MS` 1200, `SIM_COMPARE_CHECK_RATE` 0.3
+- `js/config.js`: `APP_VERSION` ('0.4.2', único lugar da versão), `MISSIONS_PER_LEVEL_IN_MATCH` (1), `FEATURES` (`simulator` ligado; `missions` e `ranking` desligados), `SIM_FANOUT` 3, `SIM_CHECK_RATE` 0.1, `SIM_VISUAL_ROUNDS` 5, `SIM_TOTAL_ROUNDS` 10, `SIM_ROUND_MS` 1200, `SIM_COMPARE_CHECK_RATE` 0.3
 - `css/theme.css` — cores: `--bg #0F1B2D`, `--surface #17263D`, `--border #2A3B55`, `--text #F2F5F9`, `--text-muted #A9B6C8`, `--accent #3DA5FF`, `--on-accent #0F1B2D`; vereditos: `--verdict-true #3FB27F`, `--verdict-false #E5534B`, `--verdict-misleading #E9A23B`, `--verdict-unproven #8A9BB0`
 - `css/theme.css` — medidas: fonte `system-ui`, `--font-sm` a `--font-2xl`, `--space-1` a `--space-7`, `--radius` 6px, `--touch-min` 44px, `--content-max` 960px, `--text-max` 60ch, `--touch-lg` 64px, `--canvas-max-height` 58vh
-- Layout (v0.3.1) — breakpoints (media query não aceita `var()`; repetir os números, documentados no topo do `theme.css`): celular < 600px (1 coluna); tablet 600–1023px (1 coluna larga, 2 em paisagem); notebook ≥ 1024px (container centralizado); telão ≥ 1600px (`--content-max` sobe para 88rem). Divisão em colunas: `(min-width: 1024px), (min-width: 600px) and (orientation: landscape)`
-- Layout — tipografia fluida: `--root-size` = `clamp(16px, 0.55vw + 11px, 30px)` no `html` (todo `rem` escala); `--font-lg/xl/2xl/3xl` com `clamp()`; `--font-sm` e `--font-md` fixos. Espaçamentos `--space-5/6/7` fluidos; `--gutter` (margem lateral)
-- Layout — medidas: `--header-height`, `--content-max` (75rem; 88rem a partir de 1600px; antes era 960px), `--panel-max` (56rem), `--compare-max` (72rem), `--split-cols` (5fr/7fr), `--split-cols-present` (2fr/3fr), `--canvas-min-height`, `--sim-chrome` (15rem), `--fade-ms` (220ms)
+- Layout (v0.3.1, revisto na v0.4.2) — breakpoints (media query não aceita `var()`; repetir os números, documentados no topo do `theme.css`): celular < 600px (1 coluna); tablet 600–1023px (1 coluna larga, 2 em paisagem); notebook ≥ 1024px (container centralizado). Sem breakpoint de 1600px desde a v0.4.2: o container cresce continuamente. Divisão em colunas: `(min-width: 1024px), (min-width: 600px) and (orientation: landscape)`. Faixa validada: 320 a ~3000 px CSS (zoom 50% a 200%)
+- Layout — tipografia fluida: `--root-size` = `clamp(16px, 0.2vw + 13px, 24px)` no `html` (v0.4.2; antes `clamp(16px, 0.55vw + 11px, 30px)`, que anulava o zoom). 16 px até ~1500 px CSS, ~16,8 px a 1920, ~17,8 px a 2400, ~19 px a 3000. `--font-lg/xl/2xl/3xl` com `clamp()`; `--font-sm` e `--font-md` fixos. Espaçamentos `--space-5/6/7` fluidos; `--gutter` (margem lateral)
+- Layout — medidas: `--header-height`, `--content-max` (`max(75rem, 82vw)` desde a v0.4.2), `--panel-max` (`max(56rem, 46vw)`), `--compare-max` (`max(72rem, 62vw)`), `--split-cols` (5fr/7fr), `--split-cols-present` (2fr/3fr), `--canvas-min-height`, `--sim-chrome` (15rem), `--fade-ms` (220ms), `--exit-width` (4.5rem) e `--exit-row` (`calc(var(--touch-min) + var(--space-3))`) do "Sair" no modo apresentação. Header, main e footer: padding lateral `max(var(--gutter), env(safe-area-inset-*))`; viewport com `viewport-fit=cover`
 - Layout — classes globais (`base.css`): `.layout-center` (coluna centralizada até `--panel-max`) e `.layout-split` (1 coluna que vira 2 nas condições acima; filhos usam `grid-area` ou `.layout-split__side` / `__visual`). Header, main e footer usam `--gutter` e `--content-max`. **Telas novas (Fase 2) devem usar essas classes e variáveis, nunca largura fixa em px**
 - `js/config.js`: `SIM_PRESENTATION_ROUNDS` 8 (última rodada mostrada na tela); `SIM_TOTAL_ROUNDS` 10 é só a rodada da comparação
 
@@ -366,6 +408,8 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 | D2 com foto contradizia o veredito "Verdadeira" (v0.4.0) | A foto de ponte interditada (placas em inglês) foi usada numa missão cujo veredito é Verdadeira | D2 voltou a `image: null`; `d2-ponte.jpg` fica no repositório e o `CREDITOS.md` marca "NÃO USADA no site (arquivo mantido)" |
 | M1 incoerente com a foto real (v0.4.0) | O texto falava de 2019 e "Rio Claro do Sul", mas a foto é de Cedar Rapids (EUA), 2008 | Pistas "Buscar a imagem" e "Conferir a data", gabarito e o sinal ("antiga e de outro país") reescritos em `MISSOES.md` e `missions-data.js`; `alt` ajustado |
 | F3 repetia o nome da instituição ao lado do logo (v0.4.0) | A linha de texto completa aparecia junto do logo, que já traz o nome | Campo `orgLineWithLogo` ("Campus Arinos · Coordenação de Ensino") usado quando há logo; se o logo falha (evento `error`), o componente restaura a linha completa |
+| B-01. A página não acompanha o zoom do navegador; em 100% no notebook parece grande demais (v0.4.2) | `--root-size` dependia muito de vw (`0.55vw + 11px`, teto 30px); como o vw CSS = largura física / zoom, o zoom era parcialmente anulado (1920: `rem` físico 19,4 px a 80% e 24,3 px a 125% — razão 1,26 para um zoom de 1,56); container com teto fixo (88rem) deixava margens vazias (2130 de 2400 px CSS a 80%); canvas não reagia à troca de DPR e era dimensionado pelo pai com borda (bitmap 2 px maior) | `--root-size: clamp(16px, 0.2vw + 13px, 24px)`; containers `max(Xrem, N vw)`; breakpoint de 1600px removido; `resizeCanvas()` pelo próprio canvas e `watchDpr()` |
+| B-02. No modo apresentação em tela baixa/celular o "Sair" sobrepunha o título/chip (v0.4.2) | "Sair" no fluxo do topo e conteúdo centralizado (`justify-content: center`) transbordando para cima | "Sair" `position: fixed` na área segura, faixa reservada `--exit-row` e `justify-content: safe center`; vale também para o fallback sem Fullscreen API |
 
 ---
 
@@ -381,4 +425,4 @@ Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
 
 ---
 
-*Última atualização: 10/11/2026 (v0.4.1 — simulador com mensagens próprias e 9 missões)*
+*Última atualização: 10/11/2026 (v0.4.2 — zoom/escala e modo apresentação)*
