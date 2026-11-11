@@ -38,12 +38,7 @@
   }
 
   function pickRumor() {
-    const pool = ChecaAi.missions.getShareableRumors();
-    if (!pool.length) {
-      throw new Error('Não há missões que sirvam de boato. Confira js/missions-data.js.');
-    }
-    const choices = pool.length > 1 ? pool.filter((m) => m.id !== lastRumorId) : pool;
-    const rumor = ChecaAi.utils.pickRandom(choices);
+    const rumor = ChecaAi.simulatorRumors.pickNext(lastRumorId);
     lastRumorId = rumor.id;
     return rumor;
   }
@@ -270,13 +265,14 @@
       step = 'b';
       const h2 = heading('Você parou o boato aqui.');
       const zero = el('p', 'sim-big', '0 pessoas enganadas');
-      const why = el('p', 'sim-text', rumor.explanation);
+      const why = el('p', 'sim-text', rumor.checkResult);
+      const tip = el('p', 'sim-text', 'Na dúvida, não compartilhe.');
       const actions = el('div', 'sim-actions');
       const what = el('button', 'btn', 'E se eu tivesse compartilhado?');
       what.type = 'button';
       what.addEventListener('click', () => renderStepC());
       actions.append(what, backLink());
-      stage.append(h2, zero, why, actions);
+      stage.append(h2, zero, why, tip, actions);
       enter('sim-stage--center');
       focusHeading(h2);
     }

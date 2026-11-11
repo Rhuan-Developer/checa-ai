@@ -149,7 +149,9 @@
 
     const media = mission.image;
     if (media && media.kind === 'document') {
-      card.appendChild(el('p', 'visually-hidden', mission.content));
+      // Missões: o texto repete o documento e fica só para leitor de tela.
+      // Com showContentWithDocument (simulador), o texto é a mensagem que vem acima do documento.
+      card.appendChild(el('p', mission.showContentWithDocument ? 'post-card__content' : 'visually-hidden', mission.content));
       card.appendChild(buildDocument(media));
     } else {
       card.appendChild(el('p', 'post-card__content', mission.content));
