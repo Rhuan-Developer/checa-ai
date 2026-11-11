@@ -57,6 +57,8 @@
   /* Formas e medidas */
   --radius: 6px;
   --border-width: 1px;
+  --border-width-strong: 2px; /* item escolhido (sinal marcado, veredito) */
+  --mark-size: 1.5rem; /* caixa de marcar e bolinha de escolher */
   --focus-width: 3px;
   --touch-min: 44px;
   --touch-lg: 64px; /* botões do modo apresentação */

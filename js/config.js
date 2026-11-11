@@ -13,19 +13,21 @@
  * @property {number} SIM_PRESENTATION_ROUNDS  última rodada mostrada na tela (árvore + visão de multidão)
  * @property {number} SIM_ROUND_MS  intervalo entre rodadas fora do modo apresentação
  * @property {number} SIM_COMPARE_CHECK_RATE  fração que checa na comparação final
+ * @property {number} IDLE_RESET_MS  tela final parada por esse tempo volta sozinha ao início
  */
 window.ChecaAi = window.ChecaAi || {};
 
 /** @type {ChecaAiConfig} */
 window.ChecaAi.config = {
-  APP_VERSION: '0.3.2',
+  APP_VERSION: '0.4.0',
   MISSIONS_PER_LEVEL_IN_MATCH: 1,
-  FEATURES: { simulator: true, missions: false, ranking: false },
+  FEATURES: { simulator: true, missions: true, ranking: false },
   SIM_FANOUT: 3,
   SIM_CHECK_RATE: 0.1,
   SIM_VISUAL_ROUNDS: 5,
   SIM_TOTAL_ROUNDS: 10,
   SIM_PRESENTATION_ROUNDS: 8,
   SIM_ROUND_MS: 1200,
-  SIM_COMPARE_CHECK_RATE: 0.3
+  SIM_COMPARE_CHECK_RATE: 0.3,
+  IDLE_RESET_MS: 90000
 };

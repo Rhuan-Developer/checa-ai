@@ -91,17 +91,23 @@
 
     const head = el('div', 'post-doc__head');
     const brand = doc.brand || {};
+    const orgEl = el('p', 'post-doc__org', doc.orgLine);
     if (brand.type === 'crest') {
       head.appendChild(buildCrest());
     } else if (brand.type === 'logo' && brand.src) {
       const logo = el('img', 'post-doc__logo');
       logo.alt = brand.alt || '';
       logo.decoding = 'async';
-      logo.addEventListener('error', () => logo.remove(), { once: true });
+      // O logo já traz o nome da instituição: com logo, a linha é a curta; se o logo falhar, volta a completa.
+      logo.addEventListener('error', () => {
+        logo.remove();
+        orgEl.textContent = doc.orgLine;
+      }, { once: true });
+      if (doc.orgLineWithLogo) orgEl.textContent = doc.orgLineWithLogo;
       logo.src = brand.src;
       head.appendChild(logo);
     }
-    head.appendChild(el('p', 'post-doc__org', doc.orgLine));
+    head.appendChild(orgEl);
     if (doc.subtitle) head.appendChild(el('p', 'post-doc__subtitle', doc.subtitle));
     root.appendChild(head);
 

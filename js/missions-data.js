@@ -20,7 +20,8 @@
    * @typedef {Object} MissionDocument  documento desenhado em HTML/CSS (ofício, comunicado)
    * @property {'document'} kind
    * @property {{type: 'crest'|'logo', src?: string, alt?: string}} brand  brasão inventado ou logo (arquivo)
-   * @property {string} orgLine  linha da instituição
+   * @property {string} orgLine  linha da instituição (completa; usada quando não há logo)
+   * @property {string} [orgLineWithLogo]  linha mais curta, usada enquanto o logo está na tela (o logo já traz o nome)
    * @property {string} [subtitle]
    * @property {string} number  título completo, ex.: "OFÍCIO Nº 487/2026"
    * @property {string} body
@@ -139,6 +140,7 @@
         kind: 'document',
         brand: { type: 'logo', src: 'assets/images/marcas/ifnmg-arinos.png', alt: 'Logo do IFNMG Campus Arinos' },
         orgLine: 'Instituto Federal do Norte de Minas Gerais — Campus Arinos · Coordenação de Ensino',
+        orgLineWithLogo: 'Campus Arinos · Coordenação de Ensino',
         number: 'COMUNICADO Nº 058/2026',
         body: 'Informamos que a Mostra de Cibersegurança CiberMissões 2026 está CANCELADA por motivo de manutenção na rede do campus. As atividades serão remarcadas em data a definir.',
         place: 'Arinos',
@@ -172,25 +174,25 @@
       image: {
         kind: 'photo',
         src: 'assets/images/missoes/m1-enchente.jpg',
-        alt: 'Foto real de uma rua com árvores totalmente alagada, com carros cobertos pela água até a janela.',
+        alt: 'Foto real de uma rua arborizada alagada, com carros cobertos pela água.',
         credit: 'Foto: Don Becker (USGS), domínio público, via Wikimedia Commons',
         width: 1200,
         height: 798
       },
       tools: [
-        { label: 'Buscar a imagem', clue: 'A mesma foto aparece num portal de notícias em março de 2019, numa reportagem sobre uma enchente em Rio Claro do Sul, outra cidade.' },
-        { label: 'Conferir a data', clue: 'O post é de hoje, às 10h12. A foto é de mais de 5 anos atrás.' },
+        { label: 'Buscar a imagem', clue: 'A mesma foto aparece em reportagens de 2008 sobre uma enchente em Cedar Rapids, nos Estados Unidos.' },
+        { label: 'Conferir a data', clue: 'O post é de hoje, às 10h12. A foto é de 2008.' },
         { label: 'Defesa Civil de Nova Aurora (perfil oficial)', clue: '"Sem chuva forte nas últimas 24 horas. Nenhum ponto de alagamento registrado."' }
       ],
       signals: [
-        { text: 'A foto é antiga e de outra cidade', isSuspicious: true },
+        { text: 'A foto é antiga e de outro país', isSuspicious: true },
         { text: 'Título alarmista ("AGORA!", "debaixo d\'água")', isSuspicious: true },
         { text: 'O perfil não é um veículo de notícias nem um órgão oficial', isSuspicious: true },
         { text: 'A foto foi montada em programa de edição', isSuspicious: false },
         { text: 'Tem muitas curtidas, então é verdade', isSuspicious: false }
       ],
       verdict: 'misleading',
-      explanation: 'A foto é verdadeira, a enchente aconteceu, mas em 2019 e em outra cidade. Usar um conteúdo real com data ou local trocados também engana. Por isso não é "montagem": a imagem não foi editada, só tirada do contexto.',
+      explanation: 'A foto é verdadeira, a enchente aconteceu, mas em 2008 e nos Estados Unidos. Usar um conteúdo real com data ou local trocados também engana. Por isso não é "montagem": a imagem não foi editada, só tirada do contexto.',
       howToProtect: 'Busque a imagem para achar a primeira publicação. Confira a data do fato e se o local bate. Para emergências, siga a Defesa Civil.',
       reference: 'Boatos — "Confira a data da notícia e dos fatos", "Observe os detalhes de imagens e vídeos" (busque a versão original).'
     },
@@ -258,14 +260,7 @@
       title: 'A ponte interditada',
       format: { type: 'group-chat', header: 'Família 👨‍👩‍👧', badge: 'Encaminhada' },
       content: 'Gente, a ponte do Rio Aurora na estrada pra Vila Serena tá INTERDITADA até sexta! Rachou a pilastra. Quem for viajar vai ter que dar a volta por Santa Luz. Passem pra frente!',
-      image: {
-        kind: 'photo',
-        src: 'assets/images/missoes/d2-ponte.jpg',
-        alt: 'Foto real da entrada de uma ponte fechada, com cones, barreira de concreto e placa de interdição.',
-        credit: 'Foto: Les Hull, CC BY-SA 2.0, via Wikimedia Commons',
-        width: 1066,
-        height: 800
-      },
+      image: null,
       tools: [
         { label: 'Ir à fonte', clue: 'A mensagem não tem link, mas cita o local exato e um prazo ("até sexta").' },
         { label: 'Órgão oficial de estradas (site do DER Estadual, fictício)', clue: 'Aviso publicado ontem: "Ponte sobre o Rio Aurora (km 42) interditada para vistoria estrutural até sexta-feira. Desvio por Santa Luz."' },
@@ -315,6 +310,15 @@
   }
 
   /**
+   * Missão pelo id ('F1', 'M2'...).
+   * @param {string} id
+   * @returns {Mission|undefined}
+   */
+  function getMissionById(id) {
+    return MISSIONS.find((m) => m.id === id);
+  }
+
+  /**
    * Missões que o simulador pode usar como boato (veredito diferente de "verdadeira").
    * @returns {Mission[]}
    */
@@ -328,6 +332,7 @@
     LEVEL_LABELS,
     LEVEL_ORDER,
     getMissionsByLevel,
+    getMissionById,
     drawMatch,
     getShareableRumors
   };

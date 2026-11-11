@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/screens.css">
   <link rel="stylesheet" href="css/simulator.css">
+  <link rel="stylesheet" href="css/game.css">
 </head>
 <body>
   <!-- Pacote de ícones: cópia idêntica de assets/icons/icons.svg (inline porque <use> com arquivo externo não funciona pelo file://). Mudou um, muda o outro. -->
@@ -31,6 +32,10 @@
     <main class="app-main" id="main">
       <section data-screen="home" hidden></section>
       <section data-screen="simulator" hidden></section>
+      <section data-screen="nickname" hidden></section>
+      <section data-screen="mission" hidden></section>
+      <section data-screen="mission-result" hidden></section>
+      <section data-screen="match-end" hidden></section>
     </main>
 
     <footer class="app-footer">
@@ -44,10 +49,16 @@
   <script src="js/config.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/missions-data.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/storage.js"></script>
   <script src="js/components/post-card.js"></script>
   <script src="js/simulator-model.js"></script>
   <script src="js/screens/home.js"></script>
   <script src="js/screens/simulator.js"></script>
+  <script src="js/screens/nickname.js"></script>
+  <script src="js/screens/mission.js"></script>
+  <script src="js/screens/mission-result.js"></script>
+  <script src="js/screens/match-end.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

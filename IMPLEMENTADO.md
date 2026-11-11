@@ -135,6 +135,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 - `css/simulator.css`: reescrito (passos centrados, grade de 2 colunas na árvore, apresentação, quadro da imagem, fade)
 - `js/simulator-model.js`: `personsPerDot`, `crowdRing` (→ perDot, dots, checkedDots, sharedDots), `MAX_CROWD_DOTS` (720)
 - `js/screens/simulator.js`: multidão, fim na rodada 8, quadro da imagem, fade, rolagem
+- Jogo (v0.4.0) — `css/theme.css`: `--border-width-strong` (2px), `--mark-size` (1.5rem); `js/config.js`: `IDLE_RESET_MS` 90000 (tela final parada volta ao início); `FEATURES.missions` ligado; pontuação em `ChecaAi.scoring.SCORING`
 - Documentos (v0.3.2) — `css/theme.css`: `--doc-paper`, `--doc-ink`, `--doc-ink-muted`, `--doc-border`, `--doc-crest-a/b/c` (papel e brasão inventado dos documentos fictícios; únicas cores fora da paleta do tema)
 - `js/config.js`: `SIM_PRESENTATION_ROUNDS` 8, `APP_VERSION` 0.3.1
 - `docs/capturas/v0.3.1/`: 6 capturas (rodada 8 e comparação em 375×812, 768×1024 e 1920×1080); fora do site
@@ -204,6 +205,60 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 
 ---
 
+## Jogo das missões (Fase 2, v0.4.0)
+
+**Status:** ✅ v0.4.0 na `feat/fase-2-jogo`, mesclada na `main` e publicada no GitHub Pages. Sem banco (ranking é a Fase 4), sem revisão do `security-engineer`. O visual será redesenhado depois (Canva); esta versão é função + layout responsivo.
+
+### Regras
+- **Pontuação (máx. 200 por missão, 600 por partida):** veredito certo 100; sinais até 80; conclusão 20 (sempre). Constantes em `ChecaAi.scoring.SCORING`: `VERDICT_POINTS` 100, `SIGNALS_POINTS` 80, `TRAP_PENALTY` 20, `COMPLETION_POINTS` 20, `MISSION_MAX` 200
+- Os 80 pontos dos sinais dividem-se igualmente entre os sinais suspeitos; o resto da divisão vai de 1 em 1 para os primeiros suspeitos, na ordem de `missions-data.js` (3 suspeitos = 27+27+26; 2 = 40+40); marcar todos dá sempre 80 (`splitSignalPoints(n)`)
+- Cada isca marcada tira 20; a parte dos sinais nunca fica abaixo de 0
+- Resultado por sinal: `found` (suspeito marcado), `missed` (suspeito não marcado), `trap` (isca marcada), `ok` (isca não marcada)
+- Entradas inválidas: índices fora da faixa, duplicados ou não inteiros são ignorados; veredito desconhecido lança erro claro
+- `scoreMatch` → `{ total, maxTotal (200 × nº de missões), correctVerdicts, missions }`
+- **Apelido** (`ChecaAi.utils.validateNickname(text)` → `{ ok, value, error }`; **a mesma regra vai para o banco na Fase 4**): tira espaços das pontas e colapsa os repetidos; normaliza em NFC; 2 a 20 caracteres (por code point); só `/^[\p{L}\p{N} ]+$/u` (letras com acento, números e espaço; emoji, símbolos e `_` recusados); lista curta de palavrões comuns em português (interna ao `utils.js`), comparada sem acento e sem diferença de maiúsculas, por palavra inteira (para não bloquear palavras comuns) e, só para as mais graves, também por trecho colado; não trata leet. Mensagens: "Use de 2 a 20 caracteres.", "Só letras, números e espaço.", "Escolha outro apelido."
+- O apelido do visitante anterior nunca é guardado nem preenchido
+
+### Fluxo / Telas
+- Início: "Começar investigação" (só com `FEATURES.missions`) e o simulador como botão secundário
+- `#/apelido`: campo sempre vazio, erro inline em `aria-live`; "Começar" sorteia `drawMatch()`, cria a partida e vai para `#/missao`
+- `#/missao`: "Missão N de 3 · nível"; post-card com mídia; ferramentas em botões (`aria-expanded`/`aria-controls`); sinais como botões `aria-pressed` em ordem embaralhada guardada na partida; veredito com 4 rádios nativos num `fieldset` (sem cores de veredito); "Enviar veredito" desabilitado até escolher. No notebook (`.layout-split`): post-card e ferramentas à esquerda, sinais e veredito à direita
+- `#/resultado-missao`: "Acertou"/"Errou" e o veredito certo na cor `--verdict-*`; cada sinal com Suspeito/Isca, Marcado/Não marcado e o resultado em palavras (Você achou, Você não viu, Caiu na isca, Evitou a isca), além da borda colorida; gabarito comentado, "Como se proteger", cartilha, pontos detalhados e total "N de 200"; "Próxima missão" ou "Ver resultado final"
+- `#/fim`: apelido, "X de 600", "N de 3", tempo mm:ss; "Antes de compartilhar" com as 5 dicas do `MISSOES.md`; "Jogar de novo" (apelido vazio) e "Ver o simulador"; espaço comentado no código para a posição no ranking (Fase 4). Parada por `IDLE_RESET_MS` (90 s; o timer reinicia com `pointerdown`, `keydown` ou `scroll`) volta a `#/inicio` e limpa a partida
+- Rotas protegidas: sem partida, `#/missao`, `#/resultado-missao` e `#/fim` voltam a `#/inicio`; recarregar no meio continua de onde parou; voltar do navegador não duplica resposta
+
+### Arquivos e funções
+- `js/scoring.js`: `SCORING`, `splitSignalPoints`, `scoreMission`, `scoreMatch`
+- `js/storage.js`: `startMatch`, `getMatch`, `getSignalOrder`, `saveAnswer`, `advance`, `finishMatch`, `clearMatch`
+- `js/utils.js`: `validateNickname`
+- `js/missions-data.js`: `getMissionById`; ajustes de conteúdo (ver "Bugs Corrigidos")
+- `js/screens/nickname.js`, `mission.js`, `mission-result.js`, `match-end.js`; `home.js` com o botão principal
+- `js/app.js`: suporte a `guard()` opcional nas telas
+- `css/game.css`; `css/theme.css` ganhou `--border-width-strong` (2px) e `--mark-size` (1.5rem)
+- `js/config.js`: `FEATURES.missions` true, `IDLE_RESET_MS` 90000, `APP_VERSION` 0.4.0
+- `CLAUDE.md`: regra de instituição real reescrita (IFNMG Campus Arinos só na F3, com nome e assinatura inventados e selo SIMULAÇÃO)
+
+### Decisões técnicas
+- Partida em `sessionStorage` (chave `checaai.match`) com cópia em memória; se o storage falhar, a partida segue só em memória e o erro vai para `console.warn`. Formato: `clientId` (`crypto.randomUUID` com fallback), `nickname`, `missionIds`, `index`, `answers[]` (`{ missionId, verdict, markedSignalIndexes, score, answeredAt }`), `signalOrders`, `startedAt`/`finishedAt` em ms
+- `saveAnswer` ignora missão já respondida e devolve a resposta existente; `finishMatch` só encerra com todas respondidas
+- Veredito com rádios nativos (teclado e leitor de tela sem código extra)
+- `guard()` nas telas faz `location.replace` (não empilha histórico). Com partida em andamento, `#/resultado-missao` sem resposta e `#/fim` sem partida concluída vão para `#/missao` (para não perder a partida ao usar o voltar); sem partida nenhuma vão para `#/inicio`; `#/missao` com a partida encerrada vai para `#/fim`
+- Valores de seleção, ferramentas abertas e sinais marcados não são guardados ao recarregar; só missão, ordem dos sinais e respostas enviadas
+- `game.css` tem poucos valores geométricos soltos (porcentagens do desenho da marca de seleção, `0.22` do rádio, `min-width: 16rem` do botão principal)
+
+### Roteiro de teste
+1. Console: `ChecaAi.scoring` (as 7 missões dão 200 com veredito certo e todos os suspeitos; veredito errado sem nada = 20; só iscas = sinais 0) e `ChecaAi.utils.validateNickname('  Ana   Paula ')` → "Ana Paula"
+2. Jogar 3 partidas seguidas → combinações diferentes; recarregar na missão 2 → continua, com os sinais na mesma ordem
+3. Abrir `#/fim`, `#/missao` e `#/resultado-missao` sem partida → volta ao início; botão voltar no resultado não duplica resposta
+4. Deixar a tela final parada (90 s) → volta ao início e limpa a partida; "Jogar de novo" → apelido vazio
+5. F3: com o logo, cabeçalho "Campus Arinos · Coordenação de Ensino"; sem o logo, texto completo
+6. 375×812, 768×1024, 1024×768, 1366×768 e 1920×1080 → sem rolagem horizontal, alvos ≥ 44 px
+7. Pendente: aparelho real (toque), Safari e Firefox, falha do `sessionStorage` (só relido o código), inspeção visual do 768×1024 e do 1024×768
+
+**Arquivos:** `js/scoring.js`, `js/storage.js`, `js/utils.js`, `js/missions-data.js`, `js/app.js`, `js/config.js`, `js/components/post-card.js`, `js/screens/{home,nickname,mission,mission-result,match-end}.js`, `css/game.css`, `css/theme.css`, `index.html`, `MISSOES.md`, `CLAUDE.md`, `assets/images/missoes/CREDITOS.md`, `docs/capturas/v0.4.0/*`
+
+---
+
 <!-- MODELO DE SEÇÃO — copiar para cada funcionalidade nova
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
@@ -246,7 +301,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 ---
 
 ## Constantes e Tema
-- `js/config.js`: `APP_VERSION` ('0.3.2', único lugar da versão), `MISSIONS_PER_LEVEL_IN_MATCH` (1), `FEATURES` (`simulator` ligado; `missions` e `ranking` desligados), `SIM_FANOUT` 3, `SIM_CHECK_RATE` 0.1, `SIM_VISUAL_ROUNDS` 5, `SIM_TOTAL_ROUNDS` 10, `SIM_ROUND_MS` 1200, `SIM_COMPARE_CHECK_RATE` 0.3
+- `js/config.js`: `APP_VERSION` ('0.4.0', único lugar da versão), `MISSIONS_PER_LEVEL_IN_MATCH` (1), `FEATURES` (`simulator` ligado; `missions` e `ranking` desligados), `SIM_FANOUT` 3, `SIM_CHECK_RATE` 0.1, `SIM_VISUAL_ROUNDS` 5, `SIM_TOTAL_ROUNDS` 10, `SIM_ROUND_MS` 1200, `SIM_COMPARE_CHECK_RATE` 0.3
 - `css/theme.css` — cores: `--bg #0F1B2D`, `--surface #17263D`, `--border #2A3B55`, `--text #F2F5F9`, `--text-muted #A9B6C8`, `--accent #3DA5FF`, `--on-accent #0F1B2D`; vereditos: `--verdict-true #3FB27F`, `--verdict-false #E5534B`, `--verdict-misleading #E9A23B`, `--verdict-unproven #8A9BB0`
 - `css/theme.css` — medidas: fonte `system-ui`, `--font-sm` a `--font-2xl`, `--space-1` a `--space-7`, `--radius` 6px, `--touch-min` 44px, `--content-max` 960px, `--text-max` 60ch, `--touch-lg` 64px, `--canvas-max-height` 58vh
 - Layout (v0.3.1) — breakpoints (media query não aceita `var()`; repetir os números, documentados no topo do `theme.css`): celular < 600px (1 coluna); tablet 600–1023px (1 coluna larga, 2 em paisagem); notebook ≥ 1024px (container centralizado); telão ≥ 1600px (`--content-max` sobe para 88rem). Divisão em colunas: `(min-width: 1024px), (min-width: 600px) and (orientation: landscape)`
@@ -264,18 +319,21 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 | B. A partir da 5ª rodada só os números subiam | `SIM_VISUAL_ROUNDS` desenha a árvore só até a rodada 5 (3 com fanout 5); as seguintes só atualizavam o contador | Visão de multidão: anéis de pontos até a rodada 8, nos dois modos — v0.3.1 |
 | C. "Nova simulação" era corte brusco e a tela cheia no computador tinha cara de tablet | Passo A era um cartão pequeno à esquerda, sem transição; apresentação usava coluna única | Fade de 220 ms, rolagem ao topo, mensagem grande e centralizada; apresentação em 2 colunas no notebook — v0.3.1 |
 | D. Quadro da imagem fictícia não aparecia no simulador | `simulator.js` nunca renderizava `rumor.image` | `buildMessage()` mostra `<figure class="sim-image">` com "Imagem fictícia" e o `alt` — v0.3.1 |
+| D2 com foto contradizia o veredito "Verdadeira" (v0.4.0) | A foto de ponte interditada (placas em inglês) foi usada numa missão cujo veredito é Verdadeira | D2 voltou a `image: null`; `d2-ponte.jpg` fica no repositório e o `CREDITOS.md` marca "NÃO USADA no site (arquivo mantido)" |
+| M1 incoerente com a foto real (v0.4.0) | O texto falava de 2019 e "Rio Claro do Sul", mas a foto é de Cedar Rapids (EUA), 2008 | Pistas "Buscar a imagem" e "Conferir a data", gabarito e o sinal ("antiga e de outro país") reescritos em `MISSOES.md` e `missions-data.js`; `alt` ajustado |
+| F3 repetia o nome da instituição ao lado do logo (v0.4.0) | A linha de texto completa aparecia junto do logo, que já traz o nome | Campo `orgLineWithLogo` ("Campus Arinos · Coordenação de Ensino") usado quando há logo; se o logo falha (evento `error`), o componente restaura a linha completa |
 
 ---
 
 ## O Que Ainda Não Foi Implementado
 Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
 - [x] Fase 1 — Simulador viral + base do site — ✅ Completo (v0.3.0)
-- [ ] Fase 2 — Jogo das missões (apelido, investigação, veredito, pontuação, resultado) — até 19/11
-- [ ] Fase 3 — Revisão das 6 missões pelo grupo — até 17/11
+- [x] Fase 2 — Jogo das missões (apelido, investigação, veredito, pontuação, resultado) — ✅ Completo (v0.4.0)
+- [ ] Fase 3 — Revisão das 7 missões pelo grupo — até 17/11
 - [ ] Fase 4 — Ranking online (Supabase) — até 22/11
 - [ ] Fase 5 — Testes em notebook/tablet/celular, service worker, QR Code, tela de dicas — até 24/11
 - [ ] v1.0.0 e congelamento — 25/11
 
 ---
 
-*Última atualização: 10/11/2026 (v0.3.2 — conteúdo e imagens)*
+*Última atualização: 10/11/2026 (v0.4.0 — jogo das missões)*

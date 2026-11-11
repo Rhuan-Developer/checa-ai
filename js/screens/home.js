@@ -35,9 +35,17 @@
       const actions = document.createElement('div');
       actions.className = 'home__actions';
 
+      if (features.missions) {
+        const start = document.createElement('a');
+        start.className = 'btn';
+        start.href = '#/apelido';
+        start.textContent = 'Começar investigação';
+        actions.appendChild(start);
+      }
+
       if (features.simulator) {
         const a = document.createElement('a');
-        a.className = 'btn';
+        a.className = features.missions ? 'btn btn--secondary' : 'btn';
         a.href = '#/simulador';
         a.textContent = 'Como um boato se espalha';
         actions.appendChild(a);

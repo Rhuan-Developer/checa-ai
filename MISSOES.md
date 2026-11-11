@@ -119,12 +119,12 @@ Formato de cada missão: **publicação** (o que o visitante vê) → **ferramen
 > AGORA! Centro de Nova Aurora debaixo d'água 😱 Evitem a Avenida Central! Compartilhem pra todo mundo saber!
 
 **Ferramentas:**
-- **Buscar a imagem** → A mesma foto aparece num portal de notícias em março de 2019, numa reportagem sobre uma enchente em **Rio Claro do Sul**, outra cidade.
-- **Conferir a data** → O post é de hoje, às 10h12. A foto é de mais de 5 anos atrás.
+- **Buscar a imagem** → A mesma foto aparece em reportagens de 2008 sobre uma enchente em **Cedar Rapids**, nos Estados Unidos.
+- **Conferir a data** → O post é de hoje, às 10h12. A foto é de 2008.
 - **Defesa Civil de Nova Aurora (perfil oficial)** → "Sem chuva forte nas últimas 24 horas. Nenhum ponto de alagamento registrado."
 
 **O que é suspeito aqui?**
-- ✅ A foto é antiga e de outra cidade
+- ✅ A foto é antiga e de outro país
 - ✅ Título alarmista ("AGORA!", "debaixo d'água")
 - ✅ O perfil não é um veículo de notícias nem um órgão oficial
 - ❌ A foto foi montada em programa de edição
@@ -132,7 +132,7 @@ Formato de cada missão: **publicação** (o que o visitante vê) → **ferramen
 
 **Veredito:** Enganosa / fora de contexto
 
-**Gabarito comentado:** A foto é verdadeira, a enchente aconteceu, mas em 2019 e em outra cidade. Usar um conteúdo real com data ou local trocados também engana. Por isso não é "montagem": a imagem não foi editada, só tirada do contexto.
+**Gabarito comentado:** A foto é verdadeira, a enchente aconteceu, mas em 2008 e nos Estados Unidos. Usar um conteúdo real com data ou local trocados também engana. Por isso não é montagem: a imagem não foi editada, só tirada do contexto.
 
 **Como se proteger:** Busque a imagem para achar a primeira publicação. Confira a data do fato e se o local bate. Para emergências, siga a Defesa Civil.
 

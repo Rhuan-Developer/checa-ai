@@ -48,6 +48,12 @@
       const routes = getRoutes();
       const hash = window.location.hash;
       const screen = routes[hash];
+      // guard() (opcional) devolve a rota para onde mandar o visitante, ou null se a tela pode abrir.
+      const redirect = screen && typeof screen.guard === 'function' ? screen.guard() : null;
+      if (redirect) {
+        window.location.replace(redirect);
+        return;
+      }
       if (!screen) {
         // Hash vazio, desconhecido ou de funcionalidade desligada: volta ao início.
         if (hash !== HOME_ROUTE) {

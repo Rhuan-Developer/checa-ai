@@ -175,6 +175,7 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 | 0 — Setup | 10 a 11/11 | v0.1.x |
 | 1 — Simulador viral (pronto para o grupo treinar a apresentação) | 12 a 14/11 | v0.2.0 (base) + v0.3.0 (simulador) |
 | 2 — Núcleo do jogo (sem banco) | 15 a 19/11 | v0.4.0 |
+| Redesign (layout do Canva) | 19 a 21/11 | v0.4.x |
 | 3 — Conteúdo: 7 missões (escritas pelo Claude, revisadas pelo grupo) | revisão até 17/11 | v0.5.0 |
 | 4 — Ranking online | 20 a 22/11 | v0.6.0 |
 | 5 — Polimento e testes | 23 a 24/11 | v0.9.x |
@@ -191,7 +192,7 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 - [x] 4. Tela do simulador: escolha Compartilhar/Checar, árvore animada no `<canvas>`, contador, ajustes, modo apresentação e comparação
 - [x] 5. Publicado no GitHub Pages e testado no notebook, no tablet e no celular (tela cheia em tablet real ainda por testar)
 
-### Fase 2 — Núcleo do jogo (sem banco)
+### Fase 2 — Núcleo do jogo (sem banco) — ✅ Completo (v0.4.0)
 **Objetivo:** uma partida completa funcionando offline, com 2 missões de exemplo.
 #### Regras de negócio
 - Partida = sorteio de 1 missão fácil + 1 média + 1 difícil, nessa ordem. O sorteio funciona com qualquer quantidade por nível (6 → 9 → 12 missões sem mudar código).
@@ -203,10 +204,10 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 - Apelido: 2 a 20 caracteres, letras (com acento), números e espaço; lista básica de palavras bloqueadas no site.
 - Toda publicação mostra o selo "Simulação". Nenhuma missão acusa pessoa ou empresa real.
 #### Checklist (ordem de implementação)
-- [ ] 1. Apelido + início da partida + `storage.js` (partida atual)
-- [ ] 2. Tela de missão: publicação, ferramentas, sinais, veredito (com as 6 missões de `MISSOES.md`)
-- [ ] 3. `scoring.js` + resultado da missão + fim da partida
-- [ ] 4. Teste: partida inteira no notebook e no celular, abrindo também pelo `file://`
+- [x] 1. Apelido + início da partida + `storage.js` (partida atual) — v0.4.0
+- [x] 2. Tela de missão: publicação, ferramentas, sinais, veredito (com as 7 missões de `MISSOES.md`) — v0.4.0
+- [x] 3. `scoring.js` + resultado da missão + fim da partida — v0.4.0
+- [x] 4. Teste: partida inteira no notebook e no celular, abrindo também pelo `file://` — v0.4.0 (celular físico ainda por testar)
 
 ### Fase 3 — Conteúdo: 7 missões (3 fáceis, 2 médias, 2 difíceis)
 **Objetivo:** as 7 missões de `MISSOES.md` (escritas pelo Claude a partir dos fascículos Boatos e Redes Sociais do CERT.br) revisadas pelo grupo até 17/11. Mudança pedida pelo grupo = editar `MISSOES.md` e o `missions-data.js` juntos.
