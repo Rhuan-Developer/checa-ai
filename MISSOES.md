@@ -1,4 +1,4 @@
-# Checa Aí — Missões (v1: 7 missões: 3 fáceis, 2 médias, 2 difíceis)
+# Checa Aí — Missões (v1: 9 missões: 3 fáceis, 3 médias, 3 difíceis)
 
 > Conteúdo das missões, para o grupo revisar e para o Claude Code converter em `js/missions-data.js`.
 > Base: Cartilha de Segurança para Internet do CERT.br — fascículo **Boatos** (jul/2024) e fascículo **Redes Sociais**. Os PDFs ficam em `cartilhas/`.
@@ -6,9 +6,9 @@
 > Tema da estação: **origem, data e contexto**. Sem golpes/phishing (Estação 1) e sem IA/deepfake (Grupo 5 da outra turma).
 
 ## Como a partida funciona
-- 7 missões: 3 fáceis, 2 médias, 2 difíceis.
+- 9 missões: 3 fáceis, 3 médias, 3 difíceis.
 - Cada partida sorteia **1 fácil + 1 média + 1 difícil**, nessa ordem. Assim, cada visitante pega uma combinação diferente.
-- Para crescer depois: 9 missões (3 de cada nível), depois 12 (4 de cada). O sorteio continua igual.
+- Para crescer depois: 12 missões (4 de cada nível). O sorteio continua igual.
 - Vereditos possíveis em todas as missões: **Verdadeira · Falsa · Enganosa / fora de contexto · Sem provas suficientes**.
 - As missões usam os 4 vereditos, para o visitante não achar que "tudo é mentira".
 
@@ -19,8 +19,20 @@
 | F3 | Fácil | A mostra cancelada | Falsa |
 | M1 | Médio | A enchente de hoje (que não era de hoje) | Enganosa / fora de contexto |
 | M2 | Médio | A pesquisa do celular na sala | Enganosa / fora de contexto |
+| M3 | Médio | A multa do lixo | Verdadeira |
 | D1 | Difícil | O comunicado oficial que não existia | Falsa |
 | D2 | Difícil | A ponte interditada | Verdadeira |
+| D3 | Difícil | A escola que vai fechar | Sem provas suficientes |
+
+### Balanceamento dos vereditos
+| | Fácil | Médio | Difícil | Total |
+|---|---|---|---|---|
+| Verdadeira | — | M3 | D2 | 2 |
+| Falsa | F2, F3 | — | D1 | 3 |
+| Enganosa | — | M1, M2 | — | 2 |
+| Sem provas | F1 | — | D3 | 2 |
+
+Regra: ao chegar a 12, manter a proporção de ~20% verdadeiras, ~35% falsas, ~20% enganosas, ~20% sem provas.
 
 Formato de cada missão: **publicação** (o que o visitante vê) → **ferramentas** (cada uma revela uma pista ao tocar) → **"O que é suspeito aqui?"** (sinais; ✅ = sinal verdadeiro, ❌ = isca) → **veredito** → **gabarito comentado** → **Como se proteger** → **referência da cartilha**.
 
@@ -168,6 +180,33 @@ Formato de cada missão: **publicação** (o que o visitante vê) → **ferramen
 
 ---
 
+## M3 · Médio — A multa do lixo
+**Formato:** mensagem encaminhada no grupo "Vizinhos da Rua das Flores" (badge *Encaminhada*), sem imagem.
+
+**Publicação:**
+> A partir de 1º de dezembro, quem colocar lixo na calçada fora do horário da coleta vai levar multa de R$ 150 em Nova Aurora. Saiu a lei! Avisem os vizinhos.
+
+**Ferramentas:**
+- **Ir à fonte** → A mensagem não traz link, mas cita uma lei. No site da Câmara Municipal de Nova Aurora está a Lei nº 2.341/2026, publicada em 3 de novembro.
+- **Conferir a data** → A lei vale a partir de 1º de dezembro de 2026. A data da mensagem bate com a lei.
+- **Comparar com outras fontes** → O jornal Diário da Aurora e o perfil oficial da Prefeitura explicam a mesma regra e o mesmo valor: R$ 150.
+
+**O que é suspeito aqui?**
+- ✅ Não traz o link da lei
+- ✅ Não diz quem escreveu a mensagem
+- ❌ Tem valor exato de multa, então é golpe
+- ❌ Fala de multa, então é boato para assustar
+
+**Veredito:** Verdadeira
+
+**Gabarito comentado:** A mensagem não tinha link, mas a lei existe: está no site da Câmara, foi publicada em 3 de novembro, e o jornal e a Prefeitura confirmam a regra e o valor. A checagem confirmou.
+
+**Como se proteger:** Quando for repassar algo verdadeiro, mande junto o link da fonte oficial.
+
+**Cartilha:** Boatos — "Vá direto à fonte da notícia", "Cheque os fatos em mais de uma fonte".
+
+---
+
 ## D1 · Difícil — O comunicado oficial que não existia
 **Formato:** imagem de um documento com brasão, cabeçalho "Prefeitura Municipal de Nova Aurora — Secretaria de Educação", número de ofício e assinatura. Circulando no grupo de pais.
 
@@ -197,7 +236,7 @@ Formato de cada missão: **publicação** (o que o visitante vê) → **ferramen
 ---
 
 ## D2 · Difícil — A ponte interditada
-**Formato:** mensagem encaminhada no grupo da família, com foto de uma ponte com cones e fita.
+**Formato:** mensagem encaminhada no grupo da família, sem imagem.
 
 **Publicação:**
 > Gente, a ponte do Rio Aurora na estrada pra Vila Serena tá INTERDITADA até sexta! Rachou a pilastra. Quem for viajar vai ter que dar a volta por Santa Luz. Passem pra frente!
@@ -211,7 +250,7 @@ Formato de cada missão: **publicação** (o que o visitante vê) → **ferramen
 - ✅ Mensagem encaminhada sem link para a fonte
 - ✅ Pede para "passar pra frente"
 - ❌ Fala de uma ponte, então só pode ser boato
-- ❌ A foto mostra cones, então foi montada
+- ❌ Fala em pilastra rachada, então é exagero para assustar
 
 **Veredito:** Verdadeira
 
@@ -223,6 +262,34 @@ Formato de cada missão: **publicação** (o que o visitante vê) → **ferramen
 
 ---
 
+## D3 · Difícil — A escola que vai fechar
+**Formato:** conversa particular, sem badge, sem imagem.
+
+**Publicação:**
+> Menina, minha prima que trabalha na prefeitura disse que a Escola Municipal Vale do Sol vai FECHAR no ano que vem! Os alunos vão ser mandados pra outras escolas. Já tá decidido!!
+
+**Ferramentas:**
+- **Ir à fonte** → A fonte é "minha prima que trabalha na prefeitura": sem nome, sem cargo, sem documento.
+- **Site oficial da Prefeitura** → Existe um "Estudo de reorganização da rede municipal de ensino" em andamento. Ele não cita nenhuma escola e não traz nenhuma decisão.
+- **Comparar com outras fontes** → O Diário da Aurora noticiou: "Prefeitura estuda mudanças na rede escolar; nada foi decidido. Audiência pública em março."
+
+**O que é suspeito aqui?**
+- ✅ A fonte é uma pessoa sem nome ("minha prima")
+- ✅ Diz "já tá decidido", mas o estudo não decidiu nada
+- ✅ Nenhum documento cita a escola
+- ❌ Existe um estudo, então é verdade
+- ❌ A prefeitura não confirmou, então é mentira
+
+**Veredito:** Sem provas suficientes
+
+**Gabarito comentado:** Existe um estudo, mas ele não cita a escola nem decidiu nada, e a audiência só acontece em março. Não dá para dizer que é verdade nem que é mentira: faltam provas. Também não é enganosa, porque não há um fato real distorcido, só uma suposição.
+
+**Como se proteger:** Antes de repassar, pergunte: quem disse isso e onde está escrito? Sem documento, espere o anúncio oficial.
+
+**Cartilha:** Boatos — "Tem cara de boato?" (autor omitido, falta de provas), "Vá direto à fonte da notícia".
+
+---
+
 ## Dicas finais ("Antes de compartilhar") — tela do fim da partida
 Baseadas no fascículo Boatos (CERT.br):
 1. **Origem:** quem publicou? É o perfil ou o site oficial?
@@ -231,7 +298,18 @@ Baseadas no fascículo Boatos (CERT.br):
 4. **Outras fontes:** veículos confiáveis e agências de checagem falam a mesma coisa?
 5. **Na dúvida, não compartilhe.**
 
-## Banco de ideias para as próximas missões (9 e 12)
+## Mensagens do simulador
+As mensagens do simulador ("Como um boato se espalha") ficam em `js/simulator-rumors.js` e **não repetem as missões, para o simulador não entregar o gabarito do jogo**. "Checar antes" mostra só o que a checagem encontrou.
+
+| # | Formato | Mensagem | O que a checagem mostra |
+|---|---|---|---|
+| S1 | Grupo "Moradores do Bairro Centro", *Encaminhada com frequência*, sem imagem | Vai faltar água em Nova Aurora a semana TODA a partir de amanhã! Encham os baldes e repassem! | O site da companhia de água fala só em manutenção de 4 horas, no sábado, em uma rua. |
+| S2 | Grupo "Turma 1º Ano", *Encaminhada*, texto "Gente, olha isso que saiu agora!" + documento com logo do IFNMG ("Campus Arinos · Coordenação de Ensino", COMUNICADO Nº 061/2026, "Informamos que, a partir de segunda-feira, o uso do uniforme passa a ser OPCIONAL em todas as atividades do campus, inclusive aulas práticas e laboratórios.", Arinos, 30 de novembro de 2026, Marta Regina Fontoura — Coordenadora de Ensino), faixa SIMULAÇÃO | Gente, olha isso que saiu agora! | O comunicado nº 061 não existe no site oficial do campus. O uso do uniforme continua obrigatório. |
+| S3 | Conversa particular, *Encaminhada com frequência*, sem imagem | Feriado extra: segunda-feira será ponto facultativo em todo o estado! Compartilhe! | O Diário Oficial não publicou nada. A mensagem é de 2019 e volta todo ano. |
+| S4 | Perfil "@aurora.urgente", sem badge, foto de uma fila longa em uma rodoviária | Olha a fila que tá AGORA na rodoviária! Ninguém tá conseguindo embarcar!! | A foto é de um feriado de 2021, em outra cidade. |
+| S5 | Grupo "Pais da Escola Monte Verde", *Encaminhada*, sem imagem | Ônibus escolar NÃO vai rodar amanhã por falta de combustível. Avisem todo mundo! | A Secretaria de Transporte publicou hoje que o transporte funciona normalmente. |
+
+## Banco de ideias para as próximas missões (12)
 - **Fácil — Sátira levada a sério:** post de um perfil de humor, compartilhado como notícia. Veredito: Falsa. Cartilha: "Outras fontes de informações falsas".
 - **Fácil — Lenda urbana da escola:** "Quem usar o bebedouro do 2º andar…". Veredito: Falsa (lenda urbana).
 - **Médio — Vídeo antigo de briga "hoje na escola":** veredito Enganosa. Conferir a data e o uniforme.

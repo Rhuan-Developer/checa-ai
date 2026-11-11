@@ -259,6 +259,50 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 
 ---
 
+## Simulador com mensagens próprias e 9 missões (v0.4.1)
+
+**Status:** ✅ v0.4.1 na `feat/conteudo-v0.4.1`, mesclada na `main` e publicada no GitHub Pages. Sem banco, sem revisão do `security-engineer`.
+
+**Motivo:** o simulador sorteava as missões do jogo e o "Checar antes" mostrava o gabarito; quem passava pelo simulador e depois jogava já sabia a resposta.
+
+### Regras
+- O simulador usa só 5 mensagens próprias (S1 a S5, em `js/simulator-rumors.js`; fonte no `MISSOES.md`, seção "Mensagens do simulador"). Elas não repetem nenhuma missão do jogo
+- O sorteio nunca repete a mensagem anterior (`pickNext(previousId, random)`, função pura)
+- "Checar antes": "Você parou o boato aqui.", "0 pessoas enganadas", o `checkResult` da mensagem (1 linha) e "Na dúvida, não compartilhe."; nenhum gabarito de missão. "E se eu tivesse compartilhado?" continua
+- 9 missões, 3 por nível. Missões novas: M3 "A multa do lixo" (médio, Verdadeira) e D3 "A escola que vai fechar" (difícil, Sem provas suficientes). D2 trocou a isca "A foto mostra cones, então foi montada" por "Fala em pilastra rachada, então é exagero para assustar"
+- Balanceamento: Verdadeira M3, D2 · Falsa F2, F3, D1 · Enganosa M1, M2 · Sem provas F1, D3. Pela distribuição por nível, nenhuma partida tem os 3 vereditos iguais. Ao chegar a 12, manter ~20% verdadeiras, ~35% falsas, ~20% enganosas, ~20% sem provas
+
+### Fluxo / Telas
+- Simulador (passo A): mensagem de `simulatorRumors`. S2 mostra "Gente, olha isso que saiu agora!" acima do documento do IFNMG (logo, faixa SIMULAÇÃO, "Campus Arinos · Coordenação de Ensino", mesmo fallback da F3). S4 mostra o quadro "Imagem fictícia" com a descrição (sem foto; ver Decisões)
+
+### Arquivos e funções
+- `js/simulator-rumors.js` (novo): `ChecaAi.simulatorRumors = { all, pickNext(previousId, random) }`, dados congelados
+- `js/screens/simulator.js`: sorteia de `simulatorRumors`; "Checar antes" com `checkResult`
+- `js/components/post-card.js`: flag opcional `showContentWithDocument` no item (só a S2 usa): o texto fica visível acima do documento; sem a flag (F3, D1) continua só para leitor de tela. Mídia `{ kind: 'placeholder', alt }` mostra o quadro "Imagem fictícia" sem tentar carregar arquivo
+- `js/missions-data.js`: M3 e D3; isca nova da D2; **`getShareableRumors` removida** (só o simulador usava; conferido com Grep e codebase-memory)
+- `index.html`: carrega `simulator-rumors.js` depois de `post-card.js`
+- `MISSOES.md`: 9 missões, M3, D3, isca da D2, "Balanceamento dos vereditos", "Mensagens do simulador"; formato da D2 passou a "sem imagem"
+- `js/config.js`: `APP_VERSION` 0.4.1
+
+### Decisões técnicas
+- **Foto da S4 não encontrada.** Nenhuma foto livre do Commons atendeu "fila longa, sem rostos em primeiro plano, sem texto em outro idioma" (descartadas: Ryde bus station — ônibus ingleses com texto; Mizue Station — placas em japonês; Retiro, Buenos Aires e fila em San José — rostos em primeiro plano; Terminal Tietê nº 53, CC0 — saguão cheio, não fila, com rostos). A S4 usa `kind: 'placeholder'` (sem 404 no console); quando houver foto, trocar por `kind: 'photo'` com `credit` e criar `assets/images/simulador/CREDITOS.md`
+- `format.type` das mensagens: S1, S2 e S5 `group-chat`; S3 `private-chat`; S4 `social-post` (só descritivo)
+- Sem mudança de CSS nem de banco
+
+### Roteiro de teste
+1. `#/simulador` e "Nova simulação" várias vezes → as 5 mensagens aparecem, nunca a mesma em sequência
+2. S2 → logo, faixa SIMULAÇÃO, "Campus Arinos · Coordenação de Ensino" e "Gente, olha isso que saiu agora!" acima do documento
+3. "Checar antes" em cada mensagem → só o `checkResult` e as frases, sem texto de missão
+4. Simulação até a rodada 8 e comparação 88.572 × 4.546 (repasses 3)
+5. Console: `ChecaAi.missions.all.length` → 9; `scoreMission` dá 200 nas 9; `drawMatch()` 300 vezes → 1 por nível, em ordem, as 9 aparecem, nunca 3 vereditos iguais
+6. Jogar M3 e D3 do começo ao resultado; F3 e D1 sem texto visível acima do documento
+7. 375×812 e 1920×1080 → sem rolagem horizontal, alvos ≥ 44 px, console limpo
+8. Pendente: foto da S4; aparelho real, Safari e Firefox
+
+**Arquivos:** `js/simulator-rumors.js`, `js/screens/simulator.js`, `js/components/post-card.js`, `js/missions-data.js`, `index.html`, `js/config.js`, `MISSOES.md`
+
+---
+
 <!-- MODELO DE SEÇÃO — copiar para cada funcionalidade nova
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
@@ -301,7 +345,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 ---
 
 ## Constantes e Tema
-- `js/config.js`: `APP_VERSION` ('0.4.0', único lugar da versão), `MISSIONS_PER_LEVEL_IN_MATCH` (1), `FEATURES` (`simulator` ligado; `missions` e `ranking` desligados), `SIM_FANOUT` 3, `SIM_CHECK_RATE` 0.1, `SIM_VISUAL_ROUNDS` 5, `SIM_TOTAL_ROUNDS` 10, `SIM_ROUND_MS` 1200, `SIM_COMPARE_CHECK_RATE` 0.3
+- `js/config.js`: `APP_VERSION` ('0.4.1', único lugar da versão), `MISSIONS_PER_LEVEL_IN_MATCH` (1), `FEATURES` (`simulator` ligado; `missions` e `ranking` desligados), `SIM_FANOUT` 3, `SIM_CHECK_RATE` 0.1, `SIM_VISUAL_ROUNDS` 5, `SIM_TOTAL_ROUNDS` 10, `SIM_ROUND_MS` 1200, `SIM_COMPARE_CHECK_RATE` 0.3
 - `css/theme.css` — cores: `--bg #0F1B2D`, `--surface #17263D`, `--border #2A3B55`, `--text #F2F5F9`, `--text-muted #A9B6C8`, `--accent #3DA5FF`, `--on-accent #0F1B2D`; vereditos: `--verdict-true #3FB27F`, `--verdict-false #E5534B`, `--verdict-misleading #E9A23B`, `--verdict-unproven #8A9BB0`
 - `css/theme.css` — medidas: fonte `system-ui`, `--font-sm` a `--font-2xl`, `--space-1` a `--space-7`, `--radius` 6px, `--touch-min` 44px, `--content-max` 960px, `--text-max` 60ch, `--touch-lg` 64px, `--canvas-max-height` 58vh
 - Layout (v0.3.1) — breakpoints (media query não aceita `var()`; repetir os números, documentados no topo do `theme.css`): celular < 600px (1 coluna); tablet 600–1023px (1 coluna larga, 2 em paisagem); notebook ≥ 1024px (container centralizado); telão ≥ 1600px (`--content-max` sobe para 88rem). Divisão em colunas: `(min-width: 1024px), (min-width: 600px) and (orientation: landscape)`
@@ -329,11 +373,12 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
 - [x] Fase 1 — Simulador viral + base do site — ✅ Completo (v0.3.0)
 - [x] Fase 2 — Jogo das missões (apelido, investigação, veredito, pontuação, resultado) — ✅ Completo (v0.4.0)
-- [ ] Fase 3 — Revisão das 7 missões pelo grupo — até 17/11
+- [ ] Foto livre para a mensagem S4 do simulador (fila em rodoviária; hoje mostra o quadro com a descrição)
+- [ ] Fase 3 — Revisão das 9 missões pelo grupo — até 17/11
 - [ ] Fase 4 — Ranking online (Supabase) — até 22/11
 - [ ] Fase 5 — Testes em notebook/tablet/celular, service worker, QR Code, tela de dicas — até 24/11
 - [ ] v1.0.0 e congelamento — 25/11
 
 ---
 
-*Última atualização: 10/11/2026 (v0.4.0 — jogo das missões)*
+*Última atualização: 10/11/2026 (v0.4.1 — simulador com mensagens próprias e 9 missões)*

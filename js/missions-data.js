@@ -39,7 +39,7 @@
    * @property {boolean} isSuspicious  true = sinal verdadeiro; false = isca
    *
    * @typedef {Object} Mission
-   * @property {string} id  'F1', 'F2', 'F3', 'M1', 'M2', 'D1', 'D2'
+   * @property {string} id  'F1'... 'D3' (letra do nível + número)
    * @property {'easy'|'medium'|'hard'} level
    * @property {string} title
    * @property {MissionFormat} format
@@ -221,6 +221,29 @@
       reference: 'Boatos — "Não se deixe levar pelo título da notícia", "Cheque os fatos em mais de uma fonte".'
     },
     {
+      id: 'M3',
+      level: 'medium',
+      title: 'A multa do lixo',
+      format: { type: 'group-chat', header: 'Vizinhos da Rua das Flores', badge: 'Encaminhada' },
+      content: 'A partir de 1º de dezembro, quem colocar lixo na calçada fora do horário da coleta vai levar multa de R$ 150 em Nova Aurora. Saiu a lei! Avisem os vizinhos.',
+      image: null,
+      tools: [
+        { label: 'Ir à fonte', clue: 'A mensagem não traz link, mas cita uma lei. No site da Câmara Municipal de Nova Aurora está a Lei nº 2.341/2026, publicada em 3 de novembro.' },
+        { label: 'Conferir a data', clue: 'A lei vale a partir de 1º de dezembro de 2026. A data da mensagem bate com a lei.' },
+        { label: 'Comparar com outras fontes', clue: 'O jornal Diário da Aurora e o perfil oficial da Prefeitura explicam a mesma regra e o mesmo valor: R$ 150.' }
+      ],
+      signals: [
+        { text: 'Não traz o link da lei', isSuspicious: true },
+        { text: 'Não diz quem escreveu a mensagem', isSuspicious: true },
+        { text: 'Tem valor exato de multa, então é golpe', isSuspicious: false },
+        { text: 'Fala de multa, então é boato para assustar', isSuspicious: false }
+      ],
+      verdict: 'true',
+      explanation: 'A mensagem não tinha link, mas a lei existe: está no site da Câmara, foi publicada em 3 de novembro, e o jornal e a Prefeitura confirmam a regra e o valor. A checagem confirmou.',
+      howToProtect: 'Quando for repassar algo verdadeiro, mande junto o link da fonte oficial.',
+      reference: 'Boatos — "Vá direto à fonte da notícia", "Cheque os fatos em mais de uma fonte".'
+    },
+    {
       id: 'D1',
       level: 'hard',
       title: 'O comunicado oficial que não existia',
@@ -270,12 +293,36 @@
         { text: 'Mensagem encaminhada sem link para a fonte', isSuspicious: true },
         { text: 'Pede para "passar pra frente"', isSuspicious: true },
         { text: 'Fala de uma ponte, então só pode ser boato', isSuspicious: false },
-        { text: 'A foto mostra cones, então foi montada', isSuspicious: false }
+        { text: 'Fala em pilastra rachada, então é exagero para assustar', isSuspicious: false }
       ],
       verdict: 'true',
       explanation: 'A mensagem tinha cara de boato (encaminhada, sem fonte, pedindo repasse), mas a checagem confirmou: o órgão oficial de estradas, a Prefeitura e a rádio publicaram a mesma informação. Desconfiar é o primeiro passo; o veredito vem depois de checar.',
       howToProtect: 'Se for repassar algo verdadeiro, mande junto o link da fonte oficial. Assim quem recebe também consegue checar.',
       reference: 'Boatos — "Cheque os fatos em mais de uma fonte", "Informe-se com outras pessoas e meios de comunicação".'
+    },
+    {
+      id: 'D3',
+      level: 'hard',
+      title: 'A escola que vai fechar',
+      format: { type: 'private-chat', header: 'Conversa particular', badge: '' },
+      content: 'Menina, minha prima que trabalha na prefeitura disse que a Escola Municipal Vale do Sol vai FECHAR no ano que vem! Os alunos vão ser mandados pra outras escolas. Já tá decidido!!',
+      image: null,
+      tools: [
+        { label: 'Ir à fonte', clue: 'A fonte é "minha prima que trabalha na prefeitura": sem nome, sem cargo, sem documento.' },
+        { label: 'Site oficial da Prefeitura', clue: 'Existe um "Estudo de reorganização da rede municipal de ensino" em andamento. Ele não cita nenhuma escola e não traz nenhuma decisão.' },
+        { label: 'Comparar com outras fontes', clue: 'O Diário da Aurora noticiou: "Prefeitura estuda mudanças na rede escolar; nada foi decidido. Audiência pública em março."' }
+      ],
+      signals: [
+        { text: 'A fonte é uma pessoa sem nome ("minha prima")', isSuspicious: true },
+        { text: 'Diz "já tá decidido", mas o estudo não decidiu nada', isSuspicious: true },
+        { text: 'Nenhum documento cita a escola', isSuspicious: true },
+        { text: 'Existe um estudo, então é verdade', isSuspicious: false },
+        { text: 'A prefeitura não confirmou, então é mentira', isSuspicious: false }
+      ],
+      verdict: 'unproven',
+      explanation: 'Existe um estudo, mas ele não cita a escola nem decidiu nada, e a audiência só acontece em março. Não dá para dizer que é verdade nem que é mentira: faltam provas. Também não é enganosa, porque não há um fato real distorcido, só uma suposição.',
+      howToProtect: 'Antes de repassar, pergunte: quem disse isso e onde está escrito? Sem documento, espere o anúncio oficial.',
+      reference: 'Boatos — "Tem cara de boato?" (autor omitido, falta de provas), "Vá direto à fonte da notícia".'
     }
   ]);
 
@@ -318,14 +365,6 @@
     return MISSIONS.find((m) => m.id === id);
   }
 
-  /**
-   * Missões que o simulador pode usar como boato (veredito diferente de "verdadeira").
-   * @returns {Mission[]}
-   */
-  function getShareableRumors() {
-    return MISSIONS.filter((m) => m.verdict !== 'true');
-  }
-
   window.ChecaAi.missions = {
     all: MISSIONS,
     VERDICT_LABELS,
@@ -333,7 +372,6 @@
     LEVEL_ORDER,
     getMissionsByLevel,
     getMissionById,
-    drawMatch,
-    getShareableRumors
+    drawMatch
   };
 })();

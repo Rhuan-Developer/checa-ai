@@ -153,8 +153,8 @@ Scripts carregados em ordem no fim do `index.html`; cada arquivo pendura suas fu
 - Top 10 do dia. **Modo telão** (tela cheia, atualiza a cada 15 s) para deixar num monitor/notebook virado para o corredor.
 
 ### Simulador viral — "Como um boato se espalha"
-- **Começa no celular do visitante:** chega um boato sorteado entre as missões que não são verdadeiras (cada vez um diferente). O visitante escolhe **Compartilhar** ou **Checar antes**.
-  - Checar antes → "Você parou o boato aqui. 0 pessoas enganadas." + o gabarito curto da missão. Botão "E se eu tivesse compartilhado?".
+- **Começa no celular do visitante:** chega uma mensagem sorteada entre as 5 mensagens próprias do simulador (`js/simulator-rumors.js`; nunca a mesma em sequência). Elas não repetem as missões, para o simulador não entregar o gabarito do jogo. O visitante escolhe **Compartilhar** ou **Checar antes**.
+  - Checar antes → "Você parou o boato aqui. 0 pessoas enganadas." + o que a checagem mostra (`checkResult`, 1 linha) + "Na dúvida, não compartilhe." Botão "E se eu tivesse compartilhado?".
   - Compartilhar → começa a animação.
 - **Animação em árvore** (`<canvas>`): o primeiro celular manda para 3, cada um manda para mais 3 (1 → 3 → 9 → 27 → 81), rodada por rodada, com os celulares abrindo em círculo a partir do centro. A árvore cobre as primeiras rodadas (3 a 5, conforme o fanout; teto de 400 nós). Contador de pessoas alcançadas e de rodadas.
 - **Visão de multidão (v0.3.1):** depois da última rodada da árvore, ela encolhe para o centro e cada rodada nova vira um anel de pontos (vermelho = repassou; verde = checou, proporcional ao sorteio da rodada; máx. 720 pontos por anel, cada ponto = `ceil(pessoas/720)` pessoas). Cada rodada muda a tela, inclusive no modo apresentação (um clique = um anel). A tela termina na rodada 8 (`SIM_PRESENTATION_ROUNDS`) ou antes, se o boato parar.
@@ -176,7 +176,7 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 | 1 — Simulador viral (pronto para o grupo treinar a apresentação) | 12 a 14/11 | v0.2.0 (base) + v0.3.0 (simulador) |
 | 2 — Núcleo do jogo (sem banco) | 15 a 19/11 | v0.4.0 |
 | Redesign (layout do Canva) | 19 a 21/11 | v0.4.x |
-| 3 — Conteúdo: 7 missões (escritas pelo Claude, revisadas pelo grupo) | revisão até 17/11 | v0.5.0 |
+| 3 — Conteúdo: 9 missões (escritas pelo Claude, revisadas pelo grupo) | revisão até 17/11 | v0.5.0 |
 | 4 — Ranking online | 20 a 22/11 | v0.6.0 |
 | 5 — Polimento e testes | 23 a 24/11 | v0.9.x |
 | Congelamento | 25/11 — só correção de bug | v1.0.0 |
@@ -205,15 +205,16 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 - Toda publicação mostra o selo "Simulação". Nenhuma missão acusa pessoa ou empresa real.
 #### Checklist (ordem de implementação)
 - [x] 1. Apelido + início da partida + `storage.js` (partida atual) — v0.4.0
-- [x] 2. Tela de missão: publicação, ferramentas, sinais, veredito (com as 7 missões de `MISSOES.md`) — v0.4.0
+- [x] 2. Tela de missão: publicação, ferramentas, sinais, veredito (com as missões de `MISSOES.md`) — v0.4.0
 - [x] 3. `scoring.js` + resultado da missão + fim da partida — v0.4.0
 - [x] 4. Teste: partida inteira no notebook e no celular, abrindo também pelo `file://` — v0.4.0 (celular físico ainda por testar)
 
-### Fase 3 — Conteúdo: 7 missões (3 fáceis, 2 médias, 2 difíceis)
-**Objetivo:** as 7 missões de `MISSOES.md` (escritas pelo Claude a partir dos fascículos Boatos e Redes Sociais do CERT.br) revisadas pelo grupo até 17/11. Mudança pedida pelo grupo = editar `MISSOES.md` e o `missions-data.js` juntos.
+### Fase 3 — Conteúdo: 9 missões (3 por nível)
+**Objetivo:** as 9 missões de `MISSOES.md` (escritas pelo Claude a partir dos fascículos Boatos e Redes Sociais do CERT.br) revisadas pelo grupo até 17/11. Mudança pedida pelo grupo = editar `MISSOES.md` e o `missions-data.js` juntos.
 - Cada missão: situação-problema (texto e imagem fictícia), ferramentas com pistas, sinais (verdadeiros e iscas), veredito, gabarito comentado de até 3 linhas, orientação de segurança ("Como se proteger") e referência ao fascículo da Cartilha do CERT.br.
 - Ficar no tema da estação: origem, data e contexto. Sem golpes/phishing nem IA (outras estações).
-- Depois, se der tempo: 9 missões (3 por nível) e 12 (4 por nível), usando o banco de ideias do `MISSOES.md`.
+- Balanceamento dos vereditos (v0.4.1): Verdadeira 2 (M3, D2) · Falsa 3 (F2, F3, D1) · Enganosa 2 (M1, M2) · Sem provas 2 (F1, D3); nenhuma partida tem os 3 vereditos iguais. Tabela no `MISSOES.md`.
+- Depois, se der tempo: 12 missões (4 por nível), usando o banco de ideias do `MISSOES.md` e mantendo ~20% verdadeiras, ~35% falsas, ~20% enganosas, ~20% sem provas.
 - Fascículos em `cartilhas/` (baixados pelo `baixar-cartilhas.bat`).
 - O grupo escreve num documento; o Claude Code converte para `missions-data.js`.
 - [ ] Missões revisadas pelo grupo (ajustes anotados no `MISSOES.md`)
