@@ -396,7 +396,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 
 ## Ranking online — banco de dados (Fase 4A)
 
-**Status:** ✅ SQL escrito e revisado pelo `security-engineer` (aprovado com ressalvas; ressalvas aplicadas) na `feat/ranking-online`. **Pendente: a Grasi aplicar no Supabase** (passo a passo em `supabase/LEIA-ME.md`). Sem merge na `main` (sai junto com a 4B, v0.6.0); `APP_VERSION` continua 0.4.3. O site ainda não chama o banco.
+**Status:** ✅ SQL escrito e revisado pelo `security-engineer` (aprovado com ressalvas; ressalvas aplicadas) na `feat/ranking-online`. **Aplicado pela Grasi no Supabase** (teste: "OK — 80 checagens conferem"). Publicado junto com a 4B na v0.5.0.
 
 ### Regras
 - Tabela `public.ranking` com RLS ligado e **nenhuma policy**; sem privilégio para `anon`, `authenticated` nem `PUBLIC` (o Supabase concede tudo por padrão; a migration revoga)
@@ -446,6 +446,62 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 
 ---
 
+## Ranking online — app (Fase 4B, v0.5.0)
+
+**Status:** ✅ v0.5.0 na `feat/ranking-online`, mesclada na `main` e publicada no GitHub Pages. SQL da 4A aplicado pela Grasi (teste "OK — 80 checagens"). Revisão do `security-engineer`: aprovada com ressalvas; ressalvas aplicadas. **Falta: a partida real de verificação da Grasi** (roteiro abaixo).
+
+### Fluxo / Telas
+- Início: "Começar investigação", **"Ranking"** e "Como um boato se espalha"
+- Fim da partida: a partida entra na fila uma vez (pelo `clientId` da partida) e uma linha mostra a situação: "Enviando para o ranking…" → "Você está em Nº no ranking de hoje." (ou "Pontuação enviada ao ranking." sem posição); sem conexão ou falha temporária: "Pontuação salva. Vai pro ranking quando a internet voltar."; recusada ou rápida demais: nada. Botão "Ver o ranking"
+- `#/ranking`: "Ranking de hoje", "Atualizado às HH:MM", tabela (posição, apelido, pontos, acertos, tempo; top 20), destaque da última partida do aparelho (enviada nos últimos 10 min), "Atualizar" e "Voltar"; atualiza sozinho a cada 15 s (só com a aba visível). Vazio: "Ninguém jogou ainda hoje." Sem conexão: "Sem conexão." + "Tentar de novo", com a última lista de hoje guardada ("Lista das HH:MM")
+- Modo telão: ícone na barra superior (mesmo lugar do "Modo apresentação" do simulador); top 10, letras em `vh`/`vw` (47 px em 1920×1080, 53 px em 2400×1200; 10 linhas cabem sem rolar de 360×640 a 3840×2160 CSS), relógio "Atualizado às HH:MM:SS", atualiza a cada 10 s, "Sair" fixo no canto com faixa reservada, Esc sai (com ou sem Fullscreen API)
+- Jogo e simulador seguem 100% sem internet; só o ranking usa a rede
+
+### Regras
+- Envio só se a partida respeita o banco: UUID, apelido válido, 1 a 3 missões, acertos 0 a missões, pontos coerentes com os acertos (`scoring.js`), **pelo menos 10 s por missão** e no máximo 1 h. Fora disso não envia e não mostra nada
+- Erros: definitivos (`invalid_*`, `blocked_nickname`, HTTP 400/422) saem da fila; temporários (`rate_limited`, `server_error`, código desconhecido, corpo inválido, HTTP 401/403 = gravação fechada, 404, 429, 5xx, rede, tempo esgotado de 8 s) ficam. Rede/limite/gravação fechada esperam sem limite; os outros saem depois de 8 tentativas (não prendem as partidas seguintes)
+- Reenvio: ao abrir o app, ao voltar a conexão (`online`) e enquanto houver fila: 30 s, 60 s, 120 s, 240 s, 300 s… (±25% de variação); para na primeira falha temporária
+- Fila: até 20 partidas (descarta a mais antiga), só apelido + pontos/acertos/tempo/data/UUID; partida de outro dia é descartada sem envio
+- Apelido (site = banco): NFC; só espaço/tab/quebra ASCII viram espaço (NBSP e espaços Unicode são recusados); 2 a 20 caracteres; sem acento solto; sem acento só `a-z0-9` e espaço (grego, cirílico, ß, º, ², emoji recusados); mesmas duas listas de bloqueio
+- Segurança: apelidos sempre por `textContent`; linhas da rede e do localStorage conferidas (`sanitizeRow`/`sanitizeCachedRow`); `fetch` com `credentials: 'omit'`, `referrerPolicy: 'no-referrer'`, `cache: 'no-store'`; só a chave publishable no código
+
+### Arquivos e funções
+- `js/config.js`: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `FEATURES.ranking: true`, `API_TIMEOUT_MS` (8 s), `MIN_MS_PER_MISSION` (10 s), `QUEUE_MAX` (20), `QUEUE_RETRY_MS` (30 s), `QUEUE_RETRY_MAX_MS` (5 min), `RANKING_LIMIT` (20), `RANKING_REFRESH_MS` (15 s), `RANKING_TV_LIMIT` (10), `RANKING_TV_REFRESH_MS` (10 s); `APP_VERSION` 0.5.0
+- `js/api.js` (novo): `classifySubmit`, `classifyFailure`, `prepareEntry`, `retryDelay`, `sanitizeRow`, `sanitizeCachedRow` (puras); `submitScore`, `getRanking` (fetch com `AbortController`); fila: `flush`, `recordMatch`, `onChange`, `startSync`
+- `js/storage.js`: `randomId` sempre UUID (fallback v4 com `Math.random`); `isUuid`, `newId`; fila (`getQueue`, `enqueueScore`, `removeQueued`, `updateQueued`), situação dos envios (`getResult`, `getResults`, `setResult`, até 20) e última lista (`getLastRanking`, `setLastRanking`) no localStorage, sempre relido (duas abas); memória só se o armazenamento falhar
+- `js/utils.js`: `validateNickname` alinhado ao banco; `formatClock` (hora de São Paulo)
+- `js/screens/ranking.js` (novo), `js/screens/match-end.js` (`rankStatusText`), `js/screens/home.js` (botão Ranking), `js/app.js` (`startSync` no início)
+- `index.html`: `css/ranking.css`, `js/api.js`, `js/screens/ranking.js`, `<section data-screen="ranking">`, símbolo `icon-tv` (também em `assets/icons/icons.svg`)
+- `css/ranking.css` (novo), `css/game.css` (`.end-rank`)
+- `docs/capturas/v0.5.0/`: 29 capturas (início, fim da partida com posição, ranking com destaque e modo telão em 360×640, 390×844, 768×1024, 1366×768, 1920×1080 e 2400×1200; ranking vazio, sem conexão e fim sem conexão em 390×844; telão com zoom 50% e 200% em 1920×1080)
+
+### Decisões técnicas
+- `client_id` = `clientId` da partida (já existia, guardado no sessionStorage): recarregar a tela de fim não gera outro envio
+- Destaque "você" pela chave apelido+pontos+tempo (o `get_ranking` não devolve `client_id`) e só da última partida do aparelho nos últimos 10 min (tablet compartilhado)
+- 401/403 são temporários: é o que o PostgREST devolve quando a Grasi fecha a gravação (`revoke execute`), e a partida tem de esperar
+- Telão com letras em `vh`/`vw`: ocupa a tela em qualquer zoom (50% a 200%) sem rolar; o tamanho físico não muda com o zoom, de propósito
+- Tela: top 20; telão: top 10 (a lista é buscada uma vez com 20 linhas)
+- Testes sem gravar em produção: Chrome headless com a rede do Supabase interceptada (CDP `Fetch`); `submit_score` sempre respondido por um servidor simulado; só `get_ranking` real (leitura)
+
+### Revisão de segurança (security-engineer, 14/11/2026): aprovada com ressalvas, todas aplicadas
+1. Erro persistente do servidor no primeiro item prendia as partidas seguintes até a virada do dia → limite de 8 tentativas para erros que não são de rede
+2. Duas abas sobrescreviam a fila uma da outra (cópia em memória) → localStorage sempre relido; memória só se ele falhar
+3. Lista guardada no localStorage desenhada sem conferência (cache adulterado travava a tela) → `sanitizeCachedRow`
+4. Destaque "você" em todas as partidas do aparelho → só a mais recente
+5. `\s` do JS (inclui NBSP) diferente do banco → só espaços ASCII
+6. Espera sem variação → ±25%
+- Para a Fase 5: o service worker não pode interceptar nem guardar `*/rest/v1/*` (`if (url.origin !== location.origin) return;`)
+
+### Roteiro de teste
+1. Automático (110 checagens, todas ok): classificação definitivo × temporário; espera crescente; `prepareEntry` (30 s envia, 29,999 s não, > 1 h não, pontos incoerentes, id não UUID); fila (limite 20, sem dados pessoais, outro dia descartado, duas abas, item preso sai no limite, `rate_limited` nunca descarta); sem conexão → volta → envia uma vez com posição; recarregar não reenvia; `rate_limited`/401/`server_error`/rede/8 s ficam na fila e depois enviam sem duplicar; definitivo sai sem aviso; rápida demais não envia; ranking com XSS (`<img onerror>`, `<script>`) vira texto; destaque; 15 s; sem conexão com e sem lista guardada; lista adulterada; vazio; telão (top 10, 10 s, Esc, "Sair" sem sobrepor); barra vazia fora do ranking; jogo e simulador sem internet; `get_ranking` real; testes antigos (9 missões = 200, drawMatch, modelo do simulador)
+2. Banco real, só leitura: `get_ranking` → 200 `[]`; GET em `/rest/v1/ranking` → 401 `permission denied for table ranking`; sem chave → 401
+3. Telas: sem rolagem horizontal e sem alvo < 44 px nos 6 tamanhos; simulador igual à v0.4.3
+4. **Pendente (Grasi):** partida real de verificação (roteiro em `supabase/LEIA-ME.md`, item "Partida real de verificação"); aparelho físico, Safari, Firefox, tela cheia real e Wi-Fi caindo de verdade
+
+**Arquivos:** `js/api.js`, `js/screens/ranking.js`, `css/ranking.css`, `js/storage.js`, `js/utils.js`, `js/config.js`, `js/app.js`, `js/screens/match-end.js`, `js/screens/home.js`, `css/game.css`, `index.html`, `assets/icons/icons.svg`, `PLANEJAMENTO.md`, `supabase/LEIA-ME.md`, `docs/capturas/v0.5.0/*`
+
+---
+
 <!-- MODELO DE SEÇÃO — copiar para cada funcionalidade nova
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
@@ -480,7 +536,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 ### Migrations
 | Arquivo | Conteúdo |
 |---|---|
-| `001_ranking.sql` | Tabela `ranking` (RLS sem policy, sem privilégio para anon/authenticated), índices, `submit_score` e `get_ranking`. **Escrita e revisada na Fase 4A; pendente de aplicação pela Grasi** |
+| `001_ranking.sql` | Tabela `ranking` (RLS sem policy, sem privilégio para anon/authenticated), índices, `submit_score` e `get_ranking`. Aplicada pela Grasi (teste OK — 80 checagens) |
 
 ### Funções RPC
 | Função | O quê |
@@ -524,12 +580,13 @@ Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
 - [x] Fase 2 — Jogo das missões (apelido, investigação, veredito, pontuação, resultado) — ✅ Completo (v0.4.0)
 - [ ] Foto livre para a mensagem S4 do simulador (fila em rodoviária; hoje mostra o quadro com a descrição)
 - [ ] Fase 3 — Revisão das 9 missões pelo grupo — até 17/11
-- [ ] Fase 4 — Ranking online (Supabase) — até 22/11
-  - [x] 4A — SQL (migration, rollback, teste, revisão do `security-engineer`) — **pendente: a Grasi aplicar**
-  - [ ] 4B — `api.js`, fila offline, telas de ranking e modo telão
+- [x] Fase 4 — Ranking online (Supabase) — ✅ v0.5.0
+  - [x] 4A — SQL (migration, rollback, teste, revisão do `security-engineer`) — aplicado pela Grasi
+  - [x] 4B — `api.js`, fila offline, telas de ranking e modo telão
+  - [ ] Partida real de verificação pela Grasi (roteiro em `supabase/LEIA-ME.md`)
 - [ ] Fase 5 — Testes em notebook/tablet/celular, service worker, QR Code, tela de dicas — até 24/11
 - [ ] v1.0.0 e congelamento — 25/11
 
 ---
 
-*Última atualização: 14/11/2026 (Fase 4A — SQL do ranking escrito e revisado; aplicação pendente)*
+*Última atualização: 14/11/2026 (v0.5.0 — ranking online: envio com fila offline, tela de ranking e modo telão)*

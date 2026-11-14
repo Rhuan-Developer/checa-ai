@@ -372,3 +372,14 @@
     flex-wrap: wrap;
   }
 }
+
+/* Fim da partida: situação do envio ao ranking (uma frase) */
+.end-rank {
+  font-size: var(--font-lg);
+  font-weight: var(--weight-bold);
+}
+
+.end-rank[data-state="pending"] {
+  color: var(--text-muted);
+  font-weight: var(--weight-normal);
+}

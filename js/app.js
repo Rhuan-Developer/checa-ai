@@ -83,6 +83,14 @@
     fillVersion();
     window.addEventListener('hashchange', onRouteChange);
     onRouteChange();
+    // Ranking: reenvia partidas guardadas sem conexão (o jogo e o simulador não dependem disso)
+    if (ChecaAi.config.FEATURES.ranking && ChecaAi.api) {
+      try {
+        ChecaAi.api.startSync();
+      } catch (err) {
+        console.error('Não deu para começar o envio do ranking; o jogo segue sem ele.', err);
+      }
+    }
   }
 
   ChecaAi.app = { start };

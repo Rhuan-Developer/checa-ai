@@ -151,7 +151,7 @@ Scripts carregados em ordem no fim do `index.html`; cada arquivo pendura suas fu
 - Em seguida, "Antes de compartilhar": 4 a 5 dicas curtas da Cartilha do CERT.br (origem, data, contexto, canal oficial, não repassar na dúvida).
 
 ### Ranking
-- Top 10 do dia. **Modo telão** (tela cheia, atualiza a cada 15 s) para deixar num monitor/notebook virado para o corredor.
+- Top 20 do dia (atualiza a cada 15 s; destaque da última partida do aparelho; última lista guardada para quando cair a conexão). **Modo telão**: top 10, letras grandes, tela cheia, atualiza a cada 10 s, para deixar num monitor/notebook virado para o corredor.
 
 ### Simulador viral — "Como um boato se espalha"
 - **Começa no celular do visitante:** chega uma mensagem sorteada entre as 5 mensagens próprias do simulador (`js/simulator-rumors.js`; nunca a mesma em sequência). Elas não repetem as missões, para o simulador não entregar o gabarito do jogo. O visitante escolhe **Compartilhar** ou **Checar antes**.
@@ -177,8 +177,8 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 | 1 — Simulador viral (pronto para o grupo treinar a apresentação) | 12 a 14/11 | v0.2.0 (base) + v0.3.0 (simulador) |
 | 2 — Núcleo do jogo (sem banco) | 15 a 19/11 | v0.4.0 |
 | Redesign (layout do Canva) | 19 a 21/11 | v0.4.x |
-| 3 — Conteúdo: 9 missões (escritas pelo Claude, revisadas pelo grupo) | revisão até 17/11 | v0.5.0 |
-| 4 — Ranking online | 20 a 22/11 | v0.6.0 |
+| 3 — Conteúdo: 9 missões (escritas pelo Claude, revisadas pelo grupo) | revisão até 17/11 | PATCH na versão vigente |
+| 4 — Ranking online | 14/11 (adiantada) | v0.5.0 |
 | 5 — Polimento e testes | 23 a 24/11 | v0.9.x |
 | Congelamento | 25/11 — só correção de bug | v1.0.0 |
 | Ensaio no estande | 26/11 | — |
@@ -224,8 +224,8 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 ### Fase 4 — Ranking online
 **Objetivo:** pontuação vai para o Supabase; ranking ao vivo; nada se perde sem internet.
 - [x] 1. Migration `001_ranking.sql` + rollback + teste (revisão do `security-engineer`) — escrito na Fase 4A; **a Grasi aplica**
-- [ ] 2. `api.js` + fila offline (reenvia ao abrir o site e a cada 30 s; `client_id` evita duplicar)
-- [ ] 3. Tela de ranking + modo telão
+- [x] 2. `api.js` + fila offline (reenvia ao abrir o site, ao voltar a conexão e a cada 30 s com espera crescente; `client_id` evita duplicar) — v0.5.0
+- [x] 3. Tela de ranking + modo telão — v0.5.0
 - [ ] 4. Teste: dois navegadores, internet desligada e religada, tentativa de fraude pelo console
 
 ### Fase 5 — Polimento e testes

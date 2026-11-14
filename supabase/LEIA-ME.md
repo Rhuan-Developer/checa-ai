@@ -18,7 +18,23 @@ Pode rodar de novo sem problema (não apaga pontuações).
 3. Se a mensagem começar com **FALHOU:**, não libere o site. Copie a mensagem e mande para o Rhuan.
 4. Se aparecer `permission denied to set role "anon"`, o teste não conseguiu agir como visitante: mande a mensagem também.
 
-## 3. Ocultar um apelido ofensivo (durante a mostra)
+## 3. Partida real de verificação (depois de publicar a v0.5.0)
+1. No celular ou notebook, abra o site publicado → **Começar investigação** → apelido `Teste Grasi` → jogue as 3 missões **devagar** (mais de 30 s no total; partida mais rápida não vai para o ranking).
+2. No fim da partida deve aparecer **"Você está em 1º no ranking de hoje."** (ou outra posição, se já houver partidas). Toque em **Ver o ranking**: a linha `Teste Grasi` aparece destacada.
+3. Confira no SQL Editor (só leitura):
+   ```sql
+   select nickname, score, correct_verdicts, duration_ms, played_on, hidden from public.ranking
+   where played_on = (now() at time zone 'America/Sao_Paulo')::date;
+   ```
+4. Sem internet: ative o modo avião, jogue outra partida (`Teste Offline`) → "Pontuação salva. Vai pro ranking quando a internet voltar." → desative o modo avião e espere alguns segundos → a frase muda para a posição. A linha aparece **uma vez só** no ranking.
+5. Modo telão: no ranking, toque no ícone da barra superior → top 10 em letras grandes; **Sair** ou Esc volta.
+6. Oculte as linhas de teste (somem do ranking em até 15 s, não são apagadas):
+   ```sql
+   update public.ranking set hidden = true
+   where nickname in ('Teste Grasi', 'Teste Offline') and played_on = (now() at time zone 'America/Sao_Paulo')::date;
+   ```
+
+## 4. Ocultar um apelido ofensivo (durante a mostra)
 No SQL Editor, troque o apelido e rode:
 ```sql
 update public.ranking set hidden = true
@@ -33,9 +49,9 @@ where played_on = (now() at time zone 'America/Sao_Paulo')::date
 order by score desc, duration_ms;
 ```
 
-## 4. Emergência no dia (alguém forjando pontos pelo console)
+## 5. Emergência no dia (alguém forjando pontos pelo console)
 Sem login, quem souber usar o console do navegador consegue mandar uma pontuação falsa. O banco já recusa tempo impossível (menos de 10 s por missão) e mais de 30 envios por minuto ou 3000 no dia, mas não sabe se a partida foi jogada de verdade.
-- Placar suspeito: oculte a linha (comando do item 3, trocando o apelido).
+- Placar suspeito: oculte a linha (comando do item 4, trocando o apelido).
 - Enxurrada de envios: feche a gravação (o ranking continua aparecendo; as partidas novas ficam guardadas na fila do aparelho):
   ```sql
   revoke execute on function public.submit_score(uuid, text, integer, integer, integer, integer) from anon;
@@ -45,7 +61,7 @@ Sem login, quem souber usar o console do navegador consegue mandar uma pontuaç�
   grant execute on function public.submit_score(uuid, text, integer, integer, integer, integer) to anon;
   ```
 
-## 5. Desfazer (só se precisar)
+## 6. Desfazer (só se precisar)
 `supabase/rollbacks/001_rollback.sql` **apaga a tabela e todas as pontuações**. Cole, clique em **Run**; deve aparecer **Success**. Pode rodar mais de uma vez.
 
 ## Regras (para quem mexer depois)
