@@ -345,6 +345,55 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 
 ---
 
+## Simulador: botão de apresentação na barra, coluna larga e mensagem compacta no celular (B-03, v0.4.3)
+
+**Status:** ✅ v0.4.3 na `fix/simulador-cabecalho-escala`, mesclada na `main` e publicada no GitHub Pages. O visual não mudou (mesmas cores, componentes e conteúdo); só posição e tamanhos. Sem banco.
+
+### Regras
+- O botão "Modo apresentação" (ícone) fica na barra superior do app, no extremo direito, na linha do "Checa Aí"; aparece só no simulador (nas outras telas a barra só tem a marca)
+- Tela inicial do simulador (mensagem) usa a largura toda do container: 82% da tela em 1366, 77% em 1920, 78% em 2400 (antes 66%, 49%, 46%)
+- Celular (< 600 px): mensagem compacta; em 390×844 título, mensagem e os dois botões cabem na primeira tela com a mensagem mais alta (S2, documento). Quando não cabem (360×640 com a S2), "Compartilhar" e "Checar antes" ficam grudados no rodapé da tela até a rolagem chegar neles
+- Modo apresentação inalterado: "Sair" fixo no canto superior direito como na v0.4.2
+
+### Arquivos e funções
+- `index.html`: `<div class="app-header__tools" id="app-header-tools">` dentro do `.app-header__inner` (vazio fora do simulador)
+- `css/screens.css`: `.app-header__inner` com `justify-content: space-between`; `.app-header__tools`
+- `js/screens/simulator.js` (`createSession`): o `presentBtn` vai para `#app-header-tools` (sem o espaço, volta para o lado do título com aviso no console); `destroy()` remove o botão da barra. O "Sair" continua no `.sim-top__tools`, dentro do `.simulator` (é ele que entra em tela cheia)
+- `css/theme.css`: `--sim-center-max: 100%` (largura da tela inicial do simulador)
+- `css/simulator.css`: `.sim-stage--center` usa `--sim-center-max` (antes `--panel-max`); bloco `@media (max-width: 599px)` só para `.simulator:not(.simulator--presenting) .sim-stage--center`: gap `--space-3`, `.post-card` padding `--space-3 --space-4` e gap `--space-2`, `.post-doc` padding `--space-3` e gap `--space-2`, logo do documento até 3.25rem de altura, foto até 35vh, quadro "Imagem fictícia" com 5rem mínimos, `.sim-actions` `position: sticky; bottom: 0` com fundo `--bg` e área segura
+- `js/config.js`: `APP_VERSION` 0.4.3
+- `docs/capturas/v0.4.3/`: 24 capturas (simulador inicial, rodando, apresentação na mensagem e apresentação rodando) em 360×640, 390×844, 768×1024, 1366×768, 1920×1080 e 2400×1200, por emulação de dispositivo (CDP `Emulation.setDeviceMetricsOverride`; abaixo de 1024 px com toque e DPR 2)
+
+### Medidas (S2, a mensagem mais alta)
+| Tamanho | Antes | Depois |
+|---|---|---|
+| 390×844 | cartão 581 px; botões de 785 a 885 (abaixo da dobra) | cartão 493 px; botões de 667 a 767 |
+| 360×640 | botões de 780 a 880 | botões grudados no rodapé (532 a 632) |
+| 1366×768 | coluna 896 px | coluna 1124 px |
+| 1920×1080 | coluna 943 px | coluna 1473 px |
+| 2400×1200 | coluna 1104 px | coluna 1861 px |
+| Ícone de apresentação | y = 81 a 112 (linha do título) | y = 6 a 9, na barra, alinhado à direita do container |
+
+### Decisões técnicas
+- "~75–80% da largura" foi lido como da tela: 80% do container daria 899 px em 1366 (o mesmo de antes). A coluna usa o container todo, que já ocupa 77–82% da tela no desktop; assim fica alinhada ao título da página e ao passo dividido. Com 80vw ficava 16 px recuada em 1366
+- As mensagens do simulador têm no máximo ~100 caracteres: a linha longa no cartão largo não atrapalha a leitura; o documento fictício continua com 44rem no máximo, centralizado
+- Botões grudados por `position: sticky` (não `fixed`) em todo celular: não fazem nada quando cabem (390×844) e grudam no rodapé quando não cabem (360×640), sem esconder o "Ajustes" nem o rodapé
+- Compactação só na tela inicial do simulador: o `.post-card` das missões não mudou
+- O ícone mora no `index.html` e é preenchido pelo simulador, em vez de o `app.js` conhecer o botão: a tela continua dona dos próprios controles
+
+### Roteiro de teste
+1. `#/simulador` em 360, 390, 768, 1366, 1920 e 2400 px → ícone na barra superior à direita, sem sobrepor "Checa Aí"; sem rolagem horizontal; alvos ≥ 44 px
+2. Ir para `#/inicio` e para o jogo → barra só com "Checa Aí"
+3. 390×844 com a S2 → "Compartilhar" e "Checar antes" visíveis sem rolar; 360×640 → botões grudados no rodapé
+4. 1366 e 2400 → mensagem larga, alinhada ao título; "Compartilhar" → layout dividido igual à v0.4.2
+5. Ícone → modo apresentação; "Sair" no canto superior direito; ao sair, o foco volta ao ícone da barra
+6. Testes (por CDP, `file://`): `scoreMission` 200 nas 9, veredito errado = 20, só iscas = 0, apelido, `drawMatch` 300× (ordem, as 9, nunca 3 vereditos iguais), `countRounds` 3/9/27/81/243, `expectedReach` 88.572 e 4.546, fluxo completo do jogo em 390×844 e 1366×768 → todos passam, console sem erros
+7. Pendente: aparelho físico, Safari, Firefox e tela cheia real (o headless recusa a tela cheia; o app cai no modo ampliado, como previsto)
+
+**Arquivos:** `index.html`, `css/theme.css`, `css/screens.css`, `css/simulator.css`, `js/screens/simulator.js`, `js/config.js`, `docs/capturas/v0.4.3/*`
+
+---
+
 <!-- MODELO DE SEÇÃO — copiar para cada funcionalidade nova
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
@@ -392,7 +441,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 - `css/theme.css` — medidas: fonte `system-ui`, `--font-sm` a `--font-2xl`, `--space-1` a `--space-7`, `--radius` 6px, `--touch-min` 44px, `--content-max` 960px, `--text-max` 60ch, `--touch-lg` 64px, `--canvas-max-height` 58vh
 - Layout (v0.3.1, revisto na v0.4.2) — breakpoints (media query não aceita `var()`; repetir os números, documentados no topo do `theme.css`): celular < 600px (1 coluna); tablet 600–1023px (1 coluna larga, 2 em paisagem); notebook ≥ 1024px (container centralizado). Sem breakpoint de 1600px desde a v0.4.2: o container cresce continuamente. Divisão em colunas: `(min-width: 1024px), (min-width: 600px) and (orientation: landscape)`. Faixa validada: 320 a ~3000 px CSS (zoom 50% a 200%)
 - Layout — tipografia fluida: `--root-size` = `clamp(16px, 0.2vw + 13px, 24px)` no `html` (v0.4.2; antes `clamp(16px, 0.55vw + 11px, 30px)`, que anulava o zoom). 16 px até ~1500 px CSS, ~16,8 px a 1920, ~17,8 px a 2400, ~19 px a 3000. `--font-lg/xl/2xl/3xl` com `clamp()`; `--font-sm` e `--font-md` fixos. Espaçamentos `--space-5/6/7` fluidos; `--gutter` (margem lateral)
-- Layout — medidas: `--header-height`, `--content-max` (`max(75rem, 82vw)` desde a v0.4.2), `--panel-max` (`max(56rem, 46vw)`), `--compare-max` (`max(72rem, 62vw)`), `--split-cols` (5fr/7fr), `--split-cols-present` (2fr/3fr), `--canvas-min-height`, `--sim-chrome` (15rem), `--fade-ms` (220ms), `--exit-width` (4.5rem) e `--exit-row` (`calc(var(--touch-min) + var(--space-3))`) do "Sair" no modo apresentação. Header, main e footer: padding lateral `max(var(--gutter), env(safe-area-inset-*))`; viewport com `viewport-fit=cover`
+- Layout — medidas: `--header-height`, `--content-max` (`max(75rem, 82vw)` desde a v0.4.2), `--panel-max` (`max(56rem, 46vw)`), `--compare-max` (`max(72rem, 62vw)`), `--sim-center-max` (100%, v0.4.3), `--split-cols` (5fr/7fr), `--split-cols-present` (2fr/3fr), `--canvas-min-height`, `--sim-chrome` (15rem), `--fade-ms` (220ms), `--exit-width` (4.5rem) e `--exit-row` (`calc(var(--touch-min) + var(--space-3))`) do "Sair" no modo apresentação. Header, main e footer: padding lateral `max(var(--gutter), env(safe-area-inset-*))`; viewport com `viewport-fit=cover`
 - Layout — classes globais (`base.css`): `.layout-center` (coluna centralizada até `--panel-max`) e `.layout-split` (1 coluna que vira 2 nas condições acima; filhos usam `grid-area` ou `.layout-split__side` / `__visual`). Header, main e footer usam `--gutter` e `--content-max`. **Telas novas (Fase 2) devem usar essas classes e variáveis, nunca largura fixa em px**
 - `js/config.js`: `SIM_PRESENTATION_ROUNDS` 8 (última rodada mostrada na tela); `SIM_TOTAL_ROUNDS` 10 é só a rodada da comparação
 
@@ -410,6 +459,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 | F3 repetia o nome da instituição ao lado do logo (v0.4.0) | A linha de texto completa aparecia junto do logo, que já traz o nome | Campo `orgLineWithLogo` ("Campus Arinos · Coordenação de Ensino") usado quando há logo; se o logo falha (evento `error`), o componente restaura a linha completa |
 | B-01. A página não acompanha o zoom do navegador; em 100% no notebook parece grande demais (v0.4.2) | `--root-size` dependia muito de vw (`0.55vw + 11px`, teto 30px); como o vw CSS = largura física / zoom, o zoom era parcialmente anulado (1920: `rem` físico 19,4 px a 80% e 24,3 px a 125% — razão 1,26 para um zoom de 1,56); container com teto fixo (88rem) deixava margens vazias (2130 de 2400 px CSS a 80%); canvas não reagia à troca de DPR e era dimensionado pelo pai com borda (bitmap 2 px maior) | `--root-size: clamp(16px, 0.2vw + 13px, 24px)`; containers `max(Xrem, N vw)`; breakpoint de 1600px removido; `resizeCanvas()` pelo próprio canvas e `watchDpr()` |
 | B-02. No modo apresentação em tela baixa/celular o "Sair" sobrepunha o título/chip (v0.4.2) | "Sair" no fluxo do topo e conteúdo centralizado (`justify-content: center`) transbordando para cima | "Sair" `position: fixed` na área segura, faixa reservada `--exit-row` e `justify-content: safe center`; vale também para o fallback sem Fullscreen API |
+| B-03. Simulador: ícone de apresentação fora da barra superior; mensagem inicial estreita no desktop; botões abaixo da dobra no celular (v0.4.3) | Ícone no `.sim-top` (linha do título); `.sim-stage--center` limitado a `--panel-max` (`max(56rem, 46vw)` = 896 px em 1366); cartão da S2 com 581 px no celular por padding/gaps largos e logo sem altura máxima | Ícone em `#app-header-tools`; coluna com `--sim-center-max: 100%`; cartão compacto e `.sim-actions` sticky no celular |
 
 ---
 
@@ -425,4 +475,4 @@ Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
 
 ---
 
-*Última atualização: 10/11/2026 (v0.4.2 — zoom/escala e modo apresentação)*
+*Última atualização: 14/11/2026 (v0.4.3 — simulador: ícone na barra, coluna larga, mensagem compacta no celular)*

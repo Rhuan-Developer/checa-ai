@@ -19,7 +19,7 @@ window.ChecaAi = window.ChecaAi || {};
 
 /** @type {ChecaAiConfig} */
 window.ChecaAi.config = {
-  APP_VERSION: '0.4.2',
+  APP_VERSION: '0.4.3',
   MISSIONS_PER_LEVEL_IN_MATCH: 1,
   FEATURES: { simulator: true, missions: true, ranking: false },
   SIM_FANOUT: 3,
