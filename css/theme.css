@@ -73,6 +73,7 @@
   --content-max: max(75rem, 82vw); /* container da página: 75rem no notebook; acima disso cresce com a tela (82vw), sem teto fixo */
   --panel-max: max(56rem, 46vw); /* coluna central de uma tela só de texto (mensagem, resultado) */
   --compare-max: max(72rem, 62vw); /* comparação final */
+  --sim-center-max: 100%; /* mensagem inicial do simulador: largura toda do container (77–82% da tela no desktop), alinhada ao título e ao passo dividido */
   --text-max: 60ch;
   --split-cols: minmax(0, 5fr) minmax(0, 7fr); /* .layout-split: conteúdo à esquerda, visual à direita */
   --split-cols-present: minmax(0, 2fr) minmax(0, 3fr); /* modo apresentação: painel e canvas */

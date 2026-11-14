@@ -122,8 +122,16 @@
     const exitBtn = el('button', 'btn btn--secondary', 'Sair');
     exitBtn.type = 'button';
     exitBtn.hidden = true;
-    toolbar.append(presentBtn, exitBtn);
+    toolbar.append(exitBtn);
     top.append(h1, toolbar);
+    // "Modo apresentação" fica na barra superior do app; o "Sair" fica no .simulator (é ele que entra em tela cheia).
+    const headerTools = document.getElementById('app-header-tools');
+    if (headerTools) {
+      headerTools.appendChild(presentBtn);
+    } else {
+      console.warn('Faltou o #app-header-tools no index.html; o botão de apresentação ficou ao lado do título.');
+      toolbar.prepend(presentBtn);
+    }
     const stage = el('div', 'sim-stage');
     wrap.append(top, stage);
     sectionEl.appendChild(wrap);
@@ -743,6 +751,7 @@
       if (presenting) leaveFullscreen();
       presenting = false;
       wrap.classList.remove('simulator--presenting');
+      presentBtn.remove(); // a barra superior volta a ficar só com a marca nas outras telas
     }
 
     renderStepA(true);

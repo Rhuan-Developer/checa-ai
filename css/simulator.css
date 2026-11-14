@@ -34,7 +34,7 @@
 
 /* Passos só de texto: coluna centralizada */
 .sim-stage--center {
-  max-width: var(--panel-max);
+  max-width: var(--sim-center-max);
   margin-left: auto;
   margin-right: auto;
 }
@@ -237,6 +237,60 @@
 .sim-compare__unit {
   color: var(--text-muted);
   font-size: var(--font-lg);
+}
+
+/* Celular: mensagem compacta para título, mensagem e botões caberem na primeira tela (390×844).
+   Se ainda assim não couberem (360×640, documento alto), os botões grudam no rodapé da tela (sticky). */
+@media (max-width: 599px) {
+  .simulator:not(.simulator--presenting) .sim-stage--center {
+    gap: var(--space-3);
+  }
+
+  .simulator:not(.simulator--presenting) .sim-stage--center .post-card {
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-2);
+  }
+
+  .simulator:not(.simulator--presenting) .sim-stage--center .post-doc {
+    padding: var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .simulator:not(.simulator--presenting) .sim-stage--center .post-doc__head {
+    gap: var(--space-1);
+    padding-bottom: var(--space-2);
+  }
+
+  .simulator:not(.simulator--presenting) .sim-stage--center .post-doc__logo {
+    width: auto;
+    max-width: 100%;
+    max-height: 3.25rem;
+  }
+
+  .simulator:not(.simulator--presenting) .sim-stage--center .post-doc__sign {
+    margin-top: 0;
+  }
+
+  .simulator:not(.simulator--presenting) .sim-stage--center .post-card__img {
+    width: auto;
+    max-width: 100%;
+    max-height: 35vh;
+    margin: 0 auto;
+  }
+
+  .simulator:not(.simulator--presenting) .sim-stage--center .post-card__placeholder {
+    min-height: 5rem;
+    padding: var(--space-3);
+  }
+
+  .simulator:not(.simulator--presenting) .sim-stage--center > .sim-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin-top: calc(-1 * var(--space-2));
+    padding: var(--space-2) 0 calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+    background: var(--bg);
+  }
 }
 
 @media (min-width: 600px) {
