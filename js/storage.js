@@ -14,7 +14,7 @@
    *
    * Partida atual (fica na sessionStorage: sobrevive a recarregar a página, some ao fechar a aba).
    * @typedef {Object} Match
-   * @property {string} clientId  identifica a partida (uso futuro: envio ao ranking)
+   * @property {string} clientId  UUID da partida; vira o client_id do ranking (reenviar não duplica)
    * @property {string} nickname
    * @property {string[]} missionIds  fácil, média e difícil, nessa ordem
    * @property {number} index  missão atual (0 a missionIds.length - 1)
@@ -39,7 +39,18 @@
       const h = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
       return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
     }
-    return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+    // Último recurso (navegador sem crypto): UUID v4 com Math.random, para o banco aceitar o client_id
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (ch) => {
+      const r = Math.floor(Math.random() * 16);
+      return (ch === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    });
+  }
+
+  const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  /** @param {string} id @returns {boolean} */
+  function isUuid(id) {
+    return typeof id === 'string' && UUID_PATTERN.test(id);
   }
 
   function isValidMatch(m) {
@@ -190,5 +201,160 @@
     }
   }
 
-  window.ChecaAi.storage = { startMatch, getMatch, getSignalOrder, saveAnswer, advance, finishMatch, clearMatch };
+  /* ---------- ranking: fila offline, resultado dos envios e última lista (localStorage) ---------- */
+
+  /**
+   * Partida esperando envio ao ranking. Só o apelido identifica a pessoa.
+   * @typedef {Object} QueuedScore
+   * @property {string} clientId  UUID da partida
+   * @property {string} nickname
+   * @property {number} score
+   * @property {number} missionsPlayed
+   * @property {number} correctVerdicts
+   * @property {number} durationMs
+   * @property {string} playedOn  AAAA-MM-DD (São Paulo); de outro dia não é enviada
+   * @property {number} attempts  tentativas que falharam por motivo temporário
+   *
+   * Situação do envio de uma partida, para a tela de fim e o destaque no ranking.
+   * @typedef {Object} SendResult
+   * @property {'pending'|'sent'|'rejected'|'skipped'} state
+   * @property {number|null} position  posição do dia devolvida pelo banco
+   * @property {string} nickname
+   * @property {number} score
+   * @property {number} durationMs
+   * @property {string} playedOn
+   * @property {number} updatedAt  ms
+   */
+
+  const QUEUE_KEY = 'checaai.rankingQueue';
+  const RESULTS_KEY = 'checaai.rankingResults';
+  const LAST_RANKING_KEY = 'checaai.rankingLast';
+  const RESULTS_MAX = 20;
+
+  /*
+   * Lê sempre o localStorage (duas abas no mesmo aparelho veem a mesma fila). A cópia em memória só vale
+   * se o navegador bloquear o armazenamento: aí tudo segue funcionando, sem guardar.
+   */
+  const memory = {};
+  let storageBroken = false;
+
+  function readLocal(key, fallback) {
+    if (!storageBroken) {
+      let raw = null;
+      try {
+        raw = window.localStorage.getItem(key);
+      } catch (err) {
+        storageBroken = true;
+        console.warn('Não deu para ler o ranking guardado no navegador; seguindo sem ele.', err);
+      }
+      if (!storageBroken) {
+        let value = fallback;
+        try {
+          if (raw) value = JSON.parse(raw);
+        } catch (err) {
+          console.warn('O ranking guardado no navegador estava corrompido e foi ignorado.', err);
+        }
+        memory[key] = value;
+        return value;
+      }
+    }
+    return Object.prototype.hasOwnProperty.call(memory, key) ? memory[key] : fallback;
+  }
+
+  function writeLocal(key, value) {
+    memory[key] = value;
+    if (storageBroken) return;
+    try {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (err) {
+      storageBroken = true;
+      console.warn('Não deu para guardar o ranking no navegador; ele fica só nesta página.', err);
+    }
+  }
+
+  function isQueuedScore(q) {
+    return !!q && typeof q === 'object' && isUuid(q.clientId) && typeof q.nickname === 'string' &&
+      [q.score, q.missionsPlayed, q.correctVerdicts, q.durationMs, q.attempts].every(Number.isInteger) &&
+      typeof q.playedOn === 'string';
+  }
+
+  /** @returns {QueuedScore[]} fila (mais antiga primeiro) */
+  function getQueue() {
+    const q = readLocal(QUEUE_KEY, []);
+    return Array.isArray(q) ? q.filter(isQueuedScore) : [];
+  }
+
+  /**
+   * Põe a partida na fila (se o mesmo clientId já está nela, não duplica). Limite: descarta a mais antiga.
+   * @param {QueuedScore} item
+   * @param {number} max
+   * @returns {QueuedScore[]} fila nova
+   */
+  function enqueueScore(item, max) {
+    if (!isQueuedScore(item)) throw new Error('enqueueScore: partida incompleta para o ranking.');
+    const queue = getQueue().filter((q) => q.clientId !== item.clientId);
+    queue.push(item);
+    while (queue.length > max) queue.shift();
+    writeLocal(QUEUE_KEY, queue);
+    return queue;
+  }
+
+  /** @param {string} clientId */
+  function removeQueued(clientId) {
+    writeLocal(QUEUE_KEY, getQueue().filter((q) => q.clientId !== clientId));
+  }
+
+  /** @param {string} clientId @param {Partial<QueuedScore>} patch */
+  function updateQueued(clientId, patch) {
+    writeLocal(QUEUE_KEY, getQueue().map((q) => (q.clientId === clientId ? Object.assign({}, q, patch) : q)));
+  }
+
+  /** @returns {Object<string, SendResult>} */
+  function getResults() {
+    const r = readLocal(RESULTS_KEY, {});
+    return r && typeof r === 'object' && !Array.isArray(r) ? r : {};
+  }
+
+  /** @param {string} clientId @returns {SendResult|null} */
+  function getResult(clientId) {
+    return getResults()[clientId] || null;
+  }
+
+  /**
+   * Registra a situação do envio de uma partida (guarda só as RESULTS_MAX mais recentes).
+   * @param {string} clientId
+   * @param {Partial<SendResult>} patch
+   * @returns {SendResult}
+   */
+  function setResult(clientId, patch) {
+    const all = getResults();
+    const next = Object.assign({ state: 'pending', position: null }, all[clientId], patch, { updatedAt: Date.now() });
+    all[clientId] = next;
+    const ids = Object.keys(all).sort((a, b) => all[b].updatedAt - all[a].updatedAt);
+    const kept = {};
+    ids.slice(0, RESULTS_MAX).forEach((id) => { kept[id] = all[id]; });
+    writeLocal(RESULTS_KEY, kept);
+    return next;
+  }
+
+  /**
+   * Última lista do ranking que chegou (reserva para quando a conexão cair).
+   * @returns {{playedOn: string, fetchedAt: number, rows: Object[]}|null}
+   */
+  function getLastRanking() {
+    const v = readLocal(LAST_RANKING_KEY, null);
+    return v && Array.isArray(v.rows) && typeof v.fetchedAt === 'number' && typeof v.playedOn === 'string' ? v : null;
+  }
+
+  /** @param {{playedOn: string, fetchedAt: number, rows: Object[]}} value */
+  function setLastRanking(value) {
+    writeLocal(LAST_RANKING_KEY, value);
+  }
+
+  window.ChecaAi.storage = {
+    startMatch, getMatch, getSignalOrder, saveAnswer, advance, finishMatch, clearMatch,
+    isUuid, newId: randomId,
+    getQueue, enqueueScore, removeQueued, updateQueued,
+    getResult, getResults, setResult, getLastRanking, setLastRanking
+  };
 })();

@@ -56,7 +56,14 @@
 
   const NICKNAME_MIN = 2;
   const NICKNAME_MAX = 20;
-  const NICKNAME_PATTERN = /^[\p{L}\p{N} ]+$/u;
+  // Igual ao banco (submit_score): depois de tirar os acentos só pode sobrar a-z, 0-9 e espaço.
+  // Aceita todo o português (á, ç, õ...); recusa outras escritas (grego, cirílico), símbolos e emoji.
+  const NICKNAME_FOLDED_PATTERN = /^[a-z0-9 ]+$/;
+  // Só espaço, tab e quebras ASCII viram espaço (como no banco); espaço Unicode (ex.: NBSP) é recusado
+  const ASCII_SPACES = new RegExp('[' + [32, 9, 10, 11, 12, 13].map((c) => String.fromCharCode(c)).join('') + ']+', 'g');
+  // Acentos combinantes U+0300 a U+036F (montado por código para não depender de caractere invisível no arquivo)
+  const COMBINING_MARKS = new RegExp('[' + String.fromCharCode(0x300) + '-' + String.fromCharCode(0x36f) + ']', 'g');
+  const HAS_COMBINING_MARK = new RegExp('[' + String.fromCharCode(0x300) + '-' + String.fromCharCode(0x36f) + ']');
 
   // Palavrões comuns, sem acento e em minúsculas. Fica interna; a regra é espelhada no banco na Fase 4.
   // Por palavra inteira (palavras curtas ou que aparecem dentro de palavras comuns, como "puta" em "computador").
@@ -68,28 +75,29 @@
 
   /** Minúsculas e sem acento, para comparar. */
   function foldText(text) {
-    return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    return text.normalize('NFD').replace(COMBINING_MARKS, '').toLowerCase();
   }
 
   /**
    * Valida e normaliza o apelido do visitante.
-   * Regra (a mesma será validada no banco na Fase 4): tira espaços das pontas e junta espaços repetidos;
-   * 2 a 20 caracteres; só letras (com acento), números e espaço; sem palavras da lista de bloqueio
+   * Regra igual à do banco (submit_score, supabase/migrations/001_ranking.sql; mudou um, muda o outro):
+   * NFC, tira espaços das pontas e junta espaços repetidos; 2 a 20 caracteres; sem acento solto (empilhado);
+   * sem acento, só a-z, 0-9 e espaço; sem palavras da lista de bloqueio
    * (comparação sem acento e sem diferença de maiúsculas, por palavra e por trecho colado nas mais graves).
    * @param {string} text
    * @returns {{ok: boolean, value: string, error: string}} value é o apelido normalizado; error vazio se ok
    */
   function validateNickname(text) {
     const value = String(text === undefined || text === null ? '' : text)
-      .normalize('NFC').replace(/\s+/g, ' ').trim();
+      .normalize('NFC').replace(ASCII_SPACES, ' ').trim();
     const length = Array.from(value).length;
     if (length < NICKNAME_MIN || length > NICKNAME_MAX) {
       return { ok: false, value, error: 'Use de ' + NICKNAME_MIN + ' a ' + NICKNAME_MAX + ' caracteres.' };
     }
-    if (!NICKNAME_PATTERN.test(value)) {
+    const folded = foldText(value);
+    if (HAS_COMBINING_MARK.test(value) || !NICKNAME_FOLDED_PATTERN.test(folded)) {
       return { ok: false, value, error: 'Só letras, números e espaço.' };
     }
-    const folded = foldText(value);
     const blocked = folded.split(' ').some((w) => BLOCKED_WORDS.indexOf(w) !== -1) ||
       BLOCKED_PARTS.some((part) => folded.replace(/ /g, '').indexOf(part) !== -1);
     if (blocked) {
@@ -98,5 +106,18 @@
     return { ok: true, value, error: '' };
   }
 
-  window.ChecaAi.utils = { todayISO, shuffle, pickRandom, validateNickname };
+  /**
+   * Hora no fuso America/Sao_Paulo (ex.: "14:05" ou "14:05:09").
+   * @param {Date|number} [date] padrão: agora
+   * @param {boolean} [withSeconds]
+   * @returns {string}
+   */
+  function formatClock(date, withSeconds) {
+    const d = date === undefined ? new Date() : new Date(date);
+    const opts = { timeZone: TIME_ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' };
+    if (withSeconds) opts.second = '2-digit';
+    return new Intl.DateTimeFormat('pt-BR', opts).format(d);
+  }
+
+  window.ChecaAi.utils = { todayISO, shuffle, pickRandom, validateNickname, formatClock };
 })();

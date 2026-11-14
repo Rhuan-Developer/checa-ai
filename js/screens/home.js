@@ -43,6 +43,14 @@
         actions.appendChild(start);
       }
 
+      if (features.ranking) {
+        const rank = document.createElement('a');
+        rank.className = 'btn btn--secondary';
+        rank.href = '#/ranking';
+        rank.textContent = 'Ranking';
+        actions.appendChild(rank);
+      }
+
       if (features.simulator) {
         const a = document.createElement('a');
         a.className = features.missions ? 'btn btn--secondary' : 'btn';

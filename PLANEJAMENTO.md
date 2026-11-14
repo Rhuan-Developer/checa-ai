@@ -70,24 +70,25 @@ Critérios de avaliação e data oficial ainda não foram divulgados pelo profes
 ## 4. Schema do Banco de Dados
 
 ### Fase 4 — Ranking
+Fonte da verdade: `supabase/migrations/001_ranking.sql` (resumo abaixo; revisto na Fase 4A, 14/11/2026).
 ```sql
 create table public.ranking (
-  id                bigint generated always as identity primary key,
+  id                uuid primary key default gen_random_uuid(),
   client_id         uuid not null unique,          -- gerado no navegador por partida; evita duplicar envio da fila offline
-  nickname          text not null check (char_length(nickname) between 2 and 20),
-  score             integer not null check (score >= 0),
-  missions_played   smallint not null check (missions_played between 1 and 6)  -- 3 por partida; folga para o futuro,
-  correct_verdicts  smallint not null check (correct_verdicts between 0 and missions_played),
-  duration_seconds  integer not null check (duration_seconds between 10 and 3600), -- desempate
-  played_on         date not null default (now() at time zone 'America/Sao_Paulo')::date,
+  nickname          text not null,                 -- 2 a 20 caracteres depois de trim
+  score             integer not null,              -- 0 a missions_played * 200
+  missions_played   integer not null,              -- 1 a 3
+  correct_verdicts  integer not null,              -- 0 a missions_played
+  duration_ms       integer not null,              -- 1000 a 3600000; desempate
+  played_on         date not null default ((now() at time zone 'America/Sao_Paulo')::date),
   created_at        timestamptz not null default now(),
-  check (score <= missions_played * 200)
+  hidden            boolean not null default false -- a Grasi oculta apelido ofensivo pelo SQL Editor
 );
-alter table public.ranking enable row level security;   -- sem policies
+alter table public.ranking enable row level security;   -- sem policies; nenhum privilégio para anon/authenticated
 ```
-- `submit_score(p_client_id, p_nickname, p_score, p_missions_played, p_correct_verdicts, p_duration_seconds)` → valida, `insert ... on conflict (client_id) do nothing`, devolve a posição do dia. `grant execute` só para `anon`.
-- `get_ranking(p_limit int default 10)` → top do dia (`played_on` = hoje em `America/Sao_Paulo`), ordenado por pontos desc, duração asc.
-- Apagar apelido ofensivo: a Grasi apaga pelo painel do Supabase (sem tela de admin no MVP).
+- `submit_score(p_client_id, p_nickname, p_score, p_missions_played, p_correct_verdicts, p_duration_ms)` → valida (apelido igual ao `validateNickname` do site; pontos coerentes com os acertos pelo `scoring.js`), `insert ... on conflict (client_id) do nothing`, devolve `{ok, duplicate, position}` (posição do dia) ou `{ok:false, error:"codigo"}`. `grant execute` só para `anon`.
+- `get_ranking(p_limit int default 20)` → top do dia (`played_on` = hoje em `America/Sao_Paulo`, sem `hidden`), 1 a 50 linhas, ordenado por pontos desc, duração asc, horário asc. Colunas: `position, nickname, score, missions_played, duration_ms, correct_verdicts` (nunca o `client_id`).
+- Apelido ofensivo: a Grasi marca `hidden = true` pelo SQL Editor (passo a passo em `supabase/LEIA-ME.md`; sem tela de admin no MVP).
 
 ---
 
@@ -150,7 +151,7 @@ Scripts carregados em ordem no fim do `index.html`; cada arquivo pendura suas fu
 - Em seguida, "Antes de compartilhar": 4 a 5 dicas curtas da Cartilha do CERT.br (origem, data, contexto, canal oficial, não repassar na dúvida).
 
 ### Ranking
-- Top 10 do dia. **Modo telão** (tela cheia, atualiza a cada 15 s) para deixar num monitor/notebook virado para o corredor.
+- Top 20 do dia (atualiza a cada 15 s; destaque da última partida do aparelho; última lista guardada para quando cair a conexão). **Modo telão**: top 10, letras grandes, tela cheia, atualiza a cada 10 s, para deixar num monitor/notebook virado para o corredor.
 
 ### Simulador viral — "Como um boato se espalha"
 - **Começa no celular do visitante:** chega uma mensagem sorteada entre as 5 mensagens próprias do simulador (`js/simulator-rumors.js`; nunca a mesma em sequência). Elas não repetem as missões, para o simulador não entregar o gabarito do jogo. O visitante escolhe **Compartilhar** ou **Checar antes**.
@@ -176,8 +177,8 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 | 1 — Simulador viral (pronto para o grupo treinar a apresentação) | 12 a 14/11 | v0.2.0 (base) + v0.3.0 (simulador) |
 | 2 — Núcleo do jogo (sem banco) | 15 a 19/11 | v0.4.0 |
 | Redesign (layout do Canva) | 19 a 21/11 | v0.4.x |
-| 3 — Conteúdo: 9 missões (escritas pelo Claude, revisadas pelo grupo) | revisão até 17/11 | v0.5.0 |
-| 4 — Ranking online | 20 a 22/11 | v0.6.0 |
+| 3 — Conteúdo: 9 missões (escritas pelo Claude, revisadas pelo grupo) | revisão até 17/11 | PATCH na versão vigente |
+| 4 — Ranking online | 14/11 (adiantada) | v0.5.0 |
 | 5 — Polimento e testes | 23 a 24/11 | v0.9.x |
 | Congelamento | 25/11 — só correção de bug | v1.0.0 |
 | Ensaio no estande | 26/11 | — |
@@ -222,9 +223,9 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 
 ### Fase 4 — Ranking online
 **Objetivo:** pontuação vai para o Supabase; ranking ao vivo; nada se perde sem internet.
-- [ ] 1. Migration `001_ranking.sql` + rollback + teste (revisão do `security-engineer`) — a Grasi aplica
-- [ ] 2. `api.js` + fila offline (reenvia ao abrir o site e a cada 30 s; `client_id` evita duplicar)
-- [ ] 3. Tela de ranking + modo telão
+- [x] 1. Migration `001_ranking.sql` + rollback + teste (revisão do `security-engineer`) — escrito na Fase 4A; **a Grasi aplica**
+- [x] 2. `api.js` + fila offline (reenvia ao abrir o site, ao voltar a conexão e a cada 30 s com espera crescente; `client_id` evita duplicar) — v0.5.0
+- [x] 3. Tela de ranking + modo telão — v0.5.0
 - [ ] 4. Teste: dois navegadores, internet desligada e religada, tentativa de fraude pelo console
 
 ### Fase 5 — Polimento e testes

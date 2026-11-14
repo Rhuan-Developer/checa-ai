@@ -1,0 +1,206 @@
+/* Ranking do dia (#/ranking) e modo telão. Cores e medidas vêm do theme.css. */
+
+.ranking {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--panel-max);
+  margin: 0 auto;
+}
+
+.ranking-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
+}
+
+.ranking-title {
+  font-size: var(--font-2xl);
+}
+
+.ranking-updated,
+.ranking-status {
+  color: var(--text-muted);
+  font-size: var(--font-md);
+}
+
+.ranking-status {
+  font-size: var(--font-lg);
+}
+
+/* Tabela: colunas fixas, apelido quebra linha (nunca some) */
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--font-md);
+}
+
+.ranking-table th {
+  padding: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+  text-align: left;
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.ranking-table td {
+  padding: var(--space-3) var(--space-2);
+  border-bottom: var(--border-width) solid var(--border);
+  vertical-align: top;
+}
+
+.ranking-table__pos {
+  width: 3rem;
+  font-weight: var(--weight-bold);
+}
+
+.ranking-table__nick {
+  overflow-wrap: anywhere;
+}
+
+.ranking-table th.ranking-table__num,
+.ranking-table td.ranking-table__num {
+  width: 4.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ranking-table th:last-child,
+.ranking-table td:last-child {
+  width: 5rem;
+}
+
+/* Linha do visitante: fundo da superfície, barra de destaque e negrito */
+.ranking-table tr.is-me td {
+  background: var(--surface);
+  font-weight: var(--weight-bold);
+}
+
+.ranking-table tr.is-me td:first-child {
+  border-left: var(--space-1) solid var(--accent);
+}
+
+.ranking-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ranking-exit[hidden] {
+  display: none;
+}
+
+/* Celular estreito: colunas numéricas mais justas para o apelido caber */
+@media (max-width: 599px) {
+  .ranking-table th,
+  .ranking-table td {
+    padding-left: var(--space-1);
+    padding-right: var(--space-1);
+  }
+
+  .ranking-table__pos {
+    width: 2.5rem;
+  }
+
+  .ranking-table th.ranking-table__num,
+  .ranking-table td.ranking-table__num {
+    width: 3.5rem;
+  }
+
+  .ranking-table th:last-child,
+  .ranking-table td:last-child {
+    width: 3.75rem;
+  }
+}
+
+@media (min-width: 600px) {
+  .ranking-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .ranking-table {
+    font-size: var(--font-lg);
+  }
+}
+
+/* ---------- Modo telão: tela toda, top 10, letras que crescem com a tela (vh/vw) ---------- */
+.ranking--tv {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  max-width: none;
+  margin: 0;
+  overflow: auto;
+  gap: 1.5vh;
+  padding: calc(env(safe-area-inset-top, 0px) + var(--space-3)) max(var(--gutter), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + var(--space-3)) max(var(--gutter), env(safe-area-inset-left, 0px));
+  background: var(--bg);
+}
+
+/* Faixa do topo reservada para o "Sair" (fixo no canto): o título nunca fica embaixo dele */
+.ranking--tv .ranking-head {
+  min-height: var(--exit-row);
+  padding-right: calc(var(--exit-width) + var(--space-3));
+  align-items: center;
+}
+
+.ranking--tv .ranking-title {
+  font-size: max(var(--font-xl), min(7vh, 4.5vw));
+  line-height: 1.1;
+}
+
+.ranking--tv .ranking-updated {
+  font-size: max(var(--font-md), min(3vh, 2vw));
+}
+
+.ranking--tv .ranking-status {
+  font-size: max(var(--font-lg), min(5vh, 3.5vw));
+}
+
+.ranking--tv .ranking-table {
+  font-size: max(var(--font-md), min(4.4vh, 3.2vw));
+  line-height: 1.2;
+}
+
+.ranking--tv .ranking-table th {
+  font-size: 0.6em;
+  padding: 0.4vh 0.4em;
+}
+
+.ranking--tv .ranking-table td {
+  padding: 0.9vh 0.4em;
+}
+
+.ranking--tv .ranking-table__pos {
+  width: 3.2em;
+}
+
+.ranking--tv .ranking-table th.ranking-table__num,
+.ranking--tv .ranking-table td.ranking-table__num {
+  width: 4.5em;
+}
+
+.ranking--tv .ranking-table th:last-child,
+.ranking--tv .ranking-table td:last-child {
+  width: 5em;
+}
+
+.ranking--tv .ranking-actions {
+  display: none;
+}
+
+.ranking--tv .ranking-exit {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + var(--space-3));
+  right: calc(env(safe-area-inset-right, 0px) + var(--space-3));
+  z-index: 11;
+  width: var(--exit-width);
+  min-height: var(--touch-min);
+  padding: 0;
+  font-size: var(--font-md);
+}

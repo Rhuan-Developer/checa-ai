@@ -33,6 +33,37 @@
 
   let idleTimer = null;
   let idleHandler = null;
+  let stopRankWatch = null;
+
+  /**
+   * Texto curto da situação do envio ao ranking ('' = não mostra nada).
+   * @param {Object|null} result SendResult (storage.js)
+   * @param {Object|null} queued item da fila, se ainda estiver nela
+   * @param {boolean} online navigator.onLine
+   * @returns {string}
+   */
+  function rankStatusText(result, queued, online) {
+    if (!result) return '';
+    if (result.state === 'sent') {
+      return result.position ? 'Você está em ' + result.position + 'º no ranking de hoje.' : 'Pontuação enviada ao ranking.';
+    }
+    if (result.state === 'pending') {
+      return !online || (queued && queued.attempts > 0)
+        ? 'Pontuação salva. Vai pro ranking quando a internet voltar.'
+        : 'Enviando para o ranking…';
+    }
+    return ''; // recusada ou não enviada (ex.: partida rápida demais): sem aviso
+  }
+
+  function stopRank() {
+    if (stopRankWatch) stopRankWatch();
+    stopRankWatch = null;
+  }
+
+  function teardown() {
+    stopIdle();
+    stopRank();
+  }
 
   function stopIdle() {
     if (idleTimer !== null) window.clearTimeout(idleTimer);
@@ -99,7 +130,37 @@
         stat('Tempo', formatDuration(match.finishedAt - match.startedAt))
       );
 
-      // Fase 4: posição no ranking do dia entra aqui (ex.: stat('Posição', '3º')).
+      // Ranking do dia: entra na fila uma vez (pelo clientId da partida) e mostra a situação do envio
+      const rankStatus = el('p', 'end-rank');
+      rankStatus.setAttribute('aria-live', 'polite');
+      if (ChecaAi.config.FEATURES.ranking && ChecaAi.api) {
+        const render = () => {
+          const result = ChecaAi.storage.getResult(match.clientId);
+          const queued = ChecaAi.storage.getQueue().find((q) => q.clientId === match.clientId) || null;
+          const text = rankStatusText(result, queued, navigator.onLine !== false);
+          rankStatus.textContent = text;
+          rankStatus.hidden = !text;
+          rankStatus.dataset.state = result ? result.state : '';
+        };
+        try {
+          ChecaAi.api.recordMatch(match);
+        } catch (err) {
+          console.error('Não deu para guardar a partida para o ranking.', err);
+        }
+        stopRank();
+        const off = ChecaAi.api.onChange(render);
+        const onNet = () => render();
+        window.addEventListener('online', onNet);
+        window.addEventListener('offline', onNet);
+        stopRankWatch = () => {
+          off();
+          window.removeEventListener('online', onNet);
+          window.removeEventListener('offline', onNet);
+        };
+        render();
+      } else {
+        rankStatus.hidden = true;
+      }
 
       const tips = el('section', 'game-block');
       tips.appendChild(el('h2', 'game-block__title', 'Antes de compartilhar'));
@@ -125,10 +186,15 @@
       sim.href = '#/simulador';
       const actions = el('div', 'game-actions');
       actions.append(again);
+      if (ChecaAi.config.FEATURES.ranking) {
+        const rank = el('a', 'btn btn--secondary game-primary', 'Ver o ranking');
+        rank.href = '#/ranking';
+        actions.append(rank);
+      }
       if (ChecaAi.config.FEATURES.simulator) actions.append(sim);
 
       const side = el('div', 'layout-split__side game__col');
-      side.append(player, stats, actions);
+      side.append(player, stats, rankStatus, actions);
       const visual = el('div', 'layout-split__visual game__col');
       visual.append(tips);
 
@@ -141,8 +207,9 @@
       return h1;
     },
 
-    unmount: stopIdle
+    unmount: teardown
   };
 
   ChecaAi.screens.matchEnd.formatDuration = formatDuration;
+  ChecaAi.screens.matchEnd.rankStatusText = rankStatusText;
 })();
