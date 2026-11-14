@@ -394,6 +394,58 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 
 ---
 
+## Ranking online — banco de dados (Fase 4A)
+
+**Status:** ✅ SQL escrito e revisado pelo `security-engineer` (aprovado com ressalvas; ressalvas aplicadas) na `feat/ranking-online`. **Pendente: a Grasi aplicar no Supabase** (passo a passo em `supabase/LEIA-ME.md`). Sem merge na `main` (sai junto com a 4B, v0.6.0); `APP_VERSION` continua 0.4.3. O site ainda não chama o banco.
+
+### Regras
+- Tabela `public.ranking` com RLS ligado e **nenhuma policy**; sem privilégio para `anon`, `authenticated` nem `PUBLIC` (o Supabase concede tudo por padrão; a migration revoga)
+- Só duas funções `security definer` com `search_path = ''`, `execute` só para `anon`:
+  - `submit_score(p_client_id uuid, p_nickname text, p_score int, p_missions_played int, p_correct_verdicts int, p_duration_ms int)` → `{ok:true, duplicate, position}` ou `{ok:false, error}`
+  - `get_ranking(p_limit int default 20)` → `position, nickname, score, missions_played, duration_ms, correct_verdicts` de hoje (São Paulo), sem ocultos, 1 a 50 linhas; ordem pontos desc, tempo asc, horário asc
+- Códigos de erro: `invalid_client_id`, `invalid_nickname`, `blocked_nickname`, `invalid_missions`, `invalid_correct`, `invalid_score`, `invalid_duration` (definitivos: a partida sai da fila) e `rate_limited`, `server_error` (temporários: a partida fica na fila). Nenhuma mensagem interna do banco vaza
+- Apelido igual ao `validateNickname` do site: NFC, espaços juntados, 2 a 20 caracteres, mesmas duas listas de bloqueio (palavra inteira e trecho colado, sem acento). Diferença: o banco só aceita letras que viram a–z sem acento (todo o português), 0–9 e espaço; recusa marca combinante solta (acento empilhado), cirílico, grego e emoji. O site aceita qualquer `\p{L}\p{N}` → alinhar na 4B
+- Pontuação coerente com o `scoring.js`: `20×missões + 100×acertos ≤ pontos ≤ 100×missões + 100×acertos` (teto 200 por missão)
+- Tempo plausível: pelo menos 10 s por missão (30 s na partida de 3), no máximo 1 h
+- Teto global contra enxurrada (sem IP): 30 partidas novas por minuto e 3000 por dia → `rate_limited`; reenvio de partida já gravada não conta
+- `client_id` repetido (reenvio da fila offline) não duplica nem altera; devolve a mesma posição
+- Apelido ofensivo: `hidden = true` pelo SQL Editor (a linha some do ranking, não é apagada)
+
+### Arquivos
+- `supabase/migrations/001_ranking.sql`: tabela, índices (`ranking_created_at_idx` e `ranking_day_order_idx`, parcial `where not hidden`), RLS, remoção de qualquer policy, revokes, as duas funções e os grants. Idempotente
+- `supabase/rollbacks/001_rollback.sql`: apaga as funções e a tabela (`if exists`)
+- `supabase/tests/001_ranking_test.sql`: um bloco `do $$` com 80 checagens que termina em "OK — 80 checagens conferem. Nada foi gravado." (RLS e zero policy; `anon`/`authenticated` sem nenhum privilégio na tabela; select/insert/update/delete reais como `anon` negados; definer, `search_path`, `execute` só `anon`, nada para `PUBLIC`/`authenticated`, nenhum `client_id` exposto, nenhuma outra função do `public` executável por `anon`; gravação válida, apelido normalizado, data de São Paulo, posição; reenvio; 25 rejeições com o código certo e nada gravado; `get_ranking` com ordem e desempates, sem ocultos, sem ontem, teto 50, mínimo 1, padrão 20; `rate_limited` e reenvio liberado)
+- `supabase/LEIA-ME.md`: passo a passo da Grasi (migration, teste, ocultar apelido, emergência, rollback)
+- `PLANEJAMENTO.md`: schema da Fase 4 atualizado
+
+### Decisões técnicas
+- Pedido × PLANEJAMENTO (decidido com o Rhuan em 14/11): `id uuid`, `duration_ms`, `missions_played` 1 a 3, coluna `hidden` (em vez de apagar), `get_ranking` padrão 20 e teto 50 vêm do pedido; `correct_verdicts` e `position` no retorno vêm do PLANEJAMENTO; apelido espelha o site; rollback em `supabase/rollbacks/001_rollback.sql` (CLAUDE.md)
+- `authenticated` sem `execute`: o site não tem login
+- `search_path = ''` (sugestão do `security-engineer`): `unnest` e `&&` são polimórficos; uma sobrecarga criada em `public` poderia ganhar a resolução dentro da função definer
+- Faixa de acentos escrita como `\u0300-\u036f` (antes eram caracteres literais, que um copiar-colar estraga)
+- Tempo mínimo de 10 s por missão (o `security-engineer` sugeriu 15 s): menor perda para quem joga rápido de verdade; conferir com a Grasi jogando
+- Validação local antes de entregar: Postgres 16 em WebAssembly (PGlite, só no scratchpad, fora do projeto) com `anon`/`authenticated` e os default privileges do Supabase simulados → migration 2× + teste OK 2×, rollback 2×; testes de mutação (sem revoke, `authenticated` com execute, `get_ranking` com ocultos, policy aberta) fazem o teste falhar
+- Rodar o teste em produção durante a mostra é seguro (só linhas novas com uuid aleatório, `lock_timeout` 3 s); ele supõe que ninguém fez 600 pontos em ≤ 30,2 s hoje e que não houve 30 envios no último minuto
+
+### Riscos que o SQL não resolve (mostra de 1 dia)
+- Sem login, quem souber usar o console consegue mandar uma partida forjada plausível (ex.: 600 pontos em 45 s). O banco barra o absurdo (pontos incoerentes, tempo impossível, enxurrada), não a mentira bem feita. Mitigação: a Grasi acompanha o ranking e oculta linhas suspeitas; em último caso, fecha a gravação (`revoke execute ... from anon`, `supabase/LEIA-ME.md` item 4) e as partidas ficam na fila do aparelho
+- O teto global pode ser esgotado de propósito, travando envios legítimos por alguns minutos; com a fila offline, nada se perde
+
+### Para a Fase 4B (site)
+- `api.js`: tratar `invalid_*`/`blocked_nickname` como definitivos e `rate_limited`, `server_error`, erro de rede e "permission denied" (gravação fechada) como temporários
+- Alinhar `validateNickname` ao banco: depois da dobra, só `a-z0-9 `; recusar marca `\u0300-\u036f` solta; trocar a faixa literal do `foldText` por `\u0300-\u036f`
+- Não enviar partida com menos de 10 s por missão (ou avisar)
+- Fim da partida: mostrar `position` do retorno
+
+### Roteiro de teste (Grasi, no SQL Editor)
+1. Rodar `001_ranking.sql` → "Success"
+2. Rodar `001_ranking_test.sql` → erro "OK — 80 checagens conferem. Nada foi gravado."
+3. Opcional: rodar a migration de novo → "Success"; repetir o teste → mesmo OK
+
+**Arquivos:** `supabase/migrations/001_ranking.sql`, `supabase/rollbacks/001_rollback.sql`, `supabase/tests/001_ranking_test.sql`, `supabase/LEIA-ME.md`, `PLANEJAMENTO.md`
+
+---
+
 <!-- MODELO DE SEÇÃO — copiar para cada funcionalidade nova
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
@@ -428,10 +480,13 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 ### Migrations
 | Arquivo | Conteúdo |
 |---|---|
+| `001_ranking.sql` | Tabela `ranking` (RLS sem policy, sem privilégio para anon/authenticated), índices, `submit_score` e `get_ranking`. **Escrita e revisada na Fase 4A; pendente de aplicação pela Grasi** |
 
 ### Funções RPC
 | Função | O quê |
 |---|---|
+| `submit_score(p_client_id, p_nickname, p_score, p_missions_played, p_correct_verdicts, p_duration_ms)` | Valida e grava uma partida; `{ok, duplicate, position}` ou `{ok:false, error}`; só `anon` |
+| `get_ranking(p_limit default 20)` | Top do dia (São Paulo), sem ocultos, 1 a 50; só `anon` |
 
 ---
 
@@ -470,9 +525,11 @@ Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
 - [ ] Foto livre para a mensagem S4 do simulador (fila em rodoviária; hoje mostra o quadro com a descrição)
 - [ ] Fase 3 — Revisão das 9 missões pelo grupo — até 17/11
 - [ ] Fase 4 — Ranking online (Supabase) — até 22/11
+  - [x] 4A — SQL (migration, rollback, teste, revisão do `security-engineer`) — **pendente: a Grasi aplicar**
+  - [ ] 4B — `api.js`, fila offline, telas de ranking e modo telão
 - [ ] Fase 5 — Testes em notebook/tablet/celular, service worker, QR Code, tela de dicas — até 24/11
 - [ ] v1.0.0 e congelamento — 25/11
 
 ---
 
-*Última atualização: 14/11/2026 (v0.4.3 — simulador: ícone na barra, coluna larga, mensagem compacta no celular)*
+*Última atualização: 14/11/2026 (Fase 4A — SQL do ranking escrito e revisado; aplicação pendente)*
