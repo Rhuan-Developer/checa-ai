@@ -1,5 +1,5 @@
 /* Tela do simulador "Como um boato se espalha". Cores e medidas vêm do theme.css.
-   Divisão em colunas: (min-width: 1024px), (min-width: 600px) and (orientation: landscape) */
+   Divisão em colunas: (min-width: 1100px), (min-width: 700px) and (orientation: landscape) */
 .simulator {
   width: 100%;
   gap: var(--space-4);
@@ -241,7 +241,7 @@
 
 /* Celular: mensagem compacta para título, mensagem e botões caberem na primeira tela (390×844).
    Se ainda assim não couberem (360×640, documento alto), os botões grudam no rodapé da tela (sticky). */
-@media (max-width: 599px) {
+@media (max-width: 699px) {
   .simulator:not(.simulator--presenting) .sim-stage--center {
     gap: var(--space-3);
   }
@@ -293,7 +293,7 @@
   }
 }
 
-@media (min-width: 600px) {
+@media (min-width: 700px) {
   .sim-actions {
     flex-direction: row;
     flex-wrap: wrap;
@@ -310,7 +310,7 @@
 }
 
 /* Duas colunas: texto e controles à esquerda, canvas à direita na altura útil */
-@media (min-width: 1024px), (min-width: 600px) and (orientation: landscape) {
+@media (min-width: 1100px), (min-width: 700px) and (orientation: landscape) {
   .sim-stage--run {
     grid-template-areas:
       "title canvas"
@@ -452,7 +452,7 @@
   width: 100%;
 }
 
-@media (min-width: 1024px), (min-width: 600px) and (orientation: landscape) {
+@media (min-width: 1100px), (min-width: 700px) and (orientation: landscape) {
   .simulator--presenting .sim-stage--run {
     grid-template-columns: var(--split-cols-present);
     grid-template-areas:

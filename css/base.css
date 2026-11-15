@@ -1,3 +1,37 @@
+/* Fonte local (sem internet; funciona por file:// e no GitHub Pages). Licença OFL em assets/fonts/LICENSE-OFL.txt */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/atkinson-hyperlegible-latin-ext-400-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/atkinson-hyperlegible-latin-ext-700-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 *,
 *::before,
 *::after {
@@ -14,12 +48,13 @@ body {
   margin: 0;
   min-height: 100vh;
   min-height: 100dvh;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--font-family);
-  font-size: var(--font-md);
+  font-size: var(--fs-body);
   font-weight: var(--weight-normal);
-  line-height: var(--line-height);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
@@ -27,8 +62,12 @@ h1, h2, h3, p {
   margin: 0;
 }
 
-h1 { font-size: var(--font-xl); line-height: 1.2; }
-h2 { font-size: var(--font-lg); line-height: 1.3; }
+h1 { font-size: var(--fs-title-1); line-height: var(--lh-title-1); font-weight: var(--weight-bold); letter-spacing: -0.01em; }
+h2 { font-size: var(--fs-title-2); line-height: var(--lh-title-2); font-weight: var(--weight-bold); }
+h3 { font-size: var(--fs-title-3); line-height: var(--lh-title-3); font-weight: var(--weight-bold); }
+
+/* Placares e contadores: algarismos de largura fixa */
+.stat__value, .points, .ranking-table, [data-tabular] { font-variant-numeric: tabular-nums; }
 
 /* Layout global: centraliza a coluna de conteúdo (usar em telas só de texto) */
 .layout-center {
@@ -48,7 +87,7 @@ h2 { font-size: var(--font-lg); line-height: 1.3; }
   width: 100%;
 }
 
-@media (min-width: 1024px), (min-width: 600px) and (orientation: landscape) {
+@media (min-width: 1100px), (min-width: 700px) and (orientation: landscape) {
   .layout-split {
     grid-template-columns: var(--split-cols);
     column-gap: var(--space-6);
@@ -56,17 +95,17 @@ h2 { font-size: var(--font-lg); line-height: 1.3; }
 }
 
 a {
-  color: var(--accent);
+  color: var(--ink);
 }
 
 img, svg, canvas {
   max-width: 100%;
 }
 
-/* Foco visível */
+/* Foco visível: anel de 3px em highlight, 3px afastado, em todo elemento focável */
 :focus-visible {
-  outline: var(--focus-width) solid var(--accent);
-  outline-offset: 2px;
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
 }
 
 /* Título que recebe foco programático não precisa de contorno */
@@ -74,68 +113,128 @@ img, svg, canvas {
   outline: none;
 }
 
-/* Botões e links com aparência de botão */
+/* Botões e links com aparência de botão. Principal por padrão; --secondary, --quiet, --xl e disabled são as variantes.
+   Largura total abaixo de 700px, automática de 700px para cima. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--touch-min);
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--control-h);
   min-width: var(--touch-min);
-  padding: var(--space-2) var(--space-5);
-  font-size: var(--font-md);
-  border: var(--border-width) solid var(--accent);
-  border-radius: var(--radius);
-  background: var(--accent);
-  color: var(--on-accent);
+  padding: var(--space-3) var(--space-5);
   font-family: inherit;
+  font-size: var(--fs-button);
   font-weight: var(--weight-bold);
+  line-height: 1.2;
+  text-align: center;
   text-decoration: none;
+  border: var(--border-width-strong) solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--on-primary);
   cursor: pointer;
   touch-action: manipulation;
 }
 
-.btn--secondary {
-  background: transparent;
-  color: var(--accent);
-  border-color: var(--border);
+.btn:hover {
+  background: var(--primary-press);
 }
 
-/* Botão só com ícone (traço em currentColor), discreto */
-.btn-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--touch-min);
-  min-height: var(--touch-min);
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius);
+.btn--secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.btn--secondary:hover {
+  background: var(--surface-alt);
+}
+
+.btn--quiet {
   background: transparent;
-  color: var(--text-muted);
+  color: var(--ink);
+  border-color: transparent;
+}
+
+.btn--quiet:hover {
+  background: var(--surface-alt);
+}
+
+.btn--xl {
+  min-height: var(--control-xl);
+  font-size: var(--fs-body-lg);
+}
+
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  background: var(--surface-alt);
+  border-color: var(--surface-alt);
+  color: var(--ink-muted);
+  cursor: not-allowed;
+}
+
+@media (min-width: 700px) {
+  .btn {
+    width: auto;
+  }
+}
+
+/* Barra superior: botões nunca em largura total */
+.app-header__tools .btn {
+  width: auto;
+}
+
+/* Botão só com ícone (traço em currentColor): 44x44, borda 2px */
+.btn-icon {
+  display: inline-grid;
+  place-items: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  padding: 0;
+  border: var(--border-width-strong) solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
   cursor: pointer;
   touch-action: manipulation;
 }
 
 .btn-icon:hover {
-  color: var(--text);
+  border-color: var(--ink);
 }
 
 .btn-icon__svg {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
-.btn[disabled],
-.btn[aria-disabled="true"] {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* Pílula de pontos, nível e tempo */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2.25rem;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--surface-alt);
+  color: var(--ink);
+  font-size: var(--fs-label);
+  font-weight: var(--weight-bold);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
+
+.pill--facil { background: var(--ok-bg); color: var(--ok); }
+.pill--media { background: var(--warn-bg); color: var(--warn); }
+.pill--dificil { background: var(--bad-bg); color: var(--bad); }
 
 /* Cartões */
 .card {
   background: var(--surface);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
+  border: var(--border-width-strong) solid var(--line);
+  border-radius: var(--radius-lg);
   padding: var(--space-4);
 }
 

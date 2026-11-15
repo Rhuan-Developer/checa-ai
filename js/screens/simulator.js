@@ -9,7 +9,7 @@
   const FIRST_ROUND_DELAY_MS = 700;
   const GROW_MS = 600; // crescimento do anel novo da árvore
   const CROWD_MS = 500; // encolher a visão e abrir o anel novo da multidão
-  const SPLIT_QUERY = '(min-width: 1024px), (min-width: 600px) and (orientation: landscape)'; // igual ao theme.css
+  const SPLIT_QUERY = '(min-width: 1100px), (min-width: 700px) and (orientation: landscape)'; // igual ao theme.css
   const PHONE_RATIO = 0.6; // largura / altura do celular desenhado
 
   const numberFormat = new Intl.NumberFormat('pt-BR');

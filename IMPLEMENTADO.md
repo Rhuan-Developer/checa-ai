@@ -503,6 +503,54 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 ---
 
 <!-- MODELO DE SEÇÃO — copiar para cada funcionalidade nova
+## Redesign 1/5 — Fundação do design (v0.6.0)
+
+**Status:** ✅ v0.6.0 na `feat/redesign-fundacao`. Só base visual: cores, fonte, escala, breakpoints, barra superior, botões. Lógica, pontuação, banco, textos e layout interno das telas não mudaram. Decisões do redesign: `design/DECISOES.md`.
+
+### Fluxo / Telas
+- Todas as telas já na paleta Noite (azul-noite + amarelo marca-texto), com a fonte Atkinson Hyperlegible; layout interno ainda o antigo (etapas 0.6.1 a 0.6.4)
+- Barra superior: 64px, fundo `surface`, borda inferior 2px `line`, fixa no topo; logo "Checa" + "Aí" em amarelo (`index.html`: `<b>Aí</b>`); `#app-header-tools` com ícone de telinha (simulador) e de telão (ranking) no novo botão de ícone 44×44
+
+### Arquivos e funções
+- `assets/fonts/`: Atkinson Hyperlegible 400 e 700, latin e latin-ext (woff2), `LICENSE-OFL.txt`. Veio de `@fontsource/atkinson-hyperlegible` (npm só no scratchpad, nada no projeto)
+- `css/theme.css`: reescrito a partir de `design/tokens.json` (Noite): cores, escala de texto (`--fs-*`/`--lh-*`, em rem; display/título maiores em 700 e 1100), espaço 4/8/12/16/24/32/48/64, raios 6/12/20/pill, `--touch-min` 44, `--control-h` 52, `--control-xl` 64, `--topbar-h` 64, foco 3px/3px
+- `css/base.css`: `@font-face` local (`../assets/fonts/`, `font-display: swap`); h1/h2/h3/body pela escala; `tabular-nums` nos placares; anel de foco global; `.btn` (principal), `--secondary`, `--quiet`, `--xl`, desabilitado; `.btn-icon`; `.pill` (+ `--facil/--media/--dificil`, ainda sem uso nas telas); `.card`
+- `css/screens.css`: barra superior sticky, logo, título da home em `--fs-display`
+- `css/game.css`: bordas de controles em `line-strong` (3,5:1), foco com os tokens; bolinha do veredito sem `box-shadow` (anel interno com `outline` negativo)
+- Breakpoints 600/1024 viraram **700/1100** em todos os `@media` (`css/*.css`) e em `SPLIT_QUERY` de `js/screens/simulator.js` (precisa ser igual ao CSS); 1600 do telão mantido
+- `js/config.js`: `APP_VERSION` 0.6.0
+
+### Decisões técnicas
+- Fonte local (file:// sem internet); sem `@import` do Google Fonts
+- Escala fluida da v0.4.2 mantida (`--root-size`, container que cresce): px do design viraram rem
+- `--lh-body` e `--lh-body-lg` **sem unidade** (1,5556 / 1,5238): com altura fixa em rem o texto maior que herda (contadores do simulador) ficava com linhas sobrepostas
+- `--space-5/6/7` agora são os valores fixos do design (1,5 / 2 / 3 rem); antes eram fluidos (clamp). Diferença pequena; a `--gutter` continua fluida
+- `--font-3xl` (alias) é fluido `clamp(3rem, 13vw, 4,5rem)`: "187 de 600" não cabia em 360px com 72px fixos
+- Largura total do `.btn` abaixo de 700px; `.app-header__tools .btn` sempre automática
+- Pontuação do design ("rapidez até 40") NÃO implementada: vale `scoring.js` (100 + 80 + 20; máx. 200)
+
+### Aliases temporários (remover nas etapas 0.6.1 a 0.6.4, quando nenhuma tela usar o nome antigo)
+`--bg`→`--paper` · `--border`→`--line` · `--text`→`--ink` · `--text-muted`→`--ink-muted` · `--accent`→`--primary` · `--on-accent`→`--on-primary` · `--verdict-true/false/misleading/unproven`→`--ok/--bad/--warn/--unk` · `--radius`→`--radius-sm` · `--font-sm/md/lg/xl/2xl/3xl`→`--fs-small/body/body-lg/title-2/title-1/big-number` · `--touch-lg`→`--control-xl` · `--header-height`→`--topbar-h` · `--line-height`. Atenção: `js/screens/simulator.js` lê `--verdict-false`, `--verdict-true`, `--accent`, `--text-muted`, `--bg`, `--surface`, `--text` para o canvas (por isso os aliases ficam até a etapa 0.6.4)
+
+### Problemas visuais encontrados (lista para as etapas 0.6.1 a 0.6.4)
+1. Missão: legenda "Seu veredito" encostada na primeira opção (o foco cobre a legenda)
+2. Missão e resultado: listas e blocos ainda no layout antigo (sem os componentes do design: pistas como cartões, vereditos em 4 colunas no tablet, pílulas de nível/pontos, faixa SIMULAÇÃO)
+3. Barra superior sem os pontos da missão e sem pílula de nível (`.pill` criada, não usada)
+4. `tabular-nums` na Atkinson troca os algarismos por uma variante larga com zero cortado: nos números grandes do fim da partida parece fonte monoespaçada; avaliar nas etapas 0.6.2 e 0.6.3
+5. Telão: "Sair" pequeno no canto; tokens `stage-*` ainda não usados (usa `--bg`/`--text`); linhas ainda sem o raio e a faixa do design
+6. Simulador: "Sair" do modo apresentação pequeno; título "Como um boato se espalha" pequeno diante do design; canvas com borda fina
+7. Ranking: sem a linha "Você" em `highlight-soft` e sem pódio amarelo (design)
+8. Fim da partida: números de 72px em coluna única no celular, sem as pílulas de acertos/tempo
+9. Abaixo de ~200px de largura CSS (celular a 200% de zoom) ainda há rolagem horizontal: ranking (já existia na v0.5.0), seletor do simulador e, novo, 5px na barra do simulador
+
+### Roteiro de teste
+1. Abrir `index.html` por `file://` e por `http://127.0.0.1`: fonte Atkinson nos dois (`document.fonts` com 400 e 700 carregadas)
+2. Capturas de todas as telas em 360×640, 390×844, 768×1024, 1366×768, 1920×1080, 2400×1200: `docs/capturas/v0.6.0/` (60 imagens) e `contraste.md`
+3. Contraste dos tokens (script): todos os pares de texto ≥ 4,5:1; bordas de controle e foco ≥ 3:1 (menor: `line-strong`/`surface` 3,53:1)
+4. `grep` em `css/`: zero `gradient`, `box-shadow`, `text-shadow`, hex ou `rgb()` fora do `theme.css`
+5. Zoom 50% a 200% em 6 tamanhos × início, apelido, ranking, simulador: sem rolagem horizontal (exceto a limitação 9); alvos ≥ 44px nos botões visíveis
+6. Regressão: 9 missões = 200, veredito certo + só iscas = 120, apelido, `drawMatch` 300×, 88.572 × 4.546, classificação do envio, fila (sem duplicar, limite 20, sem dado pessoal), XSS do ranking vira texto, console sem erros
+
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
 **Status:** ✅ vX.Y.Z na `{{branch}}`. {{publicado no GitHub Pages? migration aplicada em que data?}} {{revisada pelo security-engineer?}}
@@ -547,6 +595,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 ---
 
 ## Constantes e Tema
+- **Desde a v0.6.0** o `css/theme.css` segue o `design/tokens.json` (tema Noite) e tem aliases temporários dos nomes antigos: ver a seção "Redesign 1/5" acima. Os valores de cores/breakpoints (600/1024) citados mais abaixo são anteriores a ela
 - `js/config.js`: `APP_VERSION` ('0.4.2', único lugar da versão), `MISSIONS_PER_LEVEL_IN_MATCH` (1), `FEATURES` (`simulator` ligado; `missions` e `ranking` desligados), `SIM_FANOUT` 3, `SIM_CHECK_RATE` 0.1, `SIM_VISUAL_ROUNDS` 5, `SIM_TOTAL_ROUNDS` 10, `SIM_ROUND_MS` 1200, `SIM_COMPARE_CHECK_RATE` 0.3
 - `css/theme.css` — cores: `--bg #0F1B2D`, `--surface #17263D`, `--border #2A3B55`, `--text #F2F5F9`, `--text-muted #A9B6C8`, `--accent #3DA5FF`, `--on-accent #0F1B2D`; vereditos: `--verdict-true #3FB27F`, `--verdict-false #E5534B`, `--verdict-misleading #E9A23B`, `--verdict-unproven #8A9BB0`
 - `css/theme.css` — medidas: fonte `system-ui`, `--font-sm` a `--font-2xl`, `--space-1` a `--space-7`, `--radius` 6px, `--touch-min` 44px, `--content-max` 960px, `--text-max` 60ch, `--touch-lg` 64px, `--canvas-max-height` 58vh
@@ -584,6 +633,7 @@ Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
   - [x] 4A — SQL (migration, rollback, teste, revisão do `security-engineer`) — aplicado pela Grasi
   - [x] 4B — `api.js`, fila offline, telas de ranking e modo telão
   - [ ] Partida real de verificação pela Grasi (roteiro em `supabase/LEIA-ME.md`)
+- [ ] Redesign "Noite" em 5 etapas: 0.6.0 fundação ✅ · 0.6.1 início/apelido/missão · 0.6.2 resultado e fim · 0.6.3 ranking e telão · 0.6.4 simulador
 - [ ] Fase 5 — Testes em notebook/tablet/celular, service worker, QR Code, tela de dicas — até 24/11
 - [ ] v1.0.0 e congelamento — 25/11
 
