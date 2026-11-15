@@ -96,7 +96,7 @@
 }
 
 /* Celular estreito: colunas numéricas mais justas para o apelido caber */
-@media (max-width: 599px) {
+@media (max-width: 699px) {
   .ranking-table th,
   .ranking-table td {
     padding-left: var(--space-1);
@@ -118,7 +118,7 @@
   }
 }
 
-@media (min-width: 600px) {
+@media (min-width: 700px) {
   .ranking-actions {
     flex-direction: row;
     flex-wrap: wrap;

@@ -228,6 +228,14 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 - [x] 3. Tela de ranking + modo telão — v0.5.0
 - [ ] 4. Teste: dois navegadores, internet desligada e religada, tentativa de fraude pelo console
 
+### Redesign visual (sistema "Noite", em 5 etapas; decisões em `design/DECISOES.md`)
+- [x] 0.6.0 Fundação: cores, fonte local, escala, breakpoints 700/1100, barra superior, botões
+- [ ] 0.6.1 Início, apelido e missão
+- [ ] 0.6.2 Resultado da missão e fim da partida
+- [ ] 0.6.3 Ranking e telão
+- [ ] 0.6.4 Simulador (só a aparência; a lógica fica)
+- Ao fim da 0.6.4: remover os aliases temporários do `theme.css` (lista no `IMPLEMENTADO.md`)
+
 ### Fase 5 — Polimento e testes
 - [ ] QR Code do site para os cartazes
 - [ ] Teste no notebook, em tablet e em celulares Android/iPhone (o guia pede teste nos tablets, se houver)

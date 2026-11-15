@@ -1,26 +1,46 @@
-/* Único lugar com cores e medidas do site.
+/* Único lugar com cores e medidas do site. Fonte: design/tokens.json (tema único "Noite").
 
    PONTOS DE QUEBRA (media query não aceita var(); use sempre estes números):
-     celular  < 600px          1 coluna
-     tablet   600px a 1023px   1 coluna larga (2 colunas em paisagem)
-     notebook >= 1024px        container centralizado, 2 colunas em .layout-split
+     celular  < 700px          1 coluna, botões em largura total
+     tablet   700px a 1099px   1 coluna larga (2 colunas em paisagem)
+     notebook >= 1100px        container centralizado, 2 colunas em .layout-split
      telão    >= 1600px        mesma estrutura; tudo escala pela fonte base e pelos clamp()
    DIVISÃO EM COLUNAS (.layout-split e a tela do simulador) vale em:
-     (min-width: 1024px), (min-width: 600px) and (orientation: landscape)
-   Tipografia e espaçamentos são fluidos (clamp): tamanhos em rem escalam com --root-size. */
+     (min-width: 1100px), (min-width: 700px) and (orientation: landscape)
+   Todo tamanho em rem: 1rem = 16px na base; a base é fluida (--root-size) e acompanha o zoom. */
 :root {
-  /* Cores */
-  --bg: #0F1B2D;
-  --surface: #17263D;
-  --border: #2A3B55;
-  --text: #F2F5F9;
-  --text-muted: #A9B6C8;
-  --accent: #3DA5FF;
-  --on-accent: #0F1B2D; /* texto sobre fundo --accent (branco não passa no contraste AA) */
-  --verdict-true: #3FB27F;
-  --verdict-false: #E5534B;
-  --verdict-misleading: #E9A23B;
-  --verdict-unproven: #8A9BB0;
+  /* ---------- Cores (design/tokens.json) ---------- */
+  --paper: #10172a;
+  --surface: #18213a;
+  --surface-alt: #222c47;
+  --ink: #f6f4ee;
+  --ink-muted: #aeb6c8;
+  --line: #2c3757;
+  --line-strong: #6b7694;
+  --primary: #ffcc29;
+  --primary-press: #ffd95c;
+  --on-primary: #10172a;
+  --highlight: #ffcc29;
+  --on-highlight: #10172a;
+  --highlight-soft: #3a3418;
+  --focus: var(--highlight);
+  --ok: #4ccb8a;
+  --ok-bg: #123628;
+  --bad: #ff6b6b;
+  --bad-bg: #3d1a22;
+  --warn: #ffa246;
+  --warn-bg: #3a2614;
+  --unk: #9fb0d6;
+  --unk-bg: #232d48;
+  --info-bg: #1c2852;
+  --stage: #10172a;
+  --stage-ink: #f6f4ee;
+  --stage-muted: #aeb6c8;
+  --stage-line: #222c47;
+  --illu-sky: #2b3a66;
+  --illu-water: #3d5bb0;
+  --illu-building: #5a6482;
+  --illu-building-2: #3a4360;
 
   /* Documento fictício (ofício/comunicado desenhado na mensagem): papel claro e brasão inventado */
   --doc-paper: #F6F3EA;
@@ -31,49 +51,99 @@
   --doc-crest-b: #C9A13B;
   --doc-crest-c: #8A2F3F;
 
-  /* Tipografia (fluida: do celular ao projetor) */
-  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* ---------- ALIASES TEMPORÁRIOS (nomes antigos; remover nas etapas 0.6.1 a 0.6.4) ---------- */
+  --bg: var(--paper);
+  --border: var(--line);
+  --text: var(--ink);
+  --text-muted: var(--ink-muted);
+  --accent: var(--primary);
+  --on-accent: var(--on-primary);
+  --verdict-true: var(--ok);
+  --verdict-false: var(--bad);
+  --verdict-misleading: var(--warn);
+  --verdict-unproven: var(--unk);
+  --radius: var(--radius-sm);
+  --font-sm: var(--fs-small);
+  --font-md: var(--fs-body);
+  --font-lg: var(--fs-body-lg);
+  --font-xl: var(--fs-title-2);
+  --font-2xl: var(--fs-title-1);
+  --font-3xl: clamp(3rem, 13vw, var(--fs-big-number));
+  --touch-lg: var(--control-xl);
+  --header-height: var(--topbar-h);
+  --line-height: 1.5556;
+
+  /* ---------- Tipografia ---------- */
+  --font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   /* Base de todos os rem. Parte fixa grande (13px) + parte pequena em vw (0.2vw): o zoom do navegador continua
      mudando o tamanho visível (a parte fixa escala com o zoom; só 0.2vw é "anulada"). 16px até ~1500px CSS
      (celular e tablet inalterados), ~17px a 1920, ~18px a 2400, ~19px a 3000. */
   --root-size: clamp(16px, 0.2vw + 13px, 24px);
-  --font-sm: 0.875rem;
-  --font-md: 1rem;
-  --font-lg: clamp(1.15rem, 1.05rem + 0.4vw, 1.5rem);
-  --font-xl: clamp(1.5rem, 1.25rem + 0.9vw, 2.1rem);
-  --font-2xl: clamp(1.9rem, 1.4rem + 1.6vw, 3rem);
-  --font-3xl: clamp(2.5rem, 1.6rem + 3vw, 4.5rem);
-  --line-height: 1.5;
   --weight-normal: 400;
   --weight-bold: 700;
 
-  /* Espaçamentos (os maiores são fluidos) */
+  /* Escala de texto do design (tamanho / altura de linha). Celular; tablet e notebook sobrescrevem abaixo */
+  --fs-display: 3.5rem;
+  --lh-display: 1;
+  --fs-title-1: 2rem;
+  --lh-title-1: 2.375rem;
+  --fs-title-2: 1.625rem;
+  --lh-title-2: 2rem;
+  --fs-title-3: 1.3125rem;
+  --lh-title-3: 1.75rem;
+  --fs-body-lg: 1.3125rem;
+  --lh-body-lg: 1.5238;
+  --fs-body: 1.125rem;
+  --lh-body: 1.5556; /* sem unidade: o texto maior herda a proporção, não a altura */
+  --fs-label: 1rem;
+  --lh-label: 1.375rem;
+  --fs-small: 0.9375rem;
+  --lh-small: 1.375rem;
+  --fs-kicker: 0.9375rem;
+  --lh-kicker: 1.25rem;
+  --fs-button: 1.1875rem;
+  --fs-stage-title: 4.5rem;
+  --lh-stage-title: 4.5rem;
+  --fs-stage-row: 2.875rem;
+  --lh-stage-row: 3.25rem;
+  --fs-big-number: 4.5rem;
+  --lh-big-number: 1;
+
+  /* ---------- Espaço (design) ---------- */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
-  --space-5: clamp(1.25rem, 1rem + 1vw, 2rem);
-  --space-6: clamp(1.5rem, 1.1rem + 1.4vw, 2.75rem);
-  --space-7: clamp(2rem, 1.2rem + 2.4vw, 4rem);
-  --gutter: clamp(1rem, 0.5rem + 2.2vw, 3rem); /* margem lateral da página */
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --gutter: clamp(1rem, 0.5rem + 2.2vw, 3rem); /* margem lateral da página (fluida) */
 
-  /* Formas e medidas */
-  --radius: 6px;
+  /* ---------- Raio ---------- */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 999px;
+
+  /* ---------- Tamanhos ---------- */
+  --touch-min: 2.75rem;
+  --control-h: 3.25rem;
+  --control-xl: 4rem; /* ação principal da tela */
+  --topbar-h: 4rem;
   --border-width: 1px;
-  --border-width-strong: 2px; /* item escolhido (sinal marcado, veredito) */
+  --border-width-strong: 2px; /* borda de controle, botão e item escolhido */
   --mark-size: 1.5rem; /* caixa de marcar e bolinha de escolher */
   --focus-width: 3px;
-  --touch-min: 44px;
-  --touch-lg: 64px; /* botões do modo apresentação */
+  --focus-offset: 3px;
   --exit-width: 4.5rem; /* botão "Sair" do modo apresentação (fixo no canto superior direito) */
   --exit-row: calc(var(--touch-min) + var(--space-3)); /* faixa reservada no topo do modo apresentação: título e chip nunca ficam sob o "Sair" */
-  --header-height: 3.5rem;
 
   /* Larguras de conteúdo (em rem: crescem com a fonte base no telão) */
   --content-max: max(75rem, 82vw); /* container da página: 75rem no notebook; acima disso cresce com a tela (82vw), sem teto fixo */
   --panel-max: max(56rem, 46vw); /* coluna central de uma tela só de texto (mensagem, resultado) */
   --compare-max: max(72rem, 62vw); /* comparação final */
-  --sim-center-max: 100%; /* mensagem inicial do simulador: largura toda do container (77–82% da tela no desktop), alinhada ao título e ao passo dividido */
+  --sim-center-max: 100%; /* mensagem inicial do simulador: largura toda do container, alinhada ao título e ao passo dividido */
   --text-max: 60ch;
   --split-cols: minmax(0, 5fr) minmax(0, 7fr); /* .layout-split: conteúdo à esquerda, visual à direita */
   --split-cols-present: minmax(0, 2fr) minmax(0, 3fr); /* modo apresentação: painel e canvas */
@@ -85,3 +155,22 @@
   --fade-ms: 220ms; /* transição curta entre passos */
 }
 
+/* Tablet: títulos maiores */
+@media (min-width: 700px) {
+  :root {
+    --fs-display: 5.5rem;
+    --fs-title-1: 2.5rem;
+    --lh-title-1: 2.875rem;
+    --fs-title-2: 1.875rem;
+    --lh-title-2: 2.25rem;
+  }
+}
+
+/* Notebook */
+@media (min-width: 1100px) {
+  :root {
+    --fs-display: 6.5rem;
+    --fs-title-1: 2.75rem;
+    --lh-title-1: 3.125rem;
+  }
+}
