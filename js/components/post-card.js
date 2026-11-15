@@ -14,10 +14,24 @@
     return node;
   }
 
+  /** Iniciais do avatar: as duas primeiras palavras do nome (sem emoji, "@" nem "da/de/do"). */
+  function initials(name) {
+    const words = String(name || '').split(/[^\p{L}\p{N}]+/u).filter((w) => w && !/^(d[aeo]s?|e)$/i.test(w));
+    const letters = words.slice(0, 2).map((w) => Array.from(w)[0]).join('');
+    return (letters || '?').toUpperCase();
+  }
+
+  /** Faixa "SIMULAÇÃO" no topo da mídia (foto e quadro). O documento usa a faixa diagonal. */
+  function buildTopBand() {
+    const band = el('span', 'post-card__band', 'SIMULAÇÃO');
+    band.setAttribute('aria-hidden', 'true');
+    return band;
+  }
+
   /** Quadro "Imagem fictícia" com a descrição (usado quando não há foto ou ela não carrega). */
   function buildPlaceholder(alt) {
     const frame = el('figure', 'post-card__placeholder');
-    frame.append(el('span', 'post-card__placeholder-label', 'Imagem fictícia'), el('figcaption', 'post-card__placeholder-alt', alt));
+    frame.append(buildTopBand(), el('span', 'post-card__placeholder-label', 'Imagem fictícia'), el('figcaption', 'post-card__placeholder-alt', alt));
     return frame;
   }
 
@@ -27,6 +41,7 @@
    */
   function buildPhoto(image) {
     const figure = el('figure', 'post-card__photo');
+    figure.appendChild(buildTopBand());
     const img = el('img', 'post-card__img');
     img.alt = image.alt || '';
     img.loading = 'lazy';
@@ -142,10 +157,14 @@
     const card = el('article', 'post-card');
     card.setAttribute('aria-label', opts.ariaLabel || 'Mensagem recebida');
 
-    const top = el('div', 'post-card__top');
-    top.append(el('span', 'post-card__header', mission.format.header), el('span', 'post-card__stamp', 'Simulação'));
-    card.appendChild(top);
-    if (mission.format.badge) card.appendChild(el('p', 'post-card__badge', mission.format.badge));
+    const header = el('header', 'post-card__top');
+    const avatar = el('span', 'post-card__avatar', initials(mission.format.header));
+    avatar.setAttribute('aria-hidden', 'true');
+    const who = el('div', 'post-card__who');
+    who.appendChild(el('strong', 'post-card__header', mission.format.header));
+    if (mission.format.badge) who.appendChild(el('span', 'post-card__badge', mission.format.badge));
+    header.append(avatar, who, el('span', 'post-card__stamp', 'Simulação'));
+    card.appendChild(header);
 
     const media = mission.image;
     if (media && media.kind === 'document') {

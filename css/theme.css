@@ -70,8 +70,6 @@
   --font-2xl: var(--fs-title-1);
   --font-3xl: clamp(3rem, 13vw, var(--fs-big-number));
   --touch-lg: var(--control-xl);
-  --header-height: var(--topbar-h);
-  --line-height: 1.5556;
 
   /* ---------- Tipografia ---------- */
   --font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;

@@ -67,7 +67,7 @@ h2 { font-size: var(--fs-title-2); line-height: var(--lh-title-2); font-weight: 
 h3 { font-size: var(--fs-title-3); line-height: var(--lh-title-3); font-weight: var(--weight-bold); }
 
 /* Placares e contadores: algarismos de largura fixa */
-.stat__value, .points, .ranking-table, [data-tabular] { font-variant-numeric: tabular-nums; }
+.points, .ranking-table, [data-tabular] { font-variant-numeric: tabular-nums; }
 
 /* Layout global: centraliza a coluna de conteúdo (usar em telas só de texto) */
 .layout-center {
@@ -229,6 +229,47 @@ img, svg, canvas {
 .pill--facil { background: var(--ok-bg); color: var(--ok); }
 .pill--media { background: var(--warn-bg); color: var(--warn); }
 .pill--dificil { background: var(--bad-bg); color: var(--bad); }
+
+/* Ícone do pacote (utils.icon): traço em currentColor; tamanho por --icon-size (padrão 1.5rem) */
+.icon {
+  flex: none;
+  display: block;
+  width: var(--icon-size, 1.5rem);
+  height: var(--icon-size, 1.5rem);
+}
+
+/* Sobretítulo em maiúsculas */
+.kicker {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--fs-kicker);
+  line-height: var(--lh-kicker);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Bloco com título (pistas, sinais, veredito) */
+.block {
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--surface);
+  border: var(--border-width-strong) solid var(--line);
+  border-radius: var(--radius-lg);
+}
+
+.block__title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-title-3);
+  line-height: var(--lh-title-3);
+}
+
+@media (min-width: 700px) {
+  .block {
+    padding: var(--space-5);
+  }
+}
 
 /* Cartões */
 .card {
