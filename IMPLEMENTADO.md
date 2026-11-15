@@ -537,11 +537,11 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 2. ✅ (v0.6.1) Missão e resultado: listas e blocos ainda no layout antigo (sem os componentes do design: pistas como cartões, vereditos em 4 colunas no tablet, pílulas de nível/pontos, faixa SIMULAÇÃO)
 3. ✅ (v0.6.1) Barra superior sem os pontos da missão e sem pílula de nível (`.pill` criada, não usada)
 4. ✅ (v0.6.1) `tabular-nums` na Atkinson troca os algarismos por uma variante larga com zero cortado: nos números grandes do fim da partida parece fonte monoespaçada; avaliar nas etapas 0.6.2 e 0.6.3
-5. Telão: "Sair" pequeno no canto; tokens `stage-*` ainda não usados (usa `--bg`/`--text`); linhas ainda sem o raio e a faixa do design
+5. ✅ (v0.6.3) Telão: "Sair" pequeno no canto; tokens `stage-*` ainda não usados (usa `--bg`/`--text`); linhas ainda sem o raio e a faixa do design
 6. Simulador: "Sair" do modo apresentação pequeno; título "Como um boato se espalha" pequeno diante do design; canvas com borda fina
-7. Ranking: sem a linha "Você" em `highlight-soft` e sem pódio amarelo (design)
+7. ✅ (v0.6.3) Ranking: sem a linha "Você" em `highlight-soft` e sem pódio amarelo (design)
 8. ✅ (v0.6.2) Fim da partida: números de 72px em coluna única no celular, sem as pílulas de acertos/tempo
-9. Abaixo de ~200px de largura CSS (celular a 200% de zoom) ainda há rolagem horizontal: ranking (já existia na v0.5.0), seletor do simulador e, novo, 5px na barra do simulador
+9. ✅ (v0.6.3) Abaixo de ~200px de largura CSS (celular a 200% de zoom) ainda há rolagem horizontal: ranking (já existia na v0.5.0), seletor do simulador e, novo, 5px na barra do simulador
 
 ### Roteiro de teste
 1. Abrir `index.html` por `file://` e por `http://127.0.0.1`: fonte Atkinson nos dois (`document.fonts` com 400 e 700 carregadas)
@@ -635,6 +635,37 @@ Resolvido nesta etapa: **8** (fim da partida). Seguem: 5 (telão), 6 (simulador)
 3. `grep`: zero `gradient`, `box-shadow`, `text-shadow` e zero cor fora do `theme.css`
 4. Regressão: 162 ok e 2 falhas conhecidas (ranking a 200% de zoom em viewport de ~190px); o teste "veredito errado" agora confere 100 (a expectativa antiga estava errada, o `scoring.js` está certo)
 
+## Redesign 4/5 — Ranking e Telão (v0.6.3)
+
+**Status:** ✅ v0.6.3 na `feat/redesign-telas-3`. Só apresentação. `api.js`, fila offline, `scoring.js`, `storage.js`, banco e RPCs não mudaram. O `feature-developer` refez ranking e telão e parou no limite de uso da conta; a sessão principal terminou (cartão do fim, conferência dos aliases) e verificou tudo.
+
+### Fluxo / Telas
+- **Ranking (#/ranking):** logo + "Ranking do dia" (título novo), pílula "Atualizado às hh:mm" com ícone de relógio; lista de 20 em linhas (cartões `surface`, borda `line`): posição em círculo (os 3 primeiros em `highlight`, os demais em `surface-alt`; o número sempre visível), apelido, pontos e, a partir de 700px, acertos ("3 de 3") e tempo; no celular acertos e tempo descem para uma linha abaixo do apelido. Linha do jogador em `highlight-soft` com borda `highlight` e etiqueta "Você". Botões grandes "Atualizar" e "Voltar". Estados carregando, vazio, erro/offline e lista guardada como antes (mensagem + "Tentar de novo")
+- **Telão:** `stage`/`stage-ink`/`stage-muted`, título grande, relógio "Atualizado às hh:mm:ss", top 10 em linhas grandes (a linha 1 em amarelo cheio), botão "Sair" com ícone e 64px, sem rolagem em 1366×768, 1920×1080 e 2400×1200 (testado com apelido de 20 letras largas). Em 390×844 as 10 linhas rolam (celular não é o uso do telão)
+- **Fim da partida:** o cartão amarelo "Você está em Nº" tem o conteúdo centralizado na vertical (antes ficava com um vazio no meio); continua só com posição real do envio
+
+### Arquivos e funções
+- `js/screens/ranking.js` (só DOM: `ranking-pos`, `ranking-name`, `ranking-you`, `ranking-sub`, colunas `ranking-col-x`; mesma lógica de busca, cache, atualização e destaque), `css/ranking.css` (reescrito), `css/components.css`, `css/screens.css` e `css/theme.css` (aliases trocados por tokens), `css/game.css` (`.placecard`)
+- `js/config.js`: `APP_VERSION` 0.6.3
+
+### Decisões técnicas
+- **Pódio:** o design não define ouro/prata/bronze; os 3 primeiros usam o mesmo `highlight` (como o `is-top` do design) e o número da posição fica visível. Não foi criado token novo
+- Sem dados inventados: nada de "N jogadores"; só o que `get_ranking` devolve
+- Apelido sempre por `textContent` (testado com `<img onerror>`, `<script>`, `&amp;` e aspas: vira texto, `window.__xss` indefinido)
+- Pontuação e tempo em colunas com `tabular-nums` (contadores de tabela); destaques grandes sem
+
+### Aliases do `theme.css`
+Todos os usos fora do simulador foram trocados por tokens do design. **Sobram** (só `css/simulator.css` e o canvas de `js/screens/simulator.js` usam): `--bg`, `--border`, `--text`, `--text-muted`, `--accent`, `--verdict-true`, `--verdict-false`, `--radius`, `--font-sm/md/lg/xl/2xl/3xl`, `--touch-lg`. Saem na etapa 0.6.4
+
+### Problemas visuais da v0.6.0
+Resolvidos nesta etapa: **5** (telão), **7** (ranking), **9** (rolagem horizontal em viewport de ~190px: o teste de regressão não tem mais falhas). Resta o **6** (simulador, etapa 0.6.4)
+
+### Roteiro de teste
+1. Rede do Supabase simulada (nada gravado): lista cheia, vazia, 1 jogador, empate, apelido longo, apelido com caracteres especiais, erro 500, offline (abort), lista guardada e linha do jogador ("Você")
+2. Capturas em `docs/capturas/v0.6.3/` (celular, tablet, notebook; telão em 1366×768, 1920×1080 e 2400×1200; fim da partida com posição)
+3. `verify.js` 270 ok; `tests.js` 164 ok, 0 falhas (as 2 falhas de rolagem do ranking a ~190px da v0.6.2 foram corrigidas)
+4. `grep`: zero `gradient`, `box-shadow`, `text-shadow` e zero cor fora do `theme.css`
+
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
 **Status:** ✅ vX.Y.Z na `{{branch}}`. {{publicado no GitHub Pages? migration aplicada em que data?}} {{revisada pelo security-engineer?}}
@@ -717,7 +748,7 @@ Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
   - [x] 4A — SQL (migration, rollback, teste, revisão do `security-engineer`) — aplicado pela Grasi
   - [x] 4B — `api.js`, fila offline, telas de ranking e modo telão
   - [ ] Partida real de verificação pela Grasi (roteiro em `supabase/LEIA-ME.md`)
-- [ ] Redesign "Noite" em 5 etapas: 0.6.0 fundação ✅ · 0.6.1 início/apelido/missão ✅ · 0.6.2 resultado e fim ✅ · 0.6.3 ranking e telão · 0.6.4 simulador
+- [ ] Redesign "Noite" em 5 etapas: 0.6.0 fundação ✅ · 0.6.1 início/apelido/missão ✅ · 0.6.2 resultado e fim ✅ · 0.6.3 ranking e telão ✅ · 0.6.4 simulador
 - [ ] Fase 5 — Testes em notebook/tablet/celular, service worker, QR Code, tela de dicas — até 24/11
 - [ ] v1.0.0 e congelamento — 25/11
 

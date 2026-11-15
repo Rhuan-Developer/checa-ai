@@ -1,88 +1,203 @@
-/* Ranking do dia (#/ranking) e modo telão. Cores e medidas vêm do theme.css. */
+/* Ranking do dia (#/ranking) e modo telão. Cores e medidas vêm do theme.css (design: S.ranking e S.telao). */
 
 .ranking {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   width: 100%;
-  max-width: var(--panel-max);
+  max-width: var(--mid-max);
   margin: 0 auto;
 }
 
+/* ---------- Cabeçalho ---------- */
 .ranking-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: var(--space-1) var(--space-4);
+  gap: var(--space-3) var(--space-4);
+}
+
+.ranking-titlebox,
+.ranking-side {
+  min-width: 0;
 }
 
 .ranking-title {
-  font-size: var(--font-2xl);
+  font-size: var(--fs-title-1);
+  line-height: var(--lh-title-1);
 }
 
-.ranking-updated,
+.ranking-logo,
+.ranking-exit {
+  display: none;
+}
+
+/* Horário da lista: pílula com relógio */
+.ranking-updated {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.25rem;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--surface-alt);
+  color: var(--ink);
+  font-size: var(--fs-label);
+  font-weight: var(--weight-bold);
+  line-height: 1.25;
+}
+
+.ranking-updated .icon {
+  --icon-size: 1.25rem;
+}
+
+.ranking-updated__time {
+  font-weight: var(--weight-bold);
+}
+
+/* ---------- Situação: carregando, vazio, sem conexão ---------- */
 .ranking-status {
-  color: var(--text-muted);
-  font-size: var(--font-md);
+  margin: 0;
+  padding: var(--space-5);
+  border: var(--border-width-strong) solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body-lg);
+  overflow-wrap: anywhere;
 }
 
-.ranking-status {
-  font-size: var(--font-lg);
+.ranking-status.is-error {
+  border-color: var(--warn);
+  background: var(--warn-bg);
 }
 
-/* Tabela: colunas fixas, apelido quebra linha (nunca some) */
+/* ---------- Lista ---------- */
 .ranking-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0 0.375rem;
   table-layout: fixed;
-  font-size: var(--font-md);
+  font-size: var(--fs-body);
 }
 
 .ranking-table th {
-  padding: var(--space-2);
-  color: var(--text-muted);
-  font-size: var(--font-sm);
+  padding: 0 var(--space-2);
+  color: var(--ink-muted);
+  font-size: var(--fs-small);
   font-weight: var(--weight-bold);
+  letter-spacing: 0.06em;
   text-align: left;
-  border-bottom: var(--border-width) solid var(--border);
+  text-transform: uppercase;
 }
 
 .ranking-table td {
-  padding: var(--space-3) var(--space-2);
-  border-bottom: var(--border-width) solid var(--border);
-  vertical-align: top;
+  padding: var(--space-2);
+  border-top: var(--border-width-strong) solid var(--line);
+  border-bottom: var(--border-width-strong) solid var(--line);
+  background: var(--surface);
+  vertical-align: middle;
+}
+
+.ranking-table td:first-child {
+  border-left: var(--border-width-strong) solid var(--line);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.ranking-table td:last-child {
+  border-right: var(--border-width-strong) solid var(--line);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* Celular: acertos e tempo ficam ocultos, então o apelido-pontos fecha a linha */
+.ranking-table td.ranking-score {
+  border-right: var(--border-width-strong) solid var(--line);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.ranking-table tr.is-me td.ranking-score {
+  border-color: var(--highlight);
+}
+
+.ranking--tv .ranking-table tr:not(.is-me):not(.is-first) td.ranking-score {
+  border-color: var(--stage-line);
+}
+
+.ranking--tv .ranking-table tr.is-first td.ranking-score {
+  border-color: var(--highlight);
 }
 
 .ranking-table__pos {
-  width: 3rem;
-  font-weight: var(--weight-bold);
-}
-
-.ranking-table__nick {
-  overflow-wrap: anywhere;
+  width: 3.5rem;
 }
 
 .ranking-table th.ranking-table__num,
 .ranking-table td.ranking-table__num {
-  width: 4.5rem;
+  width: 4.25rem;
   text-align: right;
-  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-.ranking-table th:last-child,
-.ranking-table td:last-child {
-  width: 5rem;
+.ranking-col-x {
+  display: none;
 }
 
-/* Linha do visitante: fundo da superfície, barra de destaque e negrito */
-.ranking-table tr.is-me td {
-  background: var(--surface);
+.ranking-table td.ranking-score {
+  font-size: var(--fs-body-lg);
   font-weight: var(--weight-bold);
 }
 
-.ranking-table tr.is-me td:first-child {
-  border-left: var(--space-1) solid var(--accent);
+/* Posição: número sempre visível; os 3 primeiros em amarelo */
+.ranking-pos {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 var(--space-1);
+  border-radius: 50%;
+  background: var(--surface-alt);
+  font-size: var(--fs-label);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: normal;
+}
+
+.ranking-table tr.is-top .ranking-pos {
+  background: var(--highlight);
+  color: var(--on-highlight);
+}
+
+/* Linha do jogador */
+.ranking-table tr.is-me td {
+  border-color: var(--highlight);
+  background: var(--highlight-soft);
+}
+
+.ranking-name {
+  font-size: var(--fs-body-lg);
+  overflow-wrap: anywhere;
+}
+
+.ranking-you {
+  display: inline-block;
+  margin: var(--space-1) 0 0 var(--space-2);
+  padding: 0.125rem var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 0.8125rem;
+  font-weight: var(--weight-bold);
+  vertical-align: 0.125rem;
+}
+
+/* Celular: acertos e tempo vão para baixo do apelido */
+.ranking-sub {
+  display: block;
+  color: var(--ink-muted);
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
 }
 
 .ranking-actions {
@@ -91,116 +206,365 @@
   gap: var(--space-3);
 }
 
-.ranking-exit[hidden] {
-  display: none;
-}
+/* Viewport muito estreita (celular a 200% de zoom): tudo mais justo, sem rolagem horizontal */
+@media (max-width: 299px) {
+  .ranking-table {
+    font-size: var(--fs-small);
+  }
 
-/* Celular estreito: colunas numéricas mais justas para o apelido caber */
-@media (max-width: 699px) {
-  .ranking-table th,
   .ranking-table td {
-    padding-left: var(--space-1);
-    padding-right: var(--space-1);
+    padding: var(--space-1);
   }
 
   .ranking-table__pos {
-    width: 2.5rem;
+    width: 2.25rem;
+  }
+
+  .ranking-pos {
+    min-width: 1.75rem;
+    height: 1.75rem;
+    font-size: var(--fs-small);
   }
 
   .ranking-table th.ranking-table__num,
   .ranking-table td.ranking-table__num {
-    width: 3.5rem;
+    width: 3rem;
   }
 
-  .ranking-table th:last-child,
-  .ranking-table td:last-child {
-    width: 3.75rem;
+  .ranking-table td.ranking-score,
+  .ranking-name {
+    font-size: var(--fs-body);
+  }
+
+  .ranking-table th {
+    padding: 0 var(--space-1);
+    font-size: 0.75rem;
+    letter-spacing: 0;
+  }
+
+  .ranking-status {
+    padding: var(--space-3);
+    font-size: var(--fs-body);
   }
 }
 
 @media (min-width: 700px) {
+  .ranking-sub {
+    display: none;
+  }
+
+  .ranking-col-x {
+    display: table-cell;
+  }
+
+  .ranking-table td.ranking-score {
+    border-right: 0;
+    border-radius: 0;
+  }
+
+  .ranking-table td {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .ranking-table th {
+    padding: 0 var(--space-4);
+  }
+
+  .ranking-table__pos {
+    width: 4.5rem;
+  }
+
+  .ranking-table th.ranking-table__num,
+  .ranking-table td.ranking-table__num {
+    width: 6.5rem;
+  }
+
   .ranking-actions {
     flex-direction: row;
     flex-wrap: wrap;
   }
-
-  .ranking-table {
-    font-size: var(--font-lg);
-  }
 }
 
-/* ---------- Modo telão: tela toda, top 10, letras que crescem com a tela (vh/vw) ---------- */
+/* ---------- Modo telão: tela toda, top 10, tokens stage ---------- */
 .ranking--tv {
   position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 20;
   max-width: none;
   margin: 0;
+  gap: var(--space-4);
   overflow: auto;
-  gap: 1.5vh;
-  padding: calc(env(safe-area-inset-top, 0px) + var(--space-3)) max(var(--gutter), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + var(--space-3)) max(var(--gutter), env(safe-area-inset-left, 0px));
-  background: var(--bg);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--space-4)) max(var(--space-4), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + var(--space-4)) max(var(--space-4), env(safe-area-inset-left, 0px));
+  background: var(--stage);
+  color: var(--stage-ink);
 }
 
-/* Faixa do topo reservada para o "Sair" (fixo no canto): o título nunca fica embaixo dele */
 .ranking--tv .ranking-head {
-  min-height: var(--exit-row);
-  padding-right: calc(var(--exit-width) + var(--space-3));
-  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.ranking--tv .ranking-logo {
+  display: inline-flex;
+  min-height: 0;
+  margin-bottom: var(--space-1);
+  color: var(--stage-ink);
+  font-size: 1.25rem;
 }
 
 .ranking--tv .ranking-title {
-  font-size: max(var(--font-xl), min(7vh, 4.5vw));
-  line-height: 1.1;
+  font-size: 1.75rem;
+  line-height: 1;
+  letter-spacing: -0.01em;
 }
 
+.ranking--tv .ranking-side {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+/* Relógio: relógio ao lado, "Atualizado às" em cima e o horário grande */
 .ranking--tv .ranking-updated {
-  font-size: max(var(--font-md), min(3vh, 2vw));
-}
-
-.ranking--tv .ranking-status {
-  font-size: max(var(--font-lg), min(5vh, 3.5vw));
-}
-
-.ranking--tv .ranking-table {
-  font-size: max(var(--font-md), min(4.4vh, 3.2vw));
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--stage-muted);
+  font-size: 1rem;
+  font-weight: var(--weight-normal);
   line-height: 1.2;
 }
 
-.ranking--tv .ranking-table th {
-  font-size: 0.6em;
-  padding: 0.4vh 0.4em;
+.ranking--tv .ranking-updated .icon {
+  --icon-size: 2rem;
 }
 
-.ranking--tv .ranking-table td {
-  padding: 0.9vh 0.4em;
+.ranking--tv .ranking-updated__time {
+  display: block;
+  color: var(--stage-ink);
+  font-size: 1.75rem;
+  line-height: 1.1;
 }
 
-.ranking--tv .ranking-table__pos {
-  width: 3.2em;
+/* Sair: 64px de altura, contorno claro, longe do relógio */
+.ranking--tv .ranking-exit {
+  display: inline-flex;
+  width: auto;
+  min-height: 4rem;
+  padding: var(--space-2) var(--space-5);
+  border-color: var(--stage-ink);
+  background: transparent;
+  color: var(--stage-ink);
+  font-size: 1.25rem;
 }
 
-.ranking--tv .ranking-table th.ranking-table__num,
-.ranking--tv .ranking-table td.ranking-table__num {
-  width: 4.5em;
-}
-
-.ranking--tv .ranking-table th:last-child,
-.ranking--tv .ranking-table td:last-child {
-  width: 5em;
+.ranking--tv .ranking-exit:hover {
+  background: var(--stage-line);
 }
 
 .ranking--tv .ranking-actions {
   display: none;
 }
 
-.ranking--tv .ranking-exit {
-  position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + var(--space-3));
-  right: calc(env(safe-area-inset-right, 0px) + var(--space-3));
-  z-index: 11;
-  width: var(--exit-width);
-  min-height: var(--touch-min);
-  padding: 0;
-  font-size: var(--font-md);
+.ranking--tv .ranking-status {
+  border-color: var(--stage-line);
+  background: var(--stage-line);
+  color: var(--stage-ink);
+}
+
+.ranking--tv .ranking-status.is-error {
+  border-color: var(--warn);
+  background: var(--warn-bg);
+}
+
+.ranking--tv .ranking-table {
+  font-size: 1.125rem;
+  line-height: 1.1;
+}
+
+.ranking--tv .ranking-table th {
+  color: var(--stage-muted);
+  font-size: 0.8125rem;
+}
+
+.ranking--tv .ranking-table td {
+  padding: var(--space-2);
+  border-color: var(--stage-line);
+  background: var(--stage-line);
+  font-weight: var(--weight-bold);
+}
+
+.ranking--tv .ranking-table tr.is-me td {
+  border-color: var(--highlight);
+  background: var(--highlight-soft);
+}
+
+.ranking--tv .ranking-table tr.is-first td {
+  border-color: var(--highlight);
+  background: var(--highlight);
+  color: var(--on-highlight);
+}
+
+.ranking--tv .ranking-table tr.is-first .ranking-you {
+  background: var(--on-highlight);
+  color: var(--highlight);
+}
+
+.ranking--tv .ranking-name,
+.ranking--tv .ranking-table td.ranking-score {
+  font-size: inherit;
+}
+
+.ranking--tv .ranking-sub {
+  color: var(--stage-muted);
+  font-size: 0.875rem;
+  font-weight: var(--weight-normal);
+}
+
+.ranking--tv .ranking-table tr.is-first .ranking-sub {
+  color: var(--on-highlight);
+}
+
+.ranking--tv .ranking-pos {
+  background: var(--surface-alt);
+  color: var(--stage-ink);
+}
+
+.ranking--tv .ranking-table tr.is-top .ranking-pos {
+  background: var(--highlight);
+  color: var(--on-highlight);
+}
+
+.ranking--tv .ranking-table tr.is-first .ranking-pos {
+  background: var(--on-highlight);
+  color: var(--highlight);
+}
+
+.ranking--tv .ranking-you {
+  background: var(--stage-ink);
+  color: var(--stage);
+}
+
+/* Telão a partir de 700px: a escala do design (pensado para 1920x1080) vira --tv-px, "1px do design".
+   Ela segue a menor das proporções da tela, então tudo cabe sem rolagem em qualquer janela horizontal. */
+@media (min-width: 700px) {
+  .ranking--tv {
+    --tv-px: calc(min(1vh, 0.5625vw) / 10.8);
+    gap: calc(36 * var(--tv-px));
+    padding: calc(env(safe-area-inset-top, 0px) + 48 * var(--tv-px)) max(calc(80 * var(--tv-px)), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 48 * var(--tv-px)) max(calc(80 * var(--tv-px)), env(safe-area-inset-left, 0px));
+  }
+
+  .ranking--tv .ranking-head {
+    align-items: flex-end;
+    flex-wrap: nowrap;
+    gap: calc(32 * var(--tv-px));
+  }
+
+  .ranking--tv .ranking-logo {
+    margin-bottom: calc(12 * var(--tv-px));
+    font-size: max(1.25rem, calc(40 * var(--tv-px)));
+  }
+
+  .ranking--tv .ranking-title {
+    font-size: max(1.75rem, calc(72 * var(--tv-px)));
+  }
+
+  .ranking--tv .ranking-side {
+    flex-wrap: nowrap;
+    gap: calc(40 * var(--tv-px));
+  }
+
+  .ranking--tv .ranking-updated {
+    gap: calc(16 * var(--tv-px));
+    font-size: max(1rem, calc(22 * var(--tv-px)));
+    white-space: nowrap;
+  }
+
+  .ranking--tv .ranking-updated .icon {
+    --icon-size: max(2rem, calc(44 * var(--tv-px)));
+  }
+
+  .ranking--tv .ranking-updated__time {
+    font-size: max(1.75rem, calc(52 * var(--tv-px)));
+  }
+
+  .ranking--tv .ranking-exit {
+    min-height: 4rem;
+    padding: var(--space-2) max(var(--space-5), calc(28 * var(--tv-px)));
+    font-size: max(1.25rem, calc(26 * var(--tv-px)));
+  }
+
+  .ranking--tv .ranking-exit .icon {
+    --icon-size: max(1.5rem, calc(28 * var(--tv-px)));
+  }
+
+  .ranking--tv .ranking-status {
+    padding: calc(32 * var(--tv-px));
+    font-size: max(1.25rem, calc(40 * var(--tv-px)));
+  }
+
+  .ranking--tv .ranking-table {
+    border-spacing: 0 calc(8 * var(--tv-px));
+    font-size: max(1.125rem, calc(46 * var(--tv-px)));
+  }
+
+  .ranking--tv .ranking-table th {
+    padding: 0 calc(24 * var(--tv-px));
+    font-size: max(0.8125rem, calc(20 * var(--tv-px)));
+    letter-spacing: 0.1em;
+  }
+
+  .ranking--tv .ranking-table td {
+    height: calc(68 * var(--tv-px));
+    padding: 0 calc(24 * var(--tv-px));
+  }
+
+  .ranking--tv .ranking-table td:first-child {
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  }
+
+  .ranking--tv .ranking-table td:last-child {
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  }
+
+  .ranking--tv .ranking-table__pos {
+    width: calc(132 * var(--tv-px));
+  }
+
+  .ranking--tv .ranking-table th.ranking-table__num,
+  .ranking--tv .ranking-table td.ranking-table__num {
+    width: calc(230 * var(--tv-px));
+  }
+
+  .ranking--tv .ranking-table th.ranking-col-x:nth-child(4),
+  .ranking--tv .ranking-table td.ranking-col-x:nth-child(4) {
+    width: calc(230 * var(--tv-px));
+  }
+
+  .ranking--tv .ranking-table th.ranking-col-x:nth-child(5),
+  .ranking--tv .ranking-table td.ranking-col-x:nth-child(5) {
+    width: calc(200 * var(--tv-px));
+  }
+
+  .ranking--tv .ranking-pos {
+    min-width: max(2rem, calc(60 * var(--tv-px)));
+    height: max(2rem, calc(60 * var(--tv-px)));
+    font-size: max(1rem, calc(34 * var(--tv-px)));
+  }
+
+  .ranking--tv .ranking-you {
+    padding: 0.125rem max(var(--space-2), calc(14 * var(--tv-px)));
+    font-size: max(0.8125rem, calc(22 * var(--tv-px)));
+  }
+
+  .ranking--tv .ranking-dim {
+    color: var(--stage-muted);
+    font-weight: var(--weight-normal);
+  }
+
+  .ranking--tv .ranking-table tr.is-first .ranking-dim {
+    color: var(--on-highlight);
+  }
 }

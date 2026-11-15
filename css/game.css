@@ -734,8 +734,8 @@
 
 .placecard {
   display: grid;
-  align-content: space-between;
-  gap: var(--space-3);
+  align-content: center;
+  gap: var(--space-4);
   padding: var(--space-5);
   border: var(--border-width-strong) solid var(--highlight);
   border-radius: var(--radius-lg);
