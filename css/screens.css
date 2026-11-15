@@ -72,7 +72,7 @@
 .app-footer {
   border-top: var(--border-width-strong) solid var(--line);
   color: var(--ink-muted);
-  font-size: var(--font-sm);
+  font-size: var(--fs-small);
 }
 
 .app-footer__inner {

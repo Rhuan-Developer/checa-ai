@@ -67,30 +67,37 @@
     sectionEl.textContent = '';
     const wrap = el('div', 'ranking');
     const head = el('div', 'ranking-head');
-    const h1 = el('h1', 'ranking-title', 'Ranking de hoje');
+    const titleBox = el('div', 'ranking-titlebox');
+    const logo = el('span', 'app-brand ranking-logo');
+    logo.append('Checa ', el('b', null, 'Aí'));
+    const h1 = el('h1', 'ranking-title', 'Ranking do dia');
     h1.tabIndex = -1;
-    const updated = el('p', 'ranking-updated');
-    head.append(h1, updated);
+    titleBox.append(logo, h1);
 
-    const exitBtn = el('button', 'btn btn--secondary ranking-exit', 'Sair');
+    const side = el('div', 'ranking-side');
+    const updated = el('p', 'ranking-updated');
+    const updatedLabel = el('span', 'ranking-updated__label');
+    const updatedTime = el('strong', 'ranking-updated__time');
+    updated.append(ChecaAi.utils.icon('clock'), el('span', 'ranking-updated__text'));
+    const updatedText = updated.lastChild;
+    updatedText.append(updatedLabel, updatedTime);
+
+    const exitBtn = el('button', 'btn ranking-exit');
     exitBtn.type = 'button';
+    exitBtn.append(ChecaAi.utils.icon('exit', 28), 'Sair');
     exitBtn.hidden = true;
+    side.append(updated, exitBtn);
+    head.append(titleBox, side);
 
     const status = el('p', 'ranking-status');
     status.setAttribute('aria-live', 'polite');
 
     const table = el('table', 'ranking-table');
-    const caption = el('caption', 'visually-hidden', 'Ranking de hoje');
+    const caption = el('caption', 'visually-hidden', 'Ranking do dia');
     const thead = el('thead');
     const headRow = el('tr');
-    const thPos = el('th', 'ranking-table__pos');
-    thPos.scope = 'col';
-    const posMark = el('span', null, '#');
-    posMark.setAttribute('aria-hidden', 'true');
-    thPos.append(posMark, el('span', 'visually-hidden', 'Posição'));
-    headRow.appendChild(thPos);
-    [['Apelido', 'ranking-table__nick'], ['Pontos', 'ranking-table__num'], ['Acertos', 'ranking-table__num'],
-      ['Tempo', 'ranking-table__num']].forEach((c) => {
+    [['Pos.', 'ranking-table__pos'], ['Apelido', 'ranking-table__nick'], ['Pontos', 'ranking-table__num'],
+      ['Acertos', 'ranking-table__num ranking-col-x'], ['Tempo', 'ranking-table__num ranking-col-x']].forEach((c) => {
       const th = el('th', c[1], c[0]);
       th.scope = 'col';
       headRow.appendChild(th);
@@ -101,13 +108,13 @@
     table.hidden = true;
 
     const actions = el('div', 'ranking-actions');
-    const refreshBtn = el('button', 'btn', 'Atualizar');
+    const refreshBtn = el('button', 'btn btn--xl', 'Atualizar');
     refreshBtn.type = 'button';
-    const back = el('a', 'btn btn--secondary', 'Voltar');
+    const back = el('a', 'btn btn--secondary btn--xl', 'Voltar');
     back.href = '#/inicio';
     actions.append(refreshBtn, back);
 
-    wrap.append(head, exitBtn, status, table, actions);
+    wrap.append(head, status, table, actions);
     sectionEl.appendChild(wrap);
 
     // Modo telão: ícone na barra superior do app (mesmo lugar do "Modo apresentação" do simulador)
@@ -115,7 +122,7 @@
     tvBtn.type = 'button';
     tvBtn.setAttribute('aria-label', 'Modo telão');
     tvBtn.title = 'Modo telão';
-    tvBtn.innerHTML = '<svg class="btn-icon__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-tv"></use></svg>';
+    tvBtn.appendChild(ChecaAi.utils.icon('tv'));
     const headerTools = document.getElementById('app-header-tools');
     if (headerTools) {
       headerTools.appendChild(tvBtn);
@@ -135,37 +142,49 @@
       rows.forEach((row) => {
         const tr = el('tr');
         const isMe = mine.has(rowKey(row));
+        const cls = [];
+        if (row.position <= 3) cls.push('is-top');
+        if (row.position === 1) cls.push('is-first');
         if (isMe) {
-          tr.className = 'is-me';
+          cls.push('is-me');
           tr.setAttribute('aria-current', 'true');
         }
-        const nick = el('td', 'ranking-table__nick', row.nickname);
-        if (isMe) nick.appendChild(el('span', 'visually-hidden', ' (você)'));
+        tr.className = cls.join(' ');
+        const hits = row.correctVerdicts + ' de ' + row.missionsPlayed;
+        const time = formatDuration(row.durationMs);
+        const posCell = el('td', 'ranking-table__pos');
+        posCell.appendChild(el('span', 'ranking-pos', String(row.position)));
+        const nick = el('td', 'ranking-table__nick');
+        const name = el('b', 'ranking-name', row.nickname);
+        nick.appendChild(name);
+        if (isMe) nick.appendChild(el('span', 'ranking-you', 'Você'));
+        nick.appendChild(el('span', 'ranking-sub', hits + ' · ' + time));
         tr.append(
-          el('td', 'ranking-table__pos', row.position + 'º'),
+          posCell,
           nick,
-          el('td', 'ranking-table__num', String(row.score)),
-          el('td', 'ranking-table__num', row.correctVerdicts + '/' + row.missionsPlayed),
-          el('td', 'ranking-table__num', formatDuration(row.durationMs))
+          el('td', 'ranking-table__num ranking-score', String(row.score)),
+          el('td', 'ranking-table__num ranking-col-x ranking-dim', hits),
+          el('td', 'ranking-table__num ranking-col-x ranking-dim', time)
         );
         tbody.appendChild(tr);
       });
       table.hidden = rows.length === 0;
 
-      // Linha de situação: carregando, vazio, sem conexão (uma frase)
+      // Situação: carregando, vazio, sem conexão (uma frase; o botão "Tentar de novo" fica nas ações)
       let text = '';
       if (!shown) {
-        text = loading ? 'Carregando…' : 'Sem conexão.';
+        text = loading ? 'Carregando…' : 'Não deu para carregar o ranking. Confira a internet e tente de novo.';
       } else if (offline) {
-        text = 'Sem conexão.';
+        text = 'Sem conexão. Esta é a última lista guardada.';
       } else if (!rows.length) {
         text = 'Ninguém jogou ainda hoje.';
       }
       status.textContent = text;
       status.hidden = !text;
+      status.classList.toggle('is-error', !!text && !loading && (!shown || offline));
 
-      const time = shown ? ChecaAi.utils.formatClock(shown.fetchedAt, tv) : '';
-      updated.textContent = shown ? (offline ? 'Lista das ' : 'Atualizado às ') + time : '';
+      updatedLabel.textContent = shown ? (offline ? 'Lista das ' : 'Atualizado às ') : '';
+      updatedTime.textContent = shown ? ChecaAi.utils.formatClock(shown.fetchedAt, tv) : '';
       updated.hidden = !shown;
 
       refreshBtn.textContent = !shown || offline ? 'Tentar de novo' : 'Atualizar';

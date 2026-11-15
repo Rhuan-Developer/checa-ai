@@ -51,7 +51,7 @@
   --doc-crest-b: #C9A13B;
   --doc-crest-c: #8A2F3F;
 
-  /* ---------- ALIASES TEMPORÁRIOS (nomes antigos; remover nas etapas 0.6.1 a 0.6.4) ---------- */
+  /* ---------- ALIASES TEMPORÁRIOS (nomes antigos; só o simulador (css/simulator.css e o canvas de js/screens/simulator.js) ainda usa; remover na etapa 0.6.4) ---------- */
   --bg: var(--paper);
   --border: var(--line);
   --text: var(--ink);

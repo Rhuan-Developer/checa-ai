@@ -232,7 +232,7 @@ Calendário (hoje: 10/11). Cada fase termina testada e com versão publicada no 
 - [x] 0.6.0 Fundação: cores, fonte local, escala, breakpoints 700/1100, barra superior, botões
 - [x] 0.6.1 Início, apelido e missão
 - [x] 0.6.2 Início (ajuste fino), resultado da missão e fim da partida
-- [ ] 0.6.3 Ranking e telão
+- [x] 0.6.3 Ranking e telão
 - [ ] 0.6.4 Simulador (só a aparência; a lógica fica)
 - Ao fim da 0.6.4: remover os aliases temporários do `theme.css` (lista no `IMPLEMENTADO.md`)
 

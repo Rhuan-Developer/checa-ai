@@ -146,8 +146,8 @@
   background: var(--doc-paper);
   color: var(--doc-ink);
   border: var(--border-width) solid var(--doc-border);
-  border-radius: var(--radius);
-  font-size: var(--font-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-body);
   line-height: 1.45;
   display: flex;
   flex-direction: column;
@@ -177,7 +177,7 @@
 }
 
 .post-doc__org {
-  font-size: var(--font-sm);
+  font-size: var(--fs-small);
   font-weight: var(--weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -185,13 +185,13 @@
 }
 
 .post-doc__subtitle {
-  font-size: var(--font-sm);
+  font-size: var(--fs-small);
   color: var(--doc-ink-muted);
 }
 
 .post-doc__number {
   font-weight: var(--weight-bold);
-  font-size: var(--font-md);
+  font-size: var(--fs-body);
   text-align: center;
   overflow-wrap: anywhere;
 }
@@ -204,7 +204,7 @@
 
 .post-doc__place {
   text-align: right;
-  font-size: var(--font-sm);
+  font-size: var(--fs-small);
   color: var(--doc-ink-muted);
 }
 
@@ -218,7 +218,7 @@
 
 .post-doc__signature {
   font-family: "Segoe Script", "Bradley Hand", "Brush Script MT", cursive;
-  font-size: var(--font-lg);
+  font-size: var(--fs-body-lg);
   line-height: 1.2;
 }
 
@@ -231,7 +231,7 @@
 }
 
 .post-doc__role {
-  font-size: var(--font-sm);
+  font-size: var(--fs-small);
   color: var(--doc-ink-muted);
 }
 
@@ -245,10 +245,10 @@
   font-size: clamp(2.6rem, 12cqw, 5rem);
   line-height: 1.1;
   letter-spacing: 0.06em;
-  color: var(--verdict-false);
+  color: var(--bad);
   opacity: 0.42;
-  border-top: 0.06em solid var(--verdict-false);
-  border-bottom: 0.06em solid var(--verdict-false);
+  border-top: 0.06em solid var(--bad);
+  border-bottom: 0.06em solid var(--bad);
   pointer-events: none;
   user-select: none;
 }
