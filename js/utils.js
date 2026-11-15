@@ -119,5 +119,25 @@
     return new Intl.DateTimeFormat('pt-BR', opts).format(d);
   }
 
-  window.ChecaAi.utils = { todayISO, shuffle, pickRandom, validateNickname, formatClock };
+  /**
+   * Ícone do pacote do index.html (traço em currentColor). Só decorativo: o texto do botão ou do rótulo diz o que é.
+   * @param {string} name nome sem o prefixo "icon-" (ex.: 'check', 'trophy')
+   * @param {number} [size] lado em px da referência de 24; o tamanho final vem do CSS (.icon)
+   * @returns {SVGElement}
+   */
+  function icon(name, size) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'icon');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    if (size) svg.style.setProperty('--icon-size', size / 16 + 'rem');
+    const use = document.createElementNS(NS, 'use');
+    use.setAttribute('href', '#icon-' + name);
+    svg.appendChild(use);
+    return svg;
+  }
+
+  window.ChecaAi.utils = { todayISO, shuffle, pickRandom, validateNickname, formatClock, icon };
 })();

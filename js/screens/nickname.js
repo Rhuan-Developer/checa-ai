@@ -25,13 +25,24 @@
     mount(sectionEl) {
       sectionEl.textContent = '';
 
-      const form = el('form', 'game-panel layout-center nickname');
+      const icon = ChecaAi.utils.icon;
+      const HELP = '2 a 20 caracteres';
+
+      const form = el('form', 'nickname');
       form.noValidate = true;
 
-      const h1 = el('h1', 'game-title', 'Seu apelido');
-      h1.tabIndex = -1;
+      const card = el('div', 'nickname__card');
 
-      const label = el('label', 'field__label', 'Seu apelido de investigador');
+      const back = el('a', 'btn btn--quiet nickname__back');
+      back.href = '#/inicio';
+      back.append(icon('back'), 'Voltar');
+
+      const h1 = el('h1', 'nickname__title', 'Escolha seu apelido');
+      h1.tabIndex = -1;
+      const lead = el('p', 'nickname__lead', 'Ele aparece no ranking do dia.');
+
+      const field = el('div', 'nickname__field');
+      const label = el('label', 'field__label', 'Apelido');
       label.htmlFor = 'nickname-input';
 
       const input = el('input', 'field__input');
@@ -44,21 +55,41 @@
       input.spellcheck = false;
       input.setAttribute('aria-describedby', 'nickname-error');
 
+      // Linha de ajuda: "2 a 20 caracteres" e o contador; com erro, vira ícone X + a mensagem da validação
+      const help = el('div', 'field__help');
       const error = el('p', 'field__error');
       error.id = 'nickname-error';
       error.setAttribute('aria-live', 'polite');
+      const count = el('span', 'field__count', '0/20');
+      help.append(error, count);
 
-      const submit = el('button', 'btn game-primary', 'Começar');
+      function showHelp() {
+        error.textContent = HELP;
+        help.classList.remove('is-error');
+        input.removeAttribute('aria-invalid');
+      }
+      function showError(message) {
+        error.textContent = '';
+        error.append(icon('x', 16), message);
+        help.classList.add('is-error');
+        input.setAttribute('aria-invalid', 'true');
+      }
+      showHelp();
+
+      field.append(label, input, help);
+
+      const submit = el('button', 'btn btn--xl nickname__submit');
       submit.type = 'submit';
+      submit.append('Continuar', icon('arrow'));
 
-      form.append(h1, label, input, error, submit);
+      card.append(back, h1, lead, field, submit);
+      form.appendChild(card);
 
       form.addEventListener('submit', (event) => {
         event.preventDefault();
         const result = ChecaAi.utils.validateNickname(input.value);
         if (!result.ok) {
-          error.textContent = result.error;
-          input.setAttribute('aria-invalid', 'true');
+          showError(result.error);
           input.focus();
           return;
         }
@@ -67,15 +98,15 @@
           ChecaAi.storage.startMatch(result.value, missions.map((m) => m.id));
         } catch (err) {
           console.error('Não deu para montar a partida:', err);
-          error.textContent = 'Não deu para começar. Recarregue a página e tente de novo.';
+          showError('Não deu para começar. Recarregue a página e tente de novo.');
           return;
         }
         window.location.hash = '#/missao';
       });
 
       input.addEventListener('input', () => {
-        error.textContent = '';
-        input.removeAttribute('aria-invalid');
+        count.textContent = Array.from(input.value).length + '/20';
+        if (help.classList.contains('is-error')) showHelp();
       });
 
       sectionEl.appendChild(form);

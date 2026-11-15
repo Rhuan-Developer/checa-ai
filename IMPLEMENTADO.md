@@ -533,10 +533,10 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 `--bg`→`--paper` · `--border`→`--line` · `--text`→`--ink` · `--text-muted`→`--ink-muted` · `--accent`→`--primary` · `--on-accent`→`--on-primary` · `--verdict-true/false/misleading/unproven`→`--ok/--bad/--warn/--unk` · `--radius`→`--radius-sm` · `--font-sm/md/lg/xl/2xl/3xl`→`--fs-small/body/body-lg/title-2/title-1/big-number` · `--touch-lg`→`--control-xl` · `--header-height`→`--topbar-h` · `--line-height`. Atenção: `js/screens/simulator.js` lê `--verdict-false`, `--verdict-true`, `--accent`, `--text-muted`, `--bg`, `--surface`, `--text` para o canvas (por isso os aliases ficam até a etapa 0.6.4)
 
 ### Problemas visuais encontrados (lista para as etapas 0.6.1 a 0.6.4)
-1. Missão: legenda "Seu veredito" encostada na primeira opção (o foco cobre a legenda)
-2. Missão e resultado: listas e blocos ainda no layout antigo (sem os componentes do design: pistas como cartões, vereditos em 4 colunas no tablet, pílulas de nível/pontos, faixa SIMULAÇÃO)
-3. Barra superior sem os pontos da missão e sem pílula de nível (`.pill` criada, não usada)
-4. `tabular-nums` na Atkinson troca os algarismos por uma variante larga com zero cortado: nos números grandes do fim da partida parece fonte monoespaçada; avaliar nas etapas 0.6.2 e 0.6.3
+1. ✅ (v0.6.1) Missão: legenda "Seu veredito" encostada na primeira opção (o foco cobre a legenda)
+2. ✅ (v0.6.1) Missão e resultado: listas e blocos ainda no layout antigo (sem os componentes do design: pistas como cartões, vereditos em 4 colunas no tablet, pílulas de nível/pontos, faixa SIMULAÇÃO)
+3. ✅ (v0.6.1) Barra superior sem os pontos da missão e sem pílula de nível (`.pill` criada, não usada)
+4. ✅ (v0.6.1) `tabular-nums` na Atkinson troca os algarismos por uma variante larga com zero cortado: nos números grandes do fim da partida parece fonte monoespaçada; avaliar nas etapas 0.6.2 e 0.6.3
 5. Telão: "Sair" pequeno no canto; tokens `stage-*` ainda não usados (usa `--bg`/`--text`); linhas ainda sem o raio e a faixa do design
 6. Simulador: "Sair" do modo apresentação pequeno; título "Como um boato se espalha" pequeno diante do design; canvas com borda fina
 7. Ranking: sem a linha "Você" em `highlight-soft` e sem pódio amarelo (design)
@@ -550,6 +550,51 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 4. `grep` em `css/`: zero `gradient`, `box-shadow`, `text-shadow`, hex ou `rgb()` fora do `theme.css`
 5. Zoom 50% a 200% em 6 tamanhos × início, apelido, ranking, simulador: sem rolagem horizontal (exceto a limitação 9); alvos ≥ 44px nos botões visíveis
 6. Regressão: 9 missões = 200, veredito certo + só iscas = 120, apelido, `drawMatch` 300×, 88.572 × 4.546, classificação do envio, fila (sem duplicar, limite 20, sem dado pessoal), XSS do ranking vira texto, console sem erros
+
+## Redesign 2/5 — Início, Apelido e Missão (v0.6.1)
+
+**Status:** ✅ v0.6.1 na `feat/redesign-telas-1`. Só aparência e estrutura de HTML/CSS das três telas e da publicação simulada. Lógica, pontuação, banco, conteúdo das missões e as outras telas não mudaram.
+
+### Fluxo / Telas
+- **Início:** sobretítulo "CiberMissões 2026", título "Checa **Aí**" (display 56/88/104, "Aí" em `highlight`), chamada, 3 botões (Começar investigação grande; Como um boato se espalha e Ranking secundários, com ícone), arte de publicação com carimbo ENGANOSA (tablet em diante à direita; no celular menor, abaixo), pílulas "3 missões / 600 pontos / 4 vereditos" e o aviso de simulação
+- **Apelido:** Voltar discreto, título, "Ele aparece no ranking do dia.", campo de 60px (22px bold, borda `line-strong`, erro em `bad`), ajuda "2 a 20 caracteres" com contador n/20; com erro, ícone X + a mensagem que `validateNickname` devolve; botão Continuar grande. Cartão (`surface`, borda `line`, `radius-lg`) a partir de 700px; coluna máx. 37,5rem
+- **Missão:** sobretítulo "MISSÃO n DE 3", título, pílula de nível (Fácil ok / Médio warn / Difícil bad), pílula de tempo (mm:ss da partida, atualiza a cada 1 s) e barra de 3 passos. **Pontos acumulados** (pílula com troféu) na barra superior, só das missões já concluídas; sai da barra ao deixar a tela. Corpo: celular 1 coluna; tablet 2 colunas nas ferramentas (pistas | sinais; veredito e botão na largura toda); notebook (≥ 1100) publicação fixa (`sticky`) à esquerda e Pistas, Sinais e Veredito à direita
+  - Pistas: botões com ícone (um por vez; clicar de novo fecha), resultado em caixa `info-bg` com o rótulo em sobretítulo. Duas por linha só a partir de 1100px (os rótulos são longos); abaixo, uma por linha
+  - Sinais: caixas de seleção **nativas** (`<input type="checkbox">` escondido só visualmente, dentro do `<label>`); marcado = `highlight-soft` com borda `highlight`; linha de 52px
+  - Veredito: rádios **nativos** dentro de cartões (ícone redondo na cor do veredito, título, dica); 2 colunas no celular, 4 no tablet, 2 no notebook; selecionado = borda 3px e fundo do veredito
+  - "Confirmar veredito" grande, `sticky` no fim da tela; desabilitado até escolher o veredito
+- **Publicação simulada:** avatar com iniciais, nome, subtítulo (o "badge" da missão), etiqueta SIMULAÇÃO em `highlight`, texto 20px, mídia (foto com crédito, documento HTML/CSS com logo e assinatura da F3, quadro "Imagem fictícia") com faixa SIMULAÇÃO (topo na foto e no quadro; diagonal no documento). Texto sem mídia: a etiqueta do cabeçalho é a marca
+
+### Arquivos e funções
+- `js/screens/home.js`, `nickname.js`, `mission.js`: reescritos (mesmas rotas, mesmo `guard()`/`mount()`; `mission.js` ganhou `unmount()` que para o relógio e tira a pílula de pontos)
+- `js/components/post-card.js`: cabeçalho novo (`initials()`), faixa `buildTopBand()`; todos os tipos de mídia mantidos. É usado também pelo simulador (que herda o visual novo)
+- `js/utils.js`: `ChecaAi.utils.icon(name, size)` devolve `<svg class="icon"><use href="#icon-…"></svg>`
+- `assets/icons/icons.svg` e a cópia inline do `index.html`: 17 ícones novos (search, check, x, wave, question, origin, date, context, sources, clock, exit, share, tree, trophy, arrow, back, repeat), traços do `bundle.js`. Os de "sair", "compartilhar" e "repetir" ainda não são usados
+- `css/base.css`: `.icon`, `.kicker`, `.block`; `css/components.css`: publicação; `css/screens.css`: início; `css/game.css`: apelido e missão (as regras antigas de `.tool-btn`, `.toggle`, `.choice`, `.verdict` etc. saíram; `.game-block`, `.game-title`, `.game-primary`, `.result-signals`, `.tips` ficam para as etapas 3 e 4)
+- `js/config.js`: `APP_VERSION` 0.6.1
+
+### Decisões técnicas
+- **O título da missão não é `mission.title`:** alguns títulos entregam a resposta ("A enchente de hoje (que não era de hoje)", "O comunicado oficial que não existia"). O `h1` é "Investigue a publicação"
+- Sem contagens no rodapé da publicação nem @usuário/data: o conteúdo das missões não tem esses campos e não foi inventado (o "badge" faz o papel de subtítulo)
+- O ícone de cada pista sai de uma busca no rótulo da ferramenta (`toolIcon`), porque os rótulos são texto livre por missão
+- Veredito e sinais usam `role="radiogroup"`/lista com `aria-labelledby` no título em vez de `<fieldset><legend>` (o `legend` era a causa da legenda encostada na primeira opção)
+- Foco: o anel de 3px é desenhado no `<label>` via `:has(input:focus-visible)` (o `<input>` fica escondido)
+- Botão do formulário de apelido passou a "Continuar" (como no design); antes "Começar"
+- Números grandes sem `tabular-nums` (`.stat__value` saiu da regra); só tabelas e contadores pequenos usam
+- `.verdicts` e `.clues` com `minmax(0, 1fr)` e uma coluna abaixo de 360px: com `1fr` o texto "suficientes" estourava a tela em celular com zoom
+
+### Aliases do `theme.css`
+Removidos (ninguém mais usa): `--header-height`, `--line-height`. Continuam (usados pelas telas de resultado, fim, ranking, telão e simulador; o canvas do simulador lê `--verdict-*`, `--accent`, `--text`, `--text-muted`, `--bg`): `--bg`, `--border`, `--text`, `--text-muted`, `--accent`, `--on-accent`, `--verdict-true/false/misleading/unproven`, `--radius`, `--font-sm/md/lg/xl/2xl/3xl`, `--touch-lg`
+
+### Problemas visuais da v0.6.0
+Resolvidos nesta etapa: **1** (legenda "Seu veredito"), **2** (missão: pistas, sinais e veredito no layout do design; o resultado fica para a etapa 3), **3** (pontos e nível/tempo no cabeçalho da missão), **4** (números grandes sem `tabular-nums`). Seguem: 5 (telão), 6 (simulador), 7 (ranking), 8 (fim da partida), 9 (viewports de ~180px)
+
+### Roteiro de teste
+1. Capturas em 360×640, 390×844, 768×1024, 1366×768, 1920×1080 e 2400×1200 em `docs/capturas/v0.6.1/`: início; apelido (vazio, válido, erro); missões F3 (documento com logo), M1 (foto) e D2 (sem mídia) recém-abertas (botão desabilitado), com pista aberta, com sinais marcados e com veredito marcado; mais capturas só da janela (botão fixo) e a mensagem do simulador
+2. Teclado: Tab percorre pistas, sinais, veredito e o botão; Espaço marca o sinal; setas trocam o veredito; Enter abre/fecha a pista; foco de 3px em todos
+3. Alvos ≥ 44px nas 3 telas; sem rolagem horizontal de 50% a 200% de zoom (6 tamanhos × 5 telas/missões, exceto viewport < 200px)
+4. Fluxo completo pela interface em 390×844 e 1366×768 (início → apelido → 3 missões → fim com 600); recarregar na missão 2 mantém a partida; pontos da missão 1 aparecem na barra
+5. Regressão (9 missões = 200, drawMatch, apelido, 88.572 × 4.546, fila offline, XSS do ranking): passam; console sem erros
 
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
@@ -633,7 +678,7 @@ Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
   - [x] 4A — SQL (migration, rollback, teste, revisão do `security-engineer`) — aplicado pela Grasi
   - [x] 4B — `api.js`, fila offline, telas de ranking e modo telão
   - [ ] Partida real de verificação pela Grasi (roteiro em `supabase/LEIA-ME.md`)
-- [ ] Redesign "Noite" em 5 etapas: 0.6.0 fundação ✅ · 0.6.1 início/apelido/missão · 0.6.2 resultado e fim · 0.6.3 ranking e telão · 0.6.4 simulador
+- [ ] Redesign "Noite" em 5 etapas: 0.6.0 fundação ✅ · 0.6.1 início/apelido/missão ✅ · 0.6.2 resultado e fim · 0.6.3 ranking e telão · 0.6.4 simulador
 - [ ] Fase 5 — Testes em notebook/tablet/celular, service worker, QR Code, tela de dicas — até 24/11
 - [ ] v1.0.0 e congelamento — 25/11
 

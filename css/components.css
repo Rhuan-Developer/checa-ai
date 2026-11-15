@@ -1,91 +1,135 @@
 /* Componentes compartilhados. Cores e medidas vêm do theme.css. */
 
-/* Mensagem fictícia (js/components/post-card.js) */
+/* Publicação simulada (js/components/post-card.js): cabeçalho com avatar, texto, mídia e a marca SIMULAÇÃO */
 .post-card {
   background: var(--surface);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--space-5);
+  border: var(--border-width-strong) solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  font-size: var(--font-lg);
+  font-size: 1.25rem;
+  line-height: 1.5;
 }
 
 .post-card__top {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.post-card__avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--unk);
+  color: var(--on-primary);
+  font-size: 1.0625rem;
+  font-weight: var(--weight-bold);
+}
+
+.post-card__who {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  line-height: 1.3;
 }
 
 .post-card__header {
-  font-weight: var(--weight-bold);
-}
-
-.post-card__badge {
-  color: var(--text-muted);
-  font-size: var(--font-sm);
-}
-
-.post-card__content {
+  font-size: var(--fs-body);
   overflow-wrap: anywhere;
 }
 
+.post-card__badge {
+  color: var(--ink-muted);
+  font-size: var(--fs-small);
+}
+
 .post-card__stamp {
-  border: var(--border-width) solid var(--verdict-misleading);
-  border-radius: var(--radius);
-  color: var(--verdict-misleading);
-  font-size: var(--font-sm);
+  flex: none;
+  align-self: flex-start;
+  padding: var(--space-1) 0.625rem;
+  border-radius: var(--radius-sm);
+  background: var(--highlight);
+  color: var(--on-highlight);
+  font-size: 0.8125rem;
   font-weight: var(--weight-bold);
-  padding: 0 var(--space-2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.post-card__content {
+  padding: 0 var(--space-4) var(--space-4);
+  overflow-wrap: anywhere;
 }
 
 /* Foto real com crédito */
 .post-card__photo {
+  position: relative;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  border-top: var(--border-width-strong) solid var(--line-strong);
 }
 
 .post-card__img {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: var(--radius);
-  background: var(--border);
+  background: var(--illu-sky);
 }
 
 .post-card__credit {
-  color: var(--text-muted);
-  font-size: var(--font-sm);
+  padding: var(--space-2) var(--space-4);
+  color: var(--ink-muted);
+  font-size: var(--fs-small);
+  line-height: 1.4;
   overflow-wrap: anywhere;
+}
+
+/* Faixa "SIMULAÇÃO" no topo da foto e do quadro de imagem */
+.post-card__band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  padding: 0.375rem;
+  background: var(--highlight);
+  color: var(--on-highlight);
+  text-align: center;
+  font-size: var(--fs-small);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.24em;
+  line-height: 1.3;
 }
 
 /* Quadro "Imagem fictícia" (sem foto, ou foto que não carregou) */
 .post-card__placeholder {
+  position: relative;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  padding: var(--space-4);
-  min-height: 8rem;
+  padding: 3rem var(--space-4) var(--space-4);
+  min-height: 9rem;
   justify-content: center;
-  background: var(--surface);
-  border: var(--border-width) dashed var(--text-muted);
-  border-radius: var(--radius);
+  background: var(--illu-sky);
+  border-top: var(--border-width-strong) solid var(--line-strong);
 }
 
 .post-card__placeholder-label {
-  color: var(--text-muted);
-  font-size: var(--font-sm);
+  color: var(--ink);
+  font-size: var(--fs-small);
   font-weight: var(--weight-bold);
 }
 
 .post-card__placeholder-alt {
-  font-size: var(--font-md);
+  font-size: var(--fs-body);
   overflow-wrap: anywhere;
 }
 
@@ -207,4 +251,11 @@
   border-bottom: 0.06em solid var(--verdict-false);
   pointer-events: none;
   user-select: none;
+}
+
+/* O documento fictício dentro da publicação: afastado das bordas do cartão */
+.post-card > .post-doc {
+  width: auto;
+  margin: 0 var(--space-4) var(--space-4);
+  max-width: none;
 }

@@ -84,14 +84,23 @@
   padding-bottom: var(--space-3);
 }
 
-/* Tela inicial: bloco centralizado, ocupa a largura útil */
+/* Tela inicial: texto e botões à esquerda, arte de publicação à direita (tablet em diante) */
 .home {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
+  display: grid;
+  gap: var(--space-6);
   width: 100%;
-  max-width: var(--panel-max);
-  margin: 0 auto;
+}
+
+.home__hero {
+  display: grid;
+  gap: var(--space-5);
+  align-items: center;
+}
+
+.home__text {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
 }
 
 .home__title {
@@ -100,20 +109,136 @@
   letter-spacing: -0.02em;
 }
 
+.home__title b {
+  padding: 0 0.12em;
+  border-radius: var(--radius-md);
+  background: var(--highlight);
+  color: var(--on-highlight);
+}
+
 .home__tagline {
-  font-size: var(--font-xl);
-  color: var(--text-muted);
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body-lg);
+  color: var(--ink-muted);
 }
 
 .home__actions {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
-.home__actions .btn {
-  min-height: var(--control-xl);
-  font-size: var(--fs-body-lg);
+.home__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home__facts li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-width-strong) solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  font-weight: var(--weight-bold);
+}
+
+.home__facts strong {
+  color: var(--highlight);
+  font-size: 1.375rem;
+}
+
+.home__foot {
+  color: var(--ink-muted);
+  font-size: var(--fs-small);
+}
+
+/* Arte: dois cartões de publicação e o carimbo ENGANOSA (só formas lisas, decorativa) */
+.home__art {
+  position: relative;
+  width: 100%;
+  max-width: 15rem;
+  margin: 0 auto;
+  aspect-ratio: 5 / 5.4;
+}
+
+.home__art-card {
+  position: absolute;
+  inset: 6% 8% 0 0;
+  display: grid;
+  align-content: start;
+  gap: 0.625rem;
+  padding: 7%;
+  background: var(--surface);
+  border: var(--border-width-strong) solid var(--line-strong);
+  border-radius: var(--radius-lg);
+}
+
+.home__art-card--back {
+  inset: 0 0 8% 10%;
+  background: var(--surface-alt);
+  border-color: var(--line);
+  transform: rotate(5deg);
+}
+
+.home__art-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.home__art-avatar {
+  width: 15%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--unk);
+}
+
+.home__art-line {
+  display: block;
+  height: 0.625rem;
+  border-radius: 0.3125rem;
+  background: var(--surface-alt);
+}
+
+.home__art-photo {
+  overflow: hidden;
+  border: var(--border-width-strong) solid var(--line-strong);
+  border-radius: var(--radius-md);
+}
+
+.home__art-photo svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.art-sky { fill: var(--illu-sky); }
+.art-win { fill: var(--highlight); }
+.art-b1 { fill: var(--illu-building); }
+.art-b2 { fill: var(--illu-building-2); }
+.art-water { fill: var(--illu-water); }
+.art-car { fill: var(--bad); }
+.art-wave { fill: none; stroke: var(--ink-muted); stroke-width: 3; stroke-linecap: round; }
+
+.home__art-stamp {
+  position: absolute;
+  right: -2%;
+  bottom: 10%;
+  transform: rotate(-7deg);
+  padding: 0.375rem 0.875rem;
+  border: 4px solid var(--highlight);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--highlight);
+  font-size: 1.25rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.1em;
 }
 
 /* Tela do simulador (detalhes em simulator.css) */
@@ -125,21 +250,35 @@
 }
 
 @media (min-width: 700px) {
+  .home {
+    padding-top: var(--space-5);
+  }
+
+  .home__hero {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+
   .home__actions {
-    flex-direction: row;
+    display: flex;
     flex-wrap: wrap;
+  }
+
+  .home__art {
+    max-width: 25rem;
+  }
+
+  .home__art-stamp {
+    font-size: 1.625rem;
   }
 }
 
 @media (min-width: 1100px) {
   .home {
-    align-items: center;
-    text-align: center;
     padding-top: var(--space-7);
-    padding-bottom: var(--space-7);
   }
 
-  .home__actions {
-    justify-content: center;
+  .home__hero {
+    gap: var(--space-8);
   }
 }
