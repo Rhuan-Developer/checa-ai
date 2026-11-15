@@ -1,71 +1,5 @@
 /* Jogo das missões: apelido, missão, resultado da missão e fim da partida.
-   Cores e medidas vêm do theme.css. Colunas: .layout-split (base.css). */
-
-.game,
-.game-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  width: 100%;
-}
-
-.game-panel {
-  max-width: var(--panel-max);
-}
-
-.game-title {
-  font-size: var(--font-2xl);
-}
-
-.game__col {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  min-width: 0;
-}
-
-.game-block {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  border: 0;
-  min-width: 0;
-}
-
-.game-block__title {
-  padding: 0;
-  font-size: var(--font-lg);
-  font-weight: var(--weight-bold);
-}
-
-.game-text {
-  max-width: var(--text-max);
-}
-
-.game-primary {
-  width: 100%;
-  min-height: var(--touch-lg);
-  font-size: var(--font-lg);
-}
-
-.game-actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-/* Listas das telas de resultado e fim da partida */
-.result-signals,
-.tips {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+   Cores e medidas vêm do theme.css. */
 
 /* ---------- Apelido ---------- */
 .nickname {
@@ -453,6 +387,13 @@
   background: var(--paper);
 }
 
+/* Janela baixa (menos de 700px de altura): o botão flui no fim da página, sem grudar */
+@media (max-height: 699px) {
+  .mission__confirm {
+    position: static;
+  }
+}
+
 .mission__submit {
   width: 100%;
 }
@@ -521,8 +462,33 @@
     overflow-y: auto;
   }
 
+  /* Coluna das ferramentas mais compacta: no notebook ela é a mais comprida da tela */
   .mission__tools {
     grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .mission__tools .block {
+    padding: var(--space-4);
+  }
+
+  .mission__tools .block__title {
+    margin-bottom: var(--space-2);
+  }
+
+  .mission__tools .signal {
+    min-height: 3rem;
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+
+  .mission__tools .clue {
+    min-height: 3.25rem;
+  }
+
+  .mission__tools .verdict {
+    min-height: 6rem;
+    padding: var(--space-3);
   }
 
   /* Rótulos de pista são longos: duas por linha só quando a coluna é larga */
@@ -539,134 +505,321 @@
   }
 }
 
-/* Resultado da missão */
-.verdict-box {
+
+/* ---------- Resultado da missão e fim da partida ---------- */
+.result,
+.end {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--mid-max);
+  margin: 0 auto;
+}
+
+/* Marca redonda de acerto/erro: ícone em on-primary sobre a cor; sempre acompanhada de texto */
+.mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: 1px;
+  border-radius: 50%;
+  color: var(--on-primary);
+}
+
+.mark--ok { background: var(--ok); }
+.mark--bad { background: var(--bad); }
+.mark--neutral { background: var(--surface-alt); color: var(--ink-muted); }
+
+.bar {
+  height: 0.875rem;
+  margin-top: var(--space-2);
+  border-radius: 0.4375rem;
+  background: var(--surface-alt);
+  overflow: hidden;
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+}
+
+/* Faixa de resultado */
+.result__banner {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-2);
-  align-items: baseline;
-  font-size: var(--font-lg);
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: var(--border-width-strong) solid;
+  border-radius: var(--radius-lg);
 }
 
-.verdict-box__label {
-  padding: 0 var(--space-2);
-  font-weight: var(--weight-bold);
-  border: var(--border-width-strong) solid currentColor;
-  border-radius: var(--radius);
+.result__banner--ok { background: var(--ok-bg); border-color: var(--ok); }
+.result__banner--bad { background: var(--bad-bg); border-color: var(--bad); }
+
+.result__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  color: var(--on-primary);
 }
 
-.verdict-box[data-verdict="true"] .verdict-box__label { color: var(--verdict-true); }
-.verdict-box[data-verdict="false"] .verdict-box__label { color: var(--verdict-false); }
-.verdict-box[data-verdict="misleading"] .verdict-box__label { color: var(--verdict-misleading); }
-.verdict-box[data-verdict="unproven"] .verdict-box__label { color: var(--verdict-unproven); }
+.result__banner--ok .result__icon { background: var(--ok); }
+.result__banner--bad .result__icon { background: var(--bad); }
 
-.result-yours,
-.result-reference {
-  color: var(--text-muted);
+.result__body {
+  display: grid;
+  gap: 0.375rem;
+  min-width: 0;
 }
 
-.result-signals__item {
-  padding: var(--space-3) var(--space-4);
-  background: var(--surface);
-  border: var(--border-width) solid var(--border);
-  border-left: var(--border-width-strong) solid var(--text-muted);
-  border-radius: var(--radius);
+.result__grid,
+.result__col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  min-width: 0;
 }
 
-.result-signals__item[data-outcome="found"],
-.result-signals__item[data-outcome="ok"] {
-  border-left-color: var(--verdict-true);
+.result__grid {
+  align-items: start;
 }
 
-.result-signals__item[data-outcome="missed"],
-.result-signals__item[data-outcome="trap"] {
-  border-left-color: var(--verdict-false);
+.result__text {
+  max-width: var(--text-max);
 }
 
-.result-signals__text {
+.result__reference {
+  margin-top: var(--space-3);
+  color: var(--ink-muted);
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
+}
+
+/* Lista dos sinais com a marca de cada um */
+.review,
+.points,
+.mlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: var(--border-width-strong) solid var(--line);
+}
+
+.review li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.review__body {
+  display: grid;
+  min-width: 0;
+}
+
+.review__text {
   overflow-wrap: anywhere;
 }
 
-.result-signals__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-2);
-  align-items: center;
-  margin-top: var(--space-2);
-  font-size: var(--font-sm);
-}
-
-.tag {
-  padding: 0 var(--space-2);
-  color: var(--text-muted);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
-}
-
-.result-signals__outcome {
+.review__tag {
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
   font-weight: var(--weight-bold);
 }
 
-.points {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin: 0;
-}
+.review__tag.is-ok { color: var(--ok); }
+.review__tag.is-bad { color: var(--bad); }
+.review__tag.is-neutral { color: var(--ink-muted); }
 
-.points__row {
+/* Pontos da missão */
+.points li {
   display: flex;
   justify-content: space-between;
   gap: var(--space-3);
+  padding: 0.625rem 0;
+  border-top: var(--border-width-strong) solid var(--line);
 }
 
-.points__row dd {
-  margin: 0;
+.points li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.points b {
+  white-space: nowrap;
+}
+
+.total {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.total strong {
+  font-size: 3.25rem;
+  line-height: 1;
+}
+
+.total span {
+  color: var(--ink-muted);
+  font-size: 1.375rem;
   font-weight: var(--weight-bold);
 }
 
-.points__row--total {
-  margin-top: var(--space-2);
-  padding-top: var(--space-2);
-  border-top: var(--border-width) solid var(--border);
-  font-size: var(--font-lg);
+.result__actions,
+.end__actions {
+  display: grid;
+  gap: var(--space-3);
 }
 
 /* Fim da partida */
-.end-player {
-  font-size: var(--font-xl);
+.end__head {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.end__player {
+  color: var(--ink-muted);
+  font-size: var(--fs-body-lg);
   font-weight: var(--weight-bold);
   overflow-wrap: anywhere;
 }
 
-.stats {
-  display: flex;
-  flex-direction: column;
+.end__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
-  margin: 0;
 }
 
-.stat {
-  display: flex;
-  flex-direction: column;
+.scorecard {
+  display: grid;
+  align-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: var(--border-width-strong) solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--stage);
+  color: var(--stage-ink);
 }
 
-.stat__label {
-  color: var(--text-muted);
-}
+.scorecard .kicker { color: var(--stage-muted); }
+.scorecard .bar { background: var(--stage-line); }
+.scorecard .bar > span { background: var(--highlight); }
 
-.stat__value {
-  margin: 0;
-  font-size: var(--font-3xl);
+.bignum {
+  font-size: var(--fs-big-number);
+  line-height: var(--lh-big-number);
   font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.bignum small {
+  color: var(--stage-muted);
+  font-size: 1.75rem;
+  letter-spacing: 0;
+}
+
+.placecard {
+  display: grid;
+  align-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: var(--border-width-strong) solid var(--highlight);
+  border-radius: var(--radius-lg);
+  background: var(--highlight);
+  color: var(--on-highlight);
+}
+
+.placecard .kicker { color: var(--on-highlight); }
+
+.place {
+  font-size: 1.875rem;
   line-height: 1.1;
+  font-weight: var(--weight-bold);
+}
+
+.place strong {
+  display: block;
+  font-size: 5rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.mlist li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: var(--border-width-strong) solid var(--line);
+}
+
+.mlist li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.mlist small {
+  display: block;
+  color: var(--ink-muted);
+  font-size: var(--fs-small);
+}
+
+.mstats {
+  display: flex;
+  gap: var(--space-5);
+  margin: var(--space-4) 0 0;
+  padding-top: var(--space-4);
+  border-top: var(--border-width-strong) solid var(--line);
+}
+
+.mstats div {
+  display: grid;
+}
+
+.mstats dt {
+  color: var(--ink-muted);
+  font-size: var(--fs-label);
+  font-weight: var(--weight-bold);
+}
+
+.mstats dd {
+  margin: 0;
+  font-size: 1.875rem;
+  line-height: 1.1;
+  font-weight: var(--weight-bold);
+}
+
+.end__rank {
+  font-size: var(--fs-body-lg);
+  font-weight: var(--weight-bold);
+}
+
+.end__rank[data-state="pending"] {
+  color: var(--ink-muted);
+  font-weight: var(--weight-normal);
 }
 
 .tips {
-  list-style: decimal;
-  padding-left: var(--space-5);
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
-  font-size: var(--font-lg);
+  margin: 0;
+  padding: 0 0 0 var(--space-5);
+  list-style: decimal;
 }
 
 .tips__item {
@@ -674,24 +827,49 @@
 }
 
 @media (min-width: 700px) {
-  .game-primary {
-    width: auto;
-    min-width: 16rem;
+  .result__icon {
+    width: 4.5rem;
+    height: 4.5rem;
   }
 
-  .game-actions {
-    flex-direction: row;
+  .result__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .result__actions,
+  .end__actions {
+    display: flex;
     flex-wrap: wrap;
   }
+
+  .end__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .end__missions {
+    grid-column: 1 / -1;
+  }
+
+  /* Sem o cartão da posição, o placar ocupa a linha toda */
+  .end__grid:not(.end__grid--place) .scorecard {
+    grid-column: 1 / -1;
+  }
 }
 
-/* Fim da partida: situação do envio ao ranking (uma frase) */
-.end-rank {
-  font-size: var(--font-lg);
-  font-weight: var(--weight-bold);
-}
+@media (min-width: 1100px) {
+  .end__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+  }
 
-.end-rank[data-state="pending"] {
-  color: var(--text-muted);
-  font-weight: var(--weight-normal);
+  .end__missions {
+    grid-column: auto;
+  }
+
+  .end__grid:not(.end__grid--place) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  }
+
+  .end__grid:not(.end__grid--place) .scorecard {
+    grid-column: auto;
+  }
 }

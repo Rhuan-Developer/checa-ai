@@ -57,11 +57,8 @@
   --text: var(--ink);
   --text-muted: var(--ink-muted);
   --accent: var(--primary);
-  --on-accent: var(--on-primary);
   --verdict-true: var(--ok);
   --verdict-false: var(--bad);
-  --verdict-misleading: var(--warn);
-  --verdict-unproven: var(--unk);
   --radius: var(--radius-sm);
   --font-sm: var(--fs-small);
   --font-md: var(--fs-body);
@@ -140,6 +137,7 @@
   /* Larguras de conteúdo (em rem: crescem com a fonte base no telão) */
   --content-max: max(75rem, 82vw); /* container da página: 75rem no notebook; acima disso cresce com a tela (82vw), sem teto fixo */
   --panel-max: max(56rem, 46vw); /* coluna central de uma tela só de texto (mensagem, resultado) */
+  --mid-max: max(65rem, 56vw); /* coluna larga de resultado da missão e fim da partida */
   --compare-max: max(72rem, 62vw); /* comparação final */
   --sim-center-max: 100%; /* mensagem inicial do simulador: largura toda do container, alinhada ao título e ao passo dividido */
   --text-max: 60ch;

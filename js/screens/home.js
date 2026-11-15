@@ -65,7 +65,7 @@
 
       const kicker = document.createElement('p');
       kicker.className = 'kicker';
-      kicker.textContent = 'CiberMissões 2026';
+      kicker.textContent = 'Mostra de Informática';
 
       const h1 = document.createElement('h1');
       h1.className = 'home__title';
@@ -77,7 +77,7 @@
 
       const tagline = document.createElement('p');
       tagline.className = 'home__tagline';
-      tagline.textContent = 'Antes de compartilhar, checa aí.';
+      tagline.textContent = 'Investigue publicações, encontre os sinais e dê seu veredito.';
 
       const actions = document.createElement('div');
       actions.className = 'home__actions';

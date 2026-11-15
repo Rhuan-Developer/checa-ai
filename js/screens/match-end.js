@@ -90,12 +90,6 @@
     idleHandler();
   }
 
-  function stat(label, value) {
-    const box = el('div', 'stat');
-    box.append(el('dt', 'stat__label', label), el('dd', 'stat__value', value));
-    return box;
-  }
-
   /** Fim da partida: pontos, acertos, tempo e dicas "Antes de compartilhar". */
   ChecaAi.screens.matchEnd = {
     id: 'match-end',
@@ -117,27 +111,52 @@
       const results = match.answers.map((a) => a.score);
       const total = ChecaAi.scoring.scoreMatch(results);
 
-      const root = el('div', 'game');
-      const h1 = el('h1', 'game-title', 'Fim da partida');
+      const icon = ChecaAi.utils.icon;
+      const labels = ChecaAi.missions.LEVEL_LABELS;
+      const root = el('div', 'end');
+
+      const head = el('header', 'end__head');
+      head.appendChild(el('p', 'kicker', 'Partida concluída'));
+      const h1 = el('h1', 'end__title', 'Fim da partida');
       h1.tabIndex = -1;
+      head.append(h1, el('p', 'end__player', match.nickname));
 
-      const player = el('p', 'end-player', match.nickname);
+      const grid = el('div', 'end__grid');
 
-      const stats = el('dl', 'stats');
-      stats.append(
-        stat('Pontos', total.total + ' de ' + total.maxTotal),
-        stat('Acertos', total.correctVerdicts + ' de ' + total.missions),
-        stat('Tempo', formatDuration(match.finishedAt - match.startedAt))
-      );
+      // Placar: total de 600 e barra
+      const scoreCard = el('section', 'scorecard');
+      scoreCard.appendChild(el('p', 'kicker', 'Pontuação'));
+      const big = el('p', 'bignum');
+      big.append(String(total.total), el('small', null, ' de ' + total.maxTotal));
+      const bar = el('div', 'bar');
+      bar.setAttribute('aria-hidden', 'true');
+      const fill = el('span');
+      fill.style.width = (total.maxTotal > 0 ? Math.max(0, Math.min(100, (total.total / total.maxTotal) * 100)) : 0) + '%';
+      bar.appendChild(fill);
+      scoreCard.append(big, bar);
+
+      // Posição: só aparece quando o envio devolveu a posição real
+      const placeCard = el('section', 'placecard');
+      placeCard.hidden = true;
+      placeCard.appendChild(el('p', 'kicker', 'Ranking do dia'));
+      const place = el('p', 'place', 'Você está em');
+      const placeNumber = el('strong', null, '');
+      place.appendChild(placeNumber);
+      placeCard.appendChild(place);
 
       // Ranking do dia: entra na fila uma vez (pelo clientId da partida) e mostra a situação do envio
-      const rankStatus = el('p', 'end-rank');
+      const rankStatus = el('p', 'end__rank');
       rankStatus.setAttribute('aria-live', 'polite');
       if (ChecaAi.config.FEATURES.ranking && ChecaAi.api) {
         const render = () => {
           const result = ChecaAi.storage.getResult(match.clientId);
           const queued = ChecaAi.storage.getQueue().find((q) => q.clientId === match.clientId) || null;
-          const text = rankStatusText(result, queued, navigator.onLine !== false);
+          const hasPosition = !!(result && result.state === 'sent' && result.position);
+          placeNumber.textContent = hasPosition ? result.position + 'º' : '';
+          placeCard.hidden = !hasPosition;
+          grid.classList.toggle('end__grid--place', hasPosition);
+          // Com a posição no cartão, a frase "Você está em Nº" seria repetição
+          const text = hasPosition ? '' : rankStatusText(result, queued, navigator.onLine !== false);
           rankStatus.textContent = text;
           rankStatus.hidden = !text;
           rankStatus.dataset.state = result ? result.state : '';
@@ -162,9 +181,34 @@
         rankStatus.hidden = true;
       }
 
-      const tips = el('section', 'game-block');
-      tips.appendChild(el('h2', 'game-block__title', 'Antes de compartilhar'));
-      const list = el('ol', 'tips');
+      // Suas missões: nível, resultado e pontos de cada uma; depois acertos e tempo
+      const missions = el('section', 'block end__missions');
+      missions.appendChild(el('h2', 'block__title', 'Suas missões'));
+      const list = el('ul', 'mlist');
+      match.answers.forEach((a) => {
+        const mission = ChecaAi.missions.getMissionById(a.missionId);
+        const ok = !!a.score.verdictCorrect;
+        const item = el('li');
+        const mark = el('span', 'mark mark--' + (ok ? 'ok' : 'bad'));
+        mark.appendChild(icon(ok ? 'check' : 'x', 16));
+        const info = el('div');
+        info.append(el('b', null, mission ? mission.title : a.missionId), el('small', null, (mission ? labels[mission.level] + ' · ' : '') + (ok ? 'Acertou' : 'Errou')));
+        item.append(mark, info, el('b', null, String(a.score.total)));
+        list.appendChild(item);
+      });
+      const stats = el('dl', 'mstats');
+      [['Acertos', total.correctVerdicts + ' de ' + total.missions], ['Tempo', formatDuration(match.finishedAt - match.startedAt)]].forEach((row) => {
+        const box = el('div');
+        box.append(el('dt', 'label', row[0]), el('dd', null, row[1]));
+        stats.appendChild(box);
+      });
+      missions.append(list, stats);
+
+      grid.append(scoreCard, placeCard, missions);
+
+      const tips = el('section', 'block');
+      tips.appendChild(el('h2', 'block__title', 'Antes de compartilhar'));
+      const tipList = el('ol', 'tips');
       TIPS.forEach((tip) => {
         const item = el('li', 'tips__item');
         if (tip[1]) {
@@ -172,35 +216,33 @@
         } else {
           item.appendChild(el('strong', null, tip[0] + '.'));
         }
-        list.appendChild(item);
+        tipList.appendChild(item);
       });
-      tips.appendChild(list);
+      tips.appendChild(tipList);
 
-      const again = el('button', 'btn game-primary', 'Jogar de novo');
+      const actions = el('div', 'end__actions');
+      if (ChecaAi.config.FEATURES.ranking) {
+        const rank = el('a', 'btn btn--xl');
+        rank.href = '#/ranking';
+        rank.append(icon('trophy'), 'Ver o ranking');
+        actions.append(rank);
+      }
+      const again = el('button', 'btn btn--secondary btn--xl');
       again.type = 'button';
+      again.append(icon('repeat'), 'Jogar de novo');
       again.addEventListener('click', () => {
         ChecaAi.storage.clearMatch();
         window.location.hash = '#/apelido';
       });
-      const sim = el('a', 'btn btn--secondary game-primary', 'Ver o simulador');
-      sim.href = '#/simulador';
-      const actions = el('div', 'game-actions');
       actions.append(again);
-      if (ChecaAi.config.FEATURES.ranking) {
-        const rank = el('a', 'btn btn--secondary game-primary', 'Ver o ranking');
-        rank.href = '#/ranking';
-        actions.append(rank);
+      if (ChecaAi.config.FEATURES.simulator) {
+        const sim = el('a', 'btn btn--secondary btn--xl');
+        sim.href = '#/simulador';
+        sim.append(icon('tree'), 'Ver o simulador');
+        actions.append(sim);
       }
-      if (ChecaAi.config.FEATURES.simulator) actions.append(sim);
 
-      const side = el('div', 'layout-split__side game__col');
-      side.append(player, stats, rankStatus, actions);
-      const visual = el('div', 'layout-split__visual game__col');
-      visual.append(tips);
-
-      const split = el('div', 'layout-split');
-      split.append(side, visual);
-      root.append(h1, split);
+      root.append(head, grid, rankStatus, tips, actions);
       sectionEl.appendChild(root);
 
       startIdle();
