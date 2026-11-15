@@ -51,23 +51,6 @@
   --doc-crest-b: #C9A13B;
   --doc-crest-c: #8A2F3F;
 
-  /* ---------- ALIASES TEMPORÁRIOS (nomes antigos; só o simulador (css/simulator.css e o canvas de js/screens/simulator.js) ainda usa; remover na etapa 0.6.4) ---------- */
-  --bg: var(--paper);
-  --border: var(--line);
-  --text: var(--ink);
-  --text-muted: var(--ink-muted);
-  --accent: var(--primary);
-  --verdict-true: var(--ok);
-  --verdict-false: var(--bad);
-  --radius: var(--radius-sm);
-  --font-sm: var(--fs-small);
-  --font-md: var(--fs-body);
-  --font-lg: var(--fs-body-lg);
-  --font-xl: var(--fs-title-2);
-  --font-2xl: var(--fs-title-1);
-  --font-3xl: clamp(3rem, 13vw, var(--fs-big-number));
-  --touch-lg: var(--control-xl);
-
   /* ---------- Tipografia ---------- */
   --font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   /* Base de todos os rem. Parte fixa grande (13px) + parte pequena em vw (0.2vw): o zoom do navegador continua
@@ -148,6 +131,7 @@
   --canvas-max-height: 58vh; /* canvas no celular (1 coluna) */
   --canvas-min-height: 20rem;
   --sim-chrome: 15rem; /* altura de cabeçalho, rodapé, margens e barra do simulador: o canvas usa 100dvh menos isto */
+  --sim-value-size: clamp(3rem, 13vw, var(--fs-big-number)); /* número grande da comparação final */
   --fade-ms: 220ms; /* transição curta entre passos */
 }
 

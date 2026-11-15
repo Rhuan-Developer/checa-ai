@@ -64,7 +64,7 @@ Site interativo da Estação 5 ("Verdadeiro ou manipulado?", boatos e desinforma
 - Qualquer mudança em RLS, RPC ou acesso passa pelo `security-engineer` antes de aplicar
 - Consultas de diagnóstico para a Grasi rodar: sempre somente leitura
 
-## Design — tema "Noite" (redesign 0.6.0 a 0.6.4)
+## Design — tema "Noite" (redesign concluído na v0.6.4)
 Referência somente leitura em `design/` (`tokens.json` é a fonte; decisões em `design/DECISOES.md`). Resumo:
 - Cores só do `theme.css` (paper, surface, ink, primary/highlight amarelo, ok/bad/warn/unk). Veredito nunca só por cor: sempre ícone e texto
 - Fonte Atkinson Hyperlegible local (`assets/fonts/`); nunca Google Fonts em runtime
@@ -72,7 +72,7 @@ Referência somente leitura em `design/` (`tokens.json` é a fonte; decisões em
 - Breakpoints: 700 e 1100 (telão 1600), por largura da janela; sem container queries
 - Foco: 3px `highlight`, afastado 3px. Botões: mínimo 52px, borda 2px, largura total abaixo de 700px
 - A pontuação do design ("rapidez") NÃO vale: vale `scoring.js` (máx. 200)
-- Nomes antigos de variáveis CSS são aliases temporários (lista no `IMPLEMENTADO.md`); em tela nova usar os nomes do design
+- Os aliases temporários de variáveis CSS foram removidos na v0.6.4: usar só os nomes do design (`--ink`, `--paper`, `--primary`, `--ok`, `--bad`, `--fs-*`, `--radius-*`...)
 
 ## Textos da UI — o app não explica
 - Nada de parágrafo explicativo em tela (exceção: gabarito comentado e "Como se proteger", que são o conteúdo da missão — máximo 3 linhas)
