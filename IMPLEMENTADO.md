@@ -540,7 +540,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 5. Telão: "Sair" pequeno no canto; tokens `stage-*` ainda não usados (usa `--bg`/`--text`); linhas ainda sem o raio e a faixa do design
 6. Simulador: "Sair" do modo apresentação pequeno; título "Como um boato se espalha" pequeno diante do design; canvas com borda fina
 7. Ranking: sem a linha "Você" em `highlight-soft` e sem pódio amarelo (design)
-8. Fim da partida: números de 72px em coluna única no celular, sem as pílulas de acertos/tempo
+8. ✅ (v0.6.2) Fim da partida: números de 72px em coluna única no celular, sem as pílulas de acertos/tempo
 9. Abaixo de ~200px de largura CSS (celular a 200% de zoom) ainda há rolagem horizontal: ranking (já existia na v0.5.0), seletor do simulador e, novo, 5px na barra do simulador
 
 ### Roteiro de teste
@@ -595,6 +595,45 @@ Resolvidos nesta etapa: **1** (legenda "Seu veredito"), **2** (missão: pistas, 
 3. Alvos ≥ 44px nas 3 telas; sem rolagem horizontal de 50% a 200% de zoom (6 tamanhos × 5 telas/missões, exceto viewport < 200px)
 4. Fluxo completo pela interface em 390×844 e 1366×768 (início → apelido → 3 missões → fim com 600); recarregar na missão 2 mantém a partida; pontos da missão 1 aparecem na barra
 5. Regressão (9 missões = 200, drawMatch, apelido, 88.572 × 4.546, fila offline, XSS do ranking): passam; console sem erros
+
+## Redesign 3/5 — Início (ajuste), Resultado da missão e Fim da partida (v0.6.2)
+
+**Status:** ✅ v0.6.2 na `feat/redesign-telas-2`. Só aparência e estrutura de DOM/CSS. `scoring.js`, `api.js`, `storage.js`, banco e RPCs não mudaram. Feito pelo `feature-developer`; verificado e fechado pela sessão principal.
+
+### Fluxo / Telas
+- **Início:** sobretítulo "Mostra de Informática" e chamada "Investigue publicações, encontre os sinais e dê seu veredito." (como no design); padding vertical do topo alinhado ao design a partir de 700px
+- **Resultado da missão:** faixa com ícone, "Missão n de 3", "Acertou!" / "Não foi dessa vez" e "É X" ou "Você marcou X. O certo é Y."; cartões: Gabarito comentado e Sinais (esquerda) | Como se proteger (com a referência do CERT.br), Pontos e botão (direita) no notebook, uma coluna no celular. Cada sinal com ícone + texto ("Você marcou. Certo!", "Faltou marcar", "Era isca. Você marcou.", "Não era sinal. Bem deixado de lado."). Pontos: Veredito, Sinais (n de m), Conclusão e total "n de 200" com barra — só o que o `scoring.js` calcula (100 + 80, isca marcada tira 20, + 20). Pílula de pontos acumulados na barra superior (`unmount()` tira). Botão "Próxima missão" ou "Ver resultado final". A publicação não aparece (o design não a mostra aqui)
+- **Fim da partida:** "Partida concluída" + "Fim da partida" + apelido; cartão do placar "n de 600" com barra; cartão amarelo "Você está em Nº" **só** quando o envio devolve `state === 'sent'` com posição real (quando aparece, a frase "Você está em Nº no ranking de hoje." some para não repetir); "Suas missões" (título, nível, Acertou/Errou, pontos), Acertos e Tempo; dicas "Antes de compartilhar"; ações Ver o ranking, Jogar de novo e Ver o simulador. Estados do envio e fila offline como antes
+- **Missão (pendências da v0.6.1):** com altura < 700px o "Confirmar veredito" deixa de ser fixo e flui no fim da página; no notebook a coluna das ferramentas ficou mais compacta (paddings/gaps; página da missão em 1366×768: 1520 → 1399px)
+
+### Arquivos e funções
+- `js/screens/home.js` (textos); `js/screens/mission-result.js` (reescrito, com `unmount()`); `js/screens/match-end.js` (reescrito; mantidos `recordMatch`, `onChange`, `rankStatusText`, `formatDuration`)
+- `css/game.css`: saíram as regras de `game-*`, `result-*`, `verdict-box`, `stat*`, `end-*`, `.tag`; entraram `.result*`, `.end*`, `.mark`, `.bar`, `.review`, `.points`, `.total`, `.scorecard`, `.placecard`, `.mlist`, `.mstats`, `.tips`
+- `css/theme.css`: novo `--mid-max` (largura das telas de resultado e fim); `css/base.css`: `.layout-center` removido (órfão); `css/screens.css`: ajustes do início e regra para telas < 300px
+- `js/config.js`: `APP_VERSION` 0.6.2
+
+### Diferenças que sobraram do início em relação ao design
+- Largura máxima segue o container do projeto (`--content-max`, sem teto de 1280px): decisão 3 do `design/DECISOES.md` (zoom e telão)
+- Padding vertical do `app-main` (compartilhado com as outras telas): 2rem no celular (design 1,5rem)
+- Escala em rem fluido em vez de px (mesma decisão). Comparação feita por CSS regra a regra e por capturas; o `S.inicio` do design **não** foi renderizado lado a lado (usa Google Fonts e container queries)
+
+### Decisões técnicas
+- O título de cada missão aparece no fim da partida (só depois de respondida); no resultado da missão não aparece
+- Grades de resultado e fim com `minmax(0, 1fr)`: a coluna implícita `auto` crescia pelo conteúdo e estourava telas estreitas (bug do primeiro teste)
+- Abaixo de 300px a pílula de pontos perde o ícone e a marca encolhe (a barra passava da tela em ~240px)
+- Números grandes sem `tabular-nums`
+
+### Aliases do `theme.css`
+Removidos nesta etapa: `--on-accent`, `--verdict-misleading`, `--verdict-unproven`. **Sobram** (usados por `simulator.css`, `ranking.css`, `components.css` e pelo canvas do simulador, que lê `--verdict-false/true`, `--accent`, `--text-muted`, `--bg`, `--surface`, `--text`): `--bg`, `--border`, `--text`, `--text-muted`, `--accent`, `--verdict-true`, `--verdict-false`, `--radius`, `--font-sm/md/lg/xl/2xl/3xl`, `--touch-lg`. Saem nas etapas 0.6.3 (ranking) e 0.6.4 (simulador)
+
+### Problemas visuais da v0.6.0
+Resolvido nesta etapa: **8** (fim da partida). Seguem: 5 (telão), 6 (simulador), 7 (ranking), 9 (viewports < 200px)
+
+### Roteiro de teste
+1. Capturas em 360×640, 390×844, 768×1024, 1024×768, 1366×768, 1920×1080 e 2400×1200 em `docs/capturas/v0.6.2/`: início; resultado (acerto e erro) de F3, M1 e D2; fim com posição e offline; missão M1 (janela)
+2. Fluxo completo pela interface em 390×844 e 1366×768 até o fim com 600 pontos, console limpo; Tab, Espaço, setas e Enter com foco de 3px; alvos ≥ 44px; zoom 50–200% em 7 telas sem rolagem horizontal (exceto viewport < 200px)
+3. `grep`: zero `gradient`, `box-shadow`, `text-shadow` e zero cor fora do `theme.css`
+4. Regressão: 162 ok e 2 falhas conhecidas (ranking a 200% de zoom em viewport de ~190px); o teste "veredito errado" agora confere 100 (a expectativa antiga estava errada, o `scoring.js` está certo)
 
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
@@ -678,7 +717,7 @@ Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
   - [x] 4A — SQL (migration, rollback, teste, revisão do `security-engineer`) — aplicado pela Grasi
   - [x] 4B — `api.js`, fila offline, telas de ranking e modo telão
   - [ ] Partida real de verificação pela Grasi (roteiro em `supabase/LEIA-ME.md`)
-- [ ] Redesign "Noite" em 5 etapas: 0.6.0 fundação ✅ · 0.6.1 início/apelido/missão ✅ · 0.6.2 resultado e fim · 0.6.3 ranking e telão · 0.6.4 simulador
+- [ ] Redesign "Noite" em 5 etapas: 0.6.0 fundação ✅ · 0.6.1 início/apelido/missão ✅ · 0.6.2 resultado e fim ✅ · 0.6.3 ranking e telão · 0.6.4 simulador
 - [ ] Fase 5 — Testes em notebook/tablet/celular, service worker, QR Code, tela de dicas — até 24/11
 - [ ] v1.0.0 e congelamento — 25/11
 
