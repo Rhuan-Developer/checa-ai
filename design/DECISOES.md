@@ -12,3 +12,5 @@ Fonte visual: `design/` (somente leitura). Onde o design e o site divergem, vale
 8. **Variáveis** vêm de `design/tokens.json` (tema único "Noite"); o `tokens.css` do sistema original (tema claro) é ignorado.
 
 Decisões da etapa 0.6.0 tomadas sem consulta: ver "Decisões técnicas" da seção v0.6.0 do `IMPLEMENTADO.md`.
+
+Pódio do ranking (v0.6.3): o design não define ouro/prata/bronze; os 3 primeiros usam `highlight` e o número da posição fica sempre visível.

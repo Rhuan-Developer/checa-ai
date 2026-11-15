@@ -12,11 +12,16 @@
   gap: var(--space-3);
 }
 
-/* O título pode quebrar linha; o botão "Modo apresentação" fica sempre visível no canto direito */
-.sim-top__title {
+/* Sobretítulo + título; podem quebrar linha. O "Modo apresentação" fica na barra do app */
+.sim-top__head {
   flex: 1;
   min-width: 0;
-  font-size: var(--font-lg);
+}
+
+.sim-top__title {
+  font-size: var(--fs-title-2);
+  line-height: var(--lh-title-2);
+  overflow-wrap: anywhere;
 }
 
 .sim-top__tools {
@@ -57,11 +62,13 @@
 }
 
 .sim-title {
-  font-size: var(--font-xl);
+  font-size: var(--fs-title-3);
+  line-height: var(--lh-title-3);
+  overflow-wrap: anywhere;
 }
 
 .sim-big {
-  font-size: var(--font-lg);
+  font-size: var(--fs-body-lg);
   font-weight: var(--weight-bold);
 }
 
@@ -72,8 +79,9 @@
 .sim-ref,
 .sim-note,
 .sim-legend {
-  color: var(--text-muted);
-  font-size: var(--font-sm);
+  color: var(--ink-muted);
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
 }
 
 .sim-actions {
@@ -84,8 +92,8 @@
 
 /* Ajustes */
 .sim-settings {
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
+  border: var(--border-width-strong) solid var(--line);
+  border-radius: var(--radius-md);
 }
 
 .sim-settings__summary {
@@ -108,16 +116,16 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  min-width: 12rem;
+  min-width: min(12rem, 100%);
 }
 
 .sim-select {
-  min-height: var(--touch-min);
+  min-height: var(--control-h);
   padding: 0 var(--space-3);
   background: var(--surface);
-  color: var(--text);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
+  color: var(--ink);
+  border: var(--border-width-strong) solid var(--line-strong);
+  border-radius: var(--radius-md);
   font: inherit;
 }
 
@@ -141,17 +149,58 @@
 .sim-stage--run > .sim-note { grid-area: note; }
 .sim-stage--run > .sim-next { grid-area: next; }
 
+/* Contadores: caixas com rótulo e número (3 em linha no celular; 1 coluna ao lado do canvas) */
+.sim-counters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: var(--space-2);
+}
+
+.sim-counter {
+  display: grid;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  border: var(--border-width-strong) solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.sim-counter__label {
+  color: var(--ink-muted);
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
+  font-weight: var(--weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.sim-counter__value {
+  font-size: var(--fs-title-3);
+  line-height: var(--lh-title-3);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.sim-counter--checked .sim-counter__value {
+  color: var(--ok);
+}
+
+.sim-canvas-wrap { grid-area: canvas; }
+.sim-stage--run > .sim-legend { grid-area: legend; }
+.sim-stage--run > .sim-note { grid-area: note; }
+.sim-stage--run > .sim-next { grid-area: next; }
+
 /* Contadores (compactos no celular) */
 .sim-counters {
   display: flex;
   flex-wrap: wrap;
   gap: 0 var(--space-4);
-  font-size: var(--font-md);
+  font-size: var(--fs-body);
   font-weight: var(--weight-bold);
 }
 
 .sim-counters__checked {
-  color: var(--verdict-true);
+  color: var(--ok);
 }
 
 .sim-canvas-wrap {
@@ -160,8 +209,8 @@
   aspect-ratio: 1 / 1;
   max-height: var(--canvas-max-height);
   background: var(--surface);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
+  border: var(--border-width-strong) solid var(--line);
+  border-radius: var(--radius-lg);
 }
 
 .sim-canvas {
@@ -191,7 +240,7 @@
   display: inline-block;
   width: 0.75rem;
   height: 1.1rem;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .sim-swatch--dot {
@@ -200,44 +249,64 @@
   border-radius: 50%;
 }
 
-.sim-swatch--you { background: var(--accent); }
-.sim-swatch--shared { background: var(--verdict-false); }
-.sim-swatch--checked { background: var(--verdict-true); }
+.sim-swatch--you { background: var(--ink); }
+.sim-swatch--shared { background: var(--primary); }
+.sim-swatch--checked { background: var(--ok); }
 
-/* Comparação final */
+/* Comparação final: barras proporcionais (compartilhado = bad, checado = ok; o número está no texto) */
 .sim-compare {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
-.sim-compare__col {
-  background: var(--surface);
-  border: var(--border-width) solid var(--border);
-  border-left-width: var(--space-1);
-  border-radius: var(--radius);
-  padding: var(--space-5);
+.sim-compare__row {
+  display: grid;
+  gap: var(--space-2);
 }
 
-.sim-compare__col--bad { border-left-color: var(--verdict-false); }
-.sim-compare__col--good { border-left-color: var(--verdict-true); }
+/* Celular: rótulo e número empilhados; a partir de 700px, lado a lado */
+.sim-compare__top {
+  display: grid;
+  gap: var(--space-1);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 700px) {
+  .sim-compare__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-3);
+  }
+}
 
 .sim-compare__label {
-  font-weight: var(--weight-bold);
-  font-size: var(--font-lg);
+  font-size: var(--fs-body-lg);
 }
 
 .sim-compare__value {
-  font-size: var(--font-3xl);
-  font-weight: var(--weight-bold);
-  line-height: 1.2;
+  font-size: var(--fs-title-2);
+  line-height: var(--lh-title-2);
   overflow-wrap: anywhere;
 }
 
-.sim-compare__unit {
-  color: var(--text-muted);
-  font-size: var(--font-lg);
+.sim-compare__bar {
+  height: 1.75rem;
+  background: var(--surface-alt);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
 }
+
+.sim-compare__fill {
+  display: block;
+  height: 100%;
+  min-width: var(--space-1);
+}
+
+.sim-compare__row--bad .sim-compare__fill { background: var(--bad); }
+.sim-compare__row--good .sim-compare__fill { background: var(--ok); }
 
 /* Celular: mensagem compacta para título, mensagem e botões caberem na primeira tela (390×844).
    Se ainda assim não couberem (360×640, documento alto), os botões grudam no rodapé da tela (sticky). */
@@ -283,13 +352,17 @@
     padding: var(--space-3);
   }
 
+}
+
+/* Janela alta o bastante: os botões grudam no rodapé; abaixo de 700px de altura fluem no fim da página */
+@media (max-width: 699px) and (min-height: 700px) {
   .simulator:not(.simulator--presenting) .sim-stage--center > .sim-actions {
     position: sticky;
     bottom: 0;
     z-index: 1;
     margin-top: calc(-1 * var(--space-2));
     padding: var(--space-2) 0 calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
-    background: var(--bg);
+    background: var(--paper);
   }
 }
 
@@ -297,15 +370,6 @@
   .sim-actions {
     flex-direction: row;
     flex-wrap: wrap;
-  }
-
-  .sim-compare {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .sim-actions .btn {
-    min-height: var(--touch-lg);
-    font-size: var(--font-lg);
   }
 }
 
@@ -330,12 +394,16 @@
   }
 
   .sim-stage--run .sim-counters {
-    flex-direction: column;
-    font-size: var(--font-xl);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sim-stage--run .sim-counter__value {
+    font-size: var(--fs-title-1);
+    line-height: var(--lh-title-1);
   }
 
   .sim-stage--run .sim-legend {
-    font-size: var(--font-md);
+    font-size: var(--fs-body);
   }
 }
 
@@ -349,7 +417,7 @@
   flex-direction: column;
   overflow: auto;
   padding: calc(env(safe-area-inset-top, 0px) + var(--space-3)) max(var(--gutter), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + var(--space-3)) max(var(--gutter), env(safe-area-inset-left, 0px));
-  background: var(--bg);
+  background: var(--paper);
 }
 
 .simulator--presenting .sim-top {
@@ -366,10 +434,10 @@
   width: var(--exit-width);
   min-height: var(--touch-min);
   padding: 0;
-  font-size: var(--font-md);
+  font-size: var(--fs-body);
 }
 
-.simulator--presenting .sim-top__title {
+.simulator--presenting .sim-top__head {
   display: none;
 }
 
@@ -392,12 +460,12 @@
 
 .simulator--presenting .btn,
 .simulator--presenting .sim-settings__summary {
-  min-height: var(--touch-lg);
-  font-size: var(--font-lg);
+  min-height: var(--control-xl);
+  font-size: var(--fs-body-lg);
 }
 
 .simulator--presenting .sim-title {
-  font-size: var(--font-2xl);
+  font-size: var(--fs-title-1);
 }
 
 .simulator--presenting .sim-stage--run {
@@ -412,7 +480,7 @@
 }
 
 .simulator--presenting .sim-stage--run > .sim-title {
-  font-size: var(--font-xl);
+  font-size: var(--fs-title-2);
 }
 
 .simulator--presenting .sim-canvas-wrap {
@@ -424,18 +492,24 @@
   cursor: pointer;
 }
 
-.simulator--presenting .sim-counters {
-  font-size: var(--font-2xl);
+.simulator--presenting .sim-counter__label {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+.simulator--presenting .sim-counter__value {
+  font-size: var(--fs-title-1);
+  line-height: var(--lh-title-1);
 }
 
 .simulator--presenting .sim-compare__value {
-  font-size: var(--font-3xl);
+  font-size: var(--sim-value-size);
 }
 
 .simulator--presenting .sim-big,
 .simulator--presenting .sim-text,
 .simulator--presenting .post-card {
-  font-size: var(--font-xl);
+  font-size: var(--fs-title-2);
 }
 
 .simulator--presenting .sim-text {
@@ -445,7 +519,7 @@
 .simulator--presenting .sim-note,
 .simulator--presenting .sim-legend,
 .simulator--presenting .sim-ref {
-  font-size: var(--font-lg);
+  font-size: var(--fs-body-lg);
 }
 
 .simulator--presenting .sim-next {
@@ -470,8 +544,9 @@
     min-height: 0;
   }
 
-  .simulator--presenting .sim-stage--run .sim-counters {
-    font-size: var(--font-2xl);
+  .simulator--presenting .sim-stage--run .sim-counter__value {
+    font-size: var(--fs-stage-row);
+    line-height: var(--lh-stage-row);
   }
 
   .simulator--presenting .sim-stage--run > .sim-next {

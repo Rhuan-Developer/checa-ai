@@ -538,7 +538,7 @@ Cada seção lista o que foi implementado, quais arquivos foram criados/modifica
 3. ✅ (v0.6.1) Barra superior sem os pontos da missão e sem pílula de nível (`.pill` criada, não usada)
 4. ✅ (v0.6.1) `tabular-nums` na Atkinson troca os algarismos por uma variante larga com zero cortado: nos números grandes do fim da partida parece fonte monoespaçada; avaliar nas etapas 0.6.2 e 0.6.3
 5. ✅ (v0.6.3) Telão: "Sair" pequeno no canto; tokens `stage-*` ainda não usados (usa `--bg`/`--text`); linhas ainda sem o raio e a faixa do design
-6. Simulador: "Sair" do modo apresentação pequeno; título "Como um boato se espalha" pequeno diante do design; canvas com borda fina
+6. ✅ (v0.6.4) Simulador: "Sair" do modo apresentação pequeno; título "Como um boato se espalha" pequeno diante do design; canvas com borda fina
 7. ✅ (v0.6.3) Ranking: sem a linha "Você" em `highlight-soft` e sem pódio amarelo (design)
 8. ✅ (v0.6.2) Fim da partida: números de 72px em coluna única no celular, sem as pílulas de acertos/tempo
 9. ✅ (v0.6.3) Abaixo de ~200px de largura CSS (celular a 200% de zoom) ainda há rolagem horizontal: ranking (já existia na v0.5.0), seletor do simulador e, novo, 5px na barra do simulador
@@ -666,6 +666,51 @@ Resolvidos nesta etapa: **5** (telão), **7** (ranking), **9** (rolagem horizont
 3. `verify.js` 270 ok; `tests.js` 164 ok, 0 falhas (as 2 falhas de rolagem do ranking a ~190px da v0.6.2 foram corrigidas)
 4. `grep`: zero `gradient`, `box-shadow`, `text-shadow` e zero cor fora do `theme.css`
 
+## Redesign 5/5 — Simulador e limpeza final do theme.css (v0.6.4)
+
+**Status:** ✅ v0.6.4 na `feat/redesign-telas-4`. Só aparência. `simulator-model.js`, `simulator-rumors.js`, `scoring.js`, `api.js`, banco e RPCs não mudaram. Feito pelo `feature-developer`; verificado e fechado pela sessão principal. **Redesign concluído.**
+
+### Fluxo / Telas
+- **Simulador (#/simulador):** sobretítulo "Simulador" acima do título; passos com a publicação simulada (componente da v0.6.1), botões de ação `btn--xl` (64px): Compartilhar, Checar antes, "E se eu tivesse compartilhado?", Próxima rodada / Ver comparação, Nova simulação; contadores em 3 caixas (Rodada, Receberam, Checaram) com os mesmos valores de antes; canvas em quadro de 2px com raio `lg`; legenda; comparação final com barras proporcionais ("Ninguém checou" 88.572 em `bad`, "30% checaram" 4.546 em `ok`)
+- **Canvas:** lê só tokens do design — você = `ink`, repassou = `primary`, checou = `ok` com marca de check (não só cor), linhas = `line-strong`, fundo = `surface`; rótulos de 12 a 24px (antes 10 a 20)
+- Botões fixos no rodapé do celular só com altura ≥ 700px (abaixo fluem no fim da página); com `prefers-reduced-motion` o simulador não usa `requestAnimationFrame` nem fade e avança a rodada
+- **Publicação simulada:** o cabeçalho passou a quebrar linha (`flex-wrap`): a etiqueta SIMULAÇÃO desce para baixo do nome quando não cabe, em vez de partir o @usuário no meio da palavra (corrige o caso "@aurora.urge/nte" no celular)
+
+### Arquivos e funções
+- `css/simulator.css` (aliases trocados por tokens; contadores, comparação, botões), `css/theme.css`, `css/components.css` (cabeçalho da publicação), `js/screens/simulator.js` (cores do canvas, kicker, botões, contadores, comparação)
+- `css/theme.css`: removido o bloco de aliases; novo `--sim-value-size` (número da comparação no modo apresentação, no lugar de `--font-3xl`)
+- `js/config.js`: `APP_VERSION` 0.6.4
+
+### Diferenças restantes em relação ao design (justificadas)
+- O projeto mantém o canvas de celulares (o design tem moldura de celular e árvore em SVG)
+- Sem segmento "Ninguém checou / 30% checaram" nem contador "Compartilharam": o simulador do projeto não tem modo; o cenário fica em Ajustes
+- Sem a frase "N vezes menos gente...": o app não explica
+- O `h1` segue "Como um boato se espalha" em todos os passos, com `h2` por passo (estrutura de acessibilidade existente); o design usa "Chegou no seu celular" como título
+
+### Decisões técnicas
+- Cores do canvas seguem o design: o "repassou" deixou de ser vermelho e passou a `primary` (amarelo), e quem checou ganha marca de check
+- Ajustes: o campo com `min-width: 12rem` estourava a tela em ~190px (36px de rolagem horizontal); agora `min(12rem, 100%)`
+
+### Aliases do `theme.css`
+**Removidos todos** os temporários: `--bg`, `--border`, `--text`, `--text-muted`, `--accent`, `--verdict-true/false/misleading/unproven`, `--radius`, `--font-sm/md/lg/xl/2xl/3xl`, `--touch-lg`, `--on-accent`, `--header-height`, `--line-height`. `grep` em `css/`, `js/` e `index.html`: zero usos. O `theme.css` tem só os tokens do design e os de layout do projeto (`--root-size`, `--content-max`, `--panel-max`, `--mid-max`, `--compare-max`, `--sim-*`, `--canvas-*`, `--split-*`, `--exit-*`, `--fade-ms`, `--doc-*`)
+
+### Problemas visuais da v0.6.0
+Resolvido nesta etapa: **6** (simulador). **A lista dos 9 problemas está fechada.**
+
+### Revisão final do redesign (inconsistências entre telas)
+- Tamanho do `h1`: início usa `display`; apelido, resultado e fim usam `title-1`; missão e simulador usam `title-2` — igual ao design (título de tela × título de missão/simulador), então não foi alterado
+- Apelido: o "Voltar" (`btn--quiet`) fica um pouco recuado em relação à margem lateral, por causa do padding do botão (início e ranking não têm esse botão)
+- Bloco "Ajustes" do simulador usa borda `line` e raio `md`; os `.block` das outras telas usam raio `lg`
+- Cartão do placar do fim da partida ainda tem espaço vazio no meio no notebook (não pedido)
+- Telão no celular: as 10 linhas rolam e o número encosta na borda direita (o telão é para projetor)
+- Pódio do ranking: os 3 primeiros em `highlight`, sem ouro/prata/bronze (o design não define)
+
+### Roteiro de teste
+1. Capturas em `docs/capturas/v0.6.4/` (início, apelido, missões F3/M1/D2, resultado, fim, ranking, telão e simulador em vários passos, em 360×640, 390×844, 768×1024, 1366×768, 1920×1080 e 2400×1200)
+2. Simulador: passos A, B, C (árvore e multidão até a rodada 8), D, Nova simulação e modo apresentação (Enter avança, Esc/Sair), sem rolagem horizontal de 190px a 2400px, botões de 64px, console limpo, comparação 88.572 e 4.546, `prefers-reduced-motion`
+3. `verify.js` 270 ok; `tests.js` 164 ok, 0 falhas; verificação do simulador 124 ok
+4. `grep`: zero `gradient`, `box-shadow`, `text-shadow`, zero cor fora do `theme.css`; contraste conforme `docs/capturas/v0.6.0/contraste.md` (nenhuma falha)
+
 ## {{Nome da funcionalidade}} ({{Fase X — etapa Y}}, vX.Y.Z)
 
 **Status:** ✅ vX.Y.Z na `{{branch}}`. {{publicado no GitHub Pages? migration aplicada em que data?}} {{revisada pelo security-engineer?}}
@@ -748,7 +793,7 @@ Itens do roadmap pendentes (detalhes no `PLANEJAMENTO.md`):
   - [x] 4A — SQL (migration, rollback, teste, revisão do `security-engineer`) — aplicado pela Grasi
   - [x] 4B — `api.js`, fila offline, telas de ranking e modo telão
   - [ ] Partida real de verificação pela Grasi (roteiro em `supabase/LEIA-ME.md`)
-- [ ] Redesign "Noite" em 5 etapas: 0.6.0 fundação ✅ · 0.6.1 início/apelido/missão ✅ · 0.6.2 resultado e fim ✅ · 0.6.3 ranking e telão ✅ · 0.6.4 simulador
+- [ ] Redesign "Noite" em 5 etapas: 0.6.0 fundação ✅ · 0.6.1 início/apelido/missão ✅ · 0.6.2 resultado e fim ✅ · 0.6.3 ranking e telão ✅ · 0.6.4 simulador ✅ (redesign concluído)
 - [ ] Fase 5 — Testes em notebook/tablet/celular, service worker, QR Code, tela de dicas — até 24/11
 - [ ] v1.0.0 e congelamento — 25/11
 

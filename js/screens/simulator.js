@@ -56,14 +56,14 @@
     const style = getComputedStyle(document.documentElement);
     const get = (name) => style.getPropertyValue(name).trim();
     return {
-      shared: get('--verdict-false'),
-      checked: get('--verdict-true'),
-      you: get('--accent'),
-      line: get('--text-muted'),
-      mark: get('--bg'),
+      shared: get('--primary'),
+      checked: get('--ok'),
+      you: get('--ink'),
+      line: get('--line-strong'),
+      mark: get('--paper'),
       surface: get('--surface'),
-      text: get('--text'),
-      textMuted: get('--text-muted')
+      text: get('--ink'),
+      textMuted: get('--ink-muted')
     };
   }
 
@@ -123,7 +123,9 @@
     exitBtn.type = 'button';
     exitBtn.hidden = true;
     toolbar.append(exitBtn);
-    top.append(h1, toolbar);
+    const head = el('div', 'sim-top__head');
+    head.append(el('p', 'kicker', 'Simulador'), h1);
+    top.append(head, toolbar);
     // "Modo apresentação" fica na barra superior do app; o "Sair" fica no .simulator (é ele que entra em tela cheia).
     const headerTools = document.getElementById('app-header-tools');
     if (headerTools) {
@@ -251,10 +253,10 @@
       const msg = ChecaAi.components.postCard.render(rumor, { ariaLabel: 'Mensagem recebida' });
 
       const actions = el('div', 'sim-actions');
-      const share = el('button', 'btn', 'Compartilhar');
+      const share = el('button', 'btn btn--xl', 'Compartilhar');
       share.type = 'button';
       share.addEventListener('click', () => renderStepC());
-      const check = el('button', 'btn btn--secondary', 'Checar antes');
+      const check = el('button', 'btn btn--secondary btn--xl', 'Checar antes');
       check.type = 'button';
       check.addEventListener('click', () => renderStepB());
       actions.append(share, check);
@@ -277,7 +279,7 @@
       const why = el('p', 'sim-text', rumor.checkResult);
       const tip = el('p', 'sim-text', 'Na dúvida, não compartilhe.');
       const actions = el('div', 'sim-actions');
-      const what = el('button', 'btn', 'E se eu tivesse compartilhado?');
+      const what = el('button', 'btn btn--xl', 'E se eu tivesse compartilhado?');
       what.type = 'button';
       what.addEventListener('click', () => renderStepC());
       actions.append(what, backLink());
@@ -309,10 +311,16 @@
       const counters = el('div', 'sim-counters');
       counters.setAttribute('aria-live', 'polite');
       counters.setAttribute('aria-atomic', 'true');
-      const roundEl = el('span', 'sim-counters__round');
-      const receivedEl = el('span');
-      const checkedEl = el('span', 'sim-counters__checked');
-      counters.append(roundEl, receivedEl, checkedEl);
+      const makeCounter = (label, extra) => {
+        const box = el('div', 'sim-counter' + (extra ? ' ' + extra : ''));
+        const value = el('strong', 'sim-counter__value');
+        box.append(el('span', 'sim-counter__label', label), value);
+        counters.appendChild(box);
+        return value;
+      };
+      const roundEl = makeCounter('Rodada');
+      const receivedEl = makeCounter('Receberam');
+      const checkedEl = makeCounter('Checaram', 'sim-counter--checked');
       counterEls = { roundEl, receivedEl, checkedEl };
 
       const canvasWrap = el('div', 'sim-canvas-wrap');
@@ -338,7 +346,7 @@
 
       noteEl = el('p', 'sim-note');
 
-      nextBtn = el('button', 'btn sim-next', 'Próxima rodada');
+      nextBtn = el('button', 'btn btn--xl sim-next', 'Próxima rodada');
       nextBtn.type = 'button';
       nextBtn.addEventListener('click', () => advance());
 
@@ -418,9 +426,9 @@
       const row = round === 0 ? null : sim.rows[round - 1];
       const received = row ? row.receivedTotal : 0;
       const checked = row ? row.checkedTotal : 0;
-      counterEls.roundEl.textContent = 'Rodada ' + round;
-      counterEls.receivedEl.textContent = received === 1 ? '1 pessoa recebeu' : fmt(received) + ' pessoas receberam';
-      counterEls.checkedEl.textContent = checked === 1 ? '1 checou' : fmt(checked) + ' checaram';
+      counterEls.roundEl.textContent = String(round);
+      counterEls.receivedEl.textContent = fmt(received);
+      counterEls.checkedEl.textContent = fmt(checked);
 
       const crowdNow = round > sim.roundsDrawn;
       crowdLegendEl.hidden = !crowdNow;
@@ -599,7 +607,7 @@
       for (let j = 1; j <= crowdShown; j++) {
         const k = rings + j;
         const last = j === crowdShown;
-        const fontPx = Math.max(10, Math.min(ringStep * 0.5, 20));
+        const fontPx = Math.max(12, Math.min(ringStep * 0.5, 24));
         const pillH = fontPx + 6;
         if (!last && ringStep < pillH) continue;
         const info = crowdInfo(k);
@@ -629,18 +637,25 @@
       const h2 = heading('Se continuasse até a ' + fmt(total) + 'ª rodada');
 
       const compare = el('div', 'sim-compare');
-      [['Ninguém checou', none, 'sim-compare__col--bad'],
-        [Math.round(rate * 100) + '% checaram', some, 'sim-compare__col--good']].forEach((c) => {
-        const col = el('div', 'sim-compare__col ' + c[2]);
-        col.append(el('p', 'sim-compare__label', c[0]), el('p', 'sim-compare__value', fmt(c[1])), el('p', 'sim-compare__unit', 'pessoas'));
-        compare.appendChild(col);
+      const maxReach = Math.max(none, some, 1);
+      [['Ninguém checou', none, 'sim-compare__row--bad'],
+        [Math.round(rate * 100) + '% checaram', some, 'sim-compare__row--good']].forEach((c) => {
+        const row = el('div', 'sim-compare__row ' + c[2]);
+        const labels = el('div', 'sim-compare__top');
+        labels.append(el('span', 'sim-compare__label', c[0]), el('span', 'sim-compare__value', fmt(c[1]) + ' pessoas'));
+        const bar = el('div', 'sim-compare__bar');
+        const fill = el('span', 'sim-compare__fill');
+        fill.style.width = (c[1] / maxReach * 100).toFixed(2) + '%';
+        bar.appendChild(fill);
+        row.append(labels, bar);
+        compare.appendChild(row);
       });
 
       const rule = el('p', 'sim-big', 'Na dúvida, não compartilhe.');
       const ref = el('p', 'sim-ref', 'Cartilha de Segurança para Internet (CERT.br) — fascículo Boatos');
 
       const actions = el('div', 'sim-actions');
-      const again = el('button', 'btn', 'Nova simulação');
+      const again = el('button', 'btn btn--xl', 'Nova simulação');
       again.type = 'button';
       again.addEventListener('click', () => renderStepA(false));
       actions.append(again, backLink());
